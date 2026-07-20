@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#071d49" name="theme-color"/>
+<meta content="Digitaler Reisebegleiter der Berufsschule Rohrbach für die Brüsselreise 2026." name="description"/>
+<title>Brüssel 2026 · BS Rohrbach Erasmus+</title>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3Vt8cF5B6T4Y7YQWl9xY7X3p+zv0M=" rel="stylesheet"/>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<a class="skip-link" href="#main">Zum Inhalt</a>
+<header class="site-header" id="siteHeader">
+<a aria-label="Zur Startseite" class="brand" href="#start">
+<span class="brand-mark">EU</span>
+<span><strong id="brandTitle">BS Rohrbach Erasmus+</strong><small id="brandSubtitle">Brüssel · 21.–26. November 2026</small></span>
+</a>
+<div class="header-actions">
+<button aria-label="App installieren" class="icon-button" hidden="" id="installButton">＋</button>
+<button aria-expanded="false" aria-label="Navigation öffnen" class="icon-button nav-toggle" id="navToggle">☰</button>
+</div>
+<nav aria-label="Hauptnavigation" id="mainNav">
+<a href="#heute">Heute</a><a href="#news">News</a><a href="#programm">Programm</a><a href="#karte">Karte</a><a href="#galerie">Galerie</a><a href="#downloads">Downloads</a><a class="nav-upload" href="#reisegruppe">Reisegruppe 🔒</a>
+</nav>
+</header>
+<main id="main">
+<section class="hero" id="start">
+<div aria-hidden="true" class="hero-media" id="heroMedia"></div><div class="hero-shade"></div>
+<div class="hero-content reveal">
+<p class="eyebrow light" id="heroEyebrow">Berufsschule Rohrbach unterwegs</p>
+<h1 id="heroTitle">Brüssel <span>2026</span></h1>
+<p class="hero-text" id="heroSubtitle">Europa erleben, Antwerpen entdecken und gemeinsame Erinnerungen festhalten.</p>
+<div class="hero-actions"><a class="button button-yellow" href="#programm" id="heroPrimaryButton">Reiseprogramm</a><a class="button button-glass" href="#reisegruppe" id="heroSecondaryButton">Reisegruppe öffnen</a></div>
+</div>
+<aside aria-label="Countdown zur Abfahrt" class="countdown-card reveal">
+<p class="countdown-label" id="countdownLabel">🚌 Abfahrt in Rohrbach</p><h2 id="countdownDateText">Samstag, 21. November · 20:00 Uhr</h2><div class="countdown" id="countdown"></div>
+</aside>
+</section>
+<section class="quick-grid-wrap">
+<div class="quick-grid" id="quickLinks">
+<a href="#programm"><span>📅</span><b>Programm</b><small>Tag für Tag</small></a>
+<a href="#karte"><span>🗺️</span><b>Karte</b><small>Alle Reiseziele</small></a>
+<a href="#wetter"><span>🌤️</span><b>Wetter</b><small>Brüssel &amp; Ausflüge</small></a>
+<a href="#reisegruppe"><span>🔒</span><b>Reisegruppe</b><small>Fotos &amp; Galerie</small></a>
+</div>
+</section>
+<section class="section today-section" id="heute">
+<div class="today-card reveal">
+<div><p class="eyebrow" id="todayEyebrow">Digitaler Reisebegleiter</p><h2 id="todayTitle">Die Reise beginnt bald</h2><p id="todayText">Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.</p></div>
+<div class="progress-card"><div class="progress-top"><span id="progressLabel">Vorfreude</span><strong id="progressValue">0 %</strong></div><div class="progress-track"><span id="progressBar"></span></div><small id="progressDate">21.–26. November 2026</small></div>
+</div>
+<div class="today-schedule" id="todaySchedule"></div>
+</section>
+<section class="section" id="news">
+<div class="section-title reveal"><p class="eyebrow" id="newsEyebrow">Aktuelles zur Reise</p><h2 id="newsTitle">News &amp; Hinweise</h2><p id="newsIntro">Neue Informationen werden hier laufend ergänzt.</p></div>
+<div class="news-grid" id="newsGrid"><article class="news-card loading"><p>News werden geladen …</p></article></div>
+</section>
+<section class="section program-section" id="programm">
+<div class="section-title reveal"><p class="eyebrow" id="programEyebrow">Tag für Tag</p><h2 id="programTitle">Unser Reiseprogramm</h2><p id="programNotice">Noch nicht endgültig bestätigte Punkte sind entsprechend markiert.</p></div>
+<div class="day-tabs" id="dayTabs" role="tablist"></div><div class="day-panels" id="dayPanels"></div>
+</section>
+<section class="section map-section" id="karte">
+<div class="section-title reveal"><p class="eyebrow" id="mapEyebrow">Orientierung vor Ort</p><h2 id="mapTitle">Interaktive Reisekarte</h2><p id="mapIntro">Klicke auf einen Pin für Adresse, Beschreibung und Navigation.</p></div>
+<div class="map-layout"><div aria-label="Karte der Reiseziele" class="map-canvas" id="map"></div><div class="place-list" id="placeList"></div></div>
+</section>
+<section class="section weather-section" id="wetter">
+<div class="section-title reveal"><p class="eyebrow" id="weatherEyebrow">Aktuelle Vorschau</p><h2 id="weatherTitle">Wetter an unseren Reisezielen</h2><p id="weatherIntro">Die Wetterdaten werden automatisch aktualisiert.</p></div>
+<div class="weather-grid" id="weatherGrid"><article class="weather-card loading">Wetter wird geladen …</article></div>
+</section>
+<section class="section gallery-section" id="galerie">
+<div class="section-title reveal"><p class="eyebrow" id="galleryEyebrow">Vorfreude in Bildern</p><h2 id="galleryTitle">Unsere Reiseziele</h2><p id="galleryIntro">Die öffentliche Galerie zeigt ausschließlich allgemeine Reisemotive. Schülerfotos bleiben geschützt.</p></div>
+<div class="filter-row" id="galleryFilters"></div><div class="gallery-grid" id="galleryGrid"></div>
+</section>
+<section class="section culinary" id="genuss">
+<div class="section-title reveal"><p class="eyebrow" id="culinaryEyebrow">Typisch Belgien</p><h2 id="culinaryTitle">Genuss unterwegs</h2></div>
+<div class="culinary-grid" id="culinaryGrid"></div>
+</section>
+<section class="section hotel-section" id="hotel">
+<div class="hotel-photo reveal"><img alt="ibis Brussels City Centre" id="hotelImage" src="images/hotel-ibis.jpg"/></div>
+<div class="hotel-copy reveal"><p class="eyebrow" id="hotelEyebrow">Unser Zuhause in Brüssel</p><h2 id="hotelTitle">ibis Brussels City Centre</h2><address id="hotelAddress">Rue Joseph Plateau 2<br/>1000 Bruxelles, Belgien</address>
+<div class="hotel-details" id="hotelDetails"></div>
+<a class="button button-blue" href="https://www.google.com/maps/search/?api=1&amp;query=ibis+Brussels+City+Centre" id="hotelMapsButton" rel="noopener" target="_blank">In Google Maps öffnen</a>
+</div>
+</section>
+<section class="section downloads-section" id="downloads">
+<div class="section-title reveal"><p class="eyebrow" id="downloadsEyebrow">Wichtige Unterlagen</p><h2 id="downloadsTitle">Downloads</h2><p id="downloadsIntro">Hier erscheinen nur Dokumente, die ausdrücklich öffentlich freigegeben wurden.</p></div><div class="downloads-grid" id="downloadsGrid"></div>
+</section>
+<section class="section group-section" id="reisegruppe">
+<div class="group-card reveal"><div class="group-icon" id="groupIcon">🔒</div><div><p class="eyebrow" id="groupIntro">Nur mit Schulkonto</p><h2 id="groupTitle">Bereich für die Reisegruppe</h2><p>Fotoupload und Schülergalerie liegen geschützt in Microsoft 365. Auf der öffentlichen Website werden keine Schülerfotos gespeichert.</p>
+<div class="student-actions"><a aria-disabled="true" class="button button-blue disabled" id="uploadButton">📤 Fotos hochladen</a><a aria-disabled="true" class="button button-dark disabled" id="galleryButton">📸 Schülergalerie öffnen</a></div><small id="uploadNote">Microsoft-365-Links werden eingerichtet.</small></div></div>
+</section>
+<section class="section faq-section" id="faq"><div class="section-title reveal"><p class="eyebrow" id="faqEyebrow">Kurz erklärt</p><h2 id="faqTitle">Häufige Fragen</h2></div><div class="faq-list" id="faqList"></div></section>
+<section class="section admin-teaser"><div class="admin-card reveal"><div><p class="eyebrow" id="adminEyebrow">Für Lehrkräfte</p><h2 id="adminTitle">Inhalte einfach verwalten</h2><p id="adminIntro">News, Programm, Galerie, Orte, Downloads und FAQ können über den Redaktionsbereich gepflegt werden.</p></div><a class="button button-dark" href="/admin/" id="adminButton">Redaktionsbereich öffnen</a></div></section>
+</main>
+<div aria-label="Bildansicht" aria-modal="true" class="lightbox" hidden="" id="lightbox" role="dialog"><button aria-label="Schließen" class="lightbox-close" id="lightboxClose">×</button><button aria-label="Vorheriges Bild" class="lightbox-nav prev" id="lightboxPrev">‹</button><figure><img alt="" id="lightboxImage"/><figcaption><strong id="lightboxTitle"></strong><span id="lightboxCaption"></span></figcaption></figure><button aria-label="Nächstes Bild" class="lightbox-nav next" id="lightboxNext">›</button></div>
+<footer><div><strong id="footerTitle">BS Rohrbach Erasmus+</strong><span id="footerSubtitle">Brüsselreise 2026 · Erasmus+</span></div><div><a href="#start" id="footerTopLink">Nach oben ↑</a><span id="footerPrivacy">Keine personenbezogenen Reisedaten öffentlich</span></div></footer>
+<script src="config.js"></script><script crossorigin="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="app.js"></script>
+</body></html>

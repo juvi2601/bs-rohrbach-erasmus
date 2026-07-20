@@ -1,0 +1,13 @@
+{"photos":[
+{"title":"Grand Place","day":"Brüssel","image":"/images/grand-place.webp","description":"Das historische Herz der Stadt."},
+{"title":"Atomium","day":"Brüssel","image":"/images/atomium.jpg","description":"Brüssels bekanntestes Wahrzeichen."},
+{"title":"Europäisches Parlament","day":"EU-Viertel","image":"/images/europaeisches-parlament.webp","description":"Demokratie in Europa erleben."},
+{"title":"Europäischer Rat","day":"EU-Viertel","image":"/images/europaeischer-rat.jpg","description":"Europäische Politik aus nächster Nähe."},
+{"title":"Hafen Antwerpen","day":"Antwerpen","image":"/images/antwerpen-hafen.jpg","description":"Logistik im Großformat."},
+{"title":"Antwerpen-Centraal","day":"Antwerpen","image":"/images/antwerpen-centraal.jpg","description":"Beeindruckende Bahnhofsarchitektur."},
+{"title":"Diamantenviertel","day":"Antwerpen","image":"/images/diamantenviertel.jpg","description":"Weltzentrum des Diamantenhandels."},
+{"title":"Waterloo","day":"Waterloo","image":"/images/waterloo.jpg","description":"Geschichte zum Abschluss."},
+{"title":"Belgische Pommes","day":"Kulinarik","image":"/images/pommes.jpg","description":"Ein Klassiker aus Belgien."},
+{"title":"Belgische Waffeln","day":"Kulinarik","image":"/images/waffeln.jpg","description":"Süße Spezialität aus Brüssel."},
+{"title":"Belgische Schokolade","day":"Kulinarik","image":"/images/schokolade.jpg","description":"Berühmter Genuss aus Belgien."}
+]}

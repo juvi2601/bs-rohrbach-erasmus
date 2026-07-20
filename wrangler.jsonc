@@ -3,7 +3,7 @@
   "name": "bs-rohrbach-erasmus",
   "compatibility_date": "2026-07-20",
   "assets": {
-    "directory": ".",
+    "directory": "./public",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   }

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Reiseredaktion – BS Rohrbach Erasmus+</title>
+</head>
+<body>
+<script>
+  // Verhindert, dass eine alte CMS-Konfiguration aus Browser-/PWA-Caches geladen wird.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      regs.forEach(function(reg){
+        if (reg.scope && location.pathname.startsWith('/admin')) reg.unregister();
+      });
+    });
+  }
+</script>
+<script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+</body>
+</html>

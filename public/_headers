@@ -1,0 +1,14 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self)
+  X-Frame-Options: SAMEORIGIN
+
+/admin/*
+  Cache-Control: no-store
+
+/content/*
+  Cache-Control: no-cache
+
+/images/*
+  Cache-Control: public, max-age=86400
