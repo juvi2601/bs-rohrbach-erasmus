@@ -1,13 +1,13 @@
 backend:
   name: github
-  repo: juvi2601/bruesselreise-2026
+  repo: juvi2601/bs-rohrbach-erasmus
   branch: main
   base_url: https://REPLACE-WITH-CMS-AUTH-WORKER.workers.dev
 locale: de
 media_folder: images/uploads
 public_folder: /images/uploads
-site_url: https://bruesselreise-2026.pages.dev
-display_url: https://bruesselreise-2026.pages.dev
+site_url: https://bs-rohrbach-erasmus.workers.dev
+display_url: https://bs-rohrbach-erasmus.workers.dev
 logo_url: /images/hero.jpg
 collections:
 - name: site

@@ -1,0 +1,13 @@
+{
+  "name": "bs-rohrbach-erasmus",
+  "version": "4.1.0",
+  "private": true,
+  "description": "BS Rohrbach Erasmus+ – Brüsselreise 2026",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.26.0"
+  }
+}
