@@ -6,8 +6,8 @@ backend:
 locale: de
 media_folder: images/uploads
 public_folder: /images/uploads
-site_url: https://bs-rohrbach-erasmus.workers.dev
-display_url: https://bs-rohrbach-erasmus.workers.dev
+site_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
+display_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
 logo_url: /images/hero.jpg
 collections:
 - name: site
@@ -325,6 +325,40 @@ collections:
       - label: SharePoint-Galerie-Link
         name: galleryUrl
         widget: string
+    - label: Notfallbereich
+      name: emergency
+      widget: object
+      fields:
+      - label: Kleine Überschrift
+        name: eyebrow
+        widget: string
+      - label: Titel
+        name: title
+        widget: string
+      - label: Einleitung
+        name: intro
+        widget: text
+      - label: Kontakte
+        name: items
+        widget: list
+        fields:
+        - label: Icon
+          name: icon
+          widget: string
+        - label: Titel
+          name: title
+          widget: string
+        - label: Text
+          name: text
+          widget: text
+        - label: Link
+          name: url
+          widget: string
+          required: false
+        - label: Buttontext
+          name: button
+          widget: string
+          required: false
     - label: Admin-Hinweis
       name: adminArea
       widget: object

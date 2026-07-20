@@ -26,7 +26,7 @@
 <button aria-expanded="false" aria-label="Navigation öffnen" class="icon-button nav-toggle" id="navToggle">☰</button>
 </div>
 <nav aria-label="Hauptnavigation" id="mainNav">
-<a href="#heute">Heute</a><a href="#news">News</a><a href="#programm">Programm</a><a href="#karte">Karte</a><a href="#galerie">Galerie</a><a href="#downloads">Downloads</a><a class="nav-upload" href="#reisegruppe">Reisegruppe 🔒</a>
+<a href="#heute">Heute</a><a href="#news">News</a><a href="#programm">Programm</a><a href="#karte">Karte</a><a href="#galerie">Galerie</a><a href="#downloads">Downloads</a><a class="nav-emergency" href="#notfall" id="emergencyNavButton">Hilfe</a><a class="nav-upload" href="#reisegruppe">Reisegruppe 🔒</a>
 </nav>
 </header>
 <main id="main">
@@ -71,7 +71,7 @@
 </section>
 <section class="section weather-section" id="wetter">
 <div class="section-title reveal"><p class="eyebrow" id="weatherEyebrow">Aktuelle Vorschau</p><h2 id="weatherTitle">Wetter an unseren Reisezielen</h2><p id="weatherIntro">Die Wetterdaten werden automatisch aktualisiert.</p></div>
-<div class="weather-grid" id="weatherGrid"><article class="weather-card loading">Wetter wird geladen …</article></div>
+<div class="weather-current" id="weatherCurrent"><article class="weather-card loading">Wetter wird geladen …</article></div><div class="weather-forecast" id="weatherForecast"></div>
 </section>
 <section class="section gallery-section" id="galerie">
 <div class="section-title reveal"><p class="eyebrow" id="galleryEyebrow">Vorfreude in Bildern</p><h2 id="galleryTitle">Unsere Reiseziele</h2><p id="galleryIntro">Die öffentliche Galerie zeigt ausschließlich allgemeine Reisemotive. Schülerfotos bleiben geschützt.</p></div>
@@ -94,6 +94,13 @@
 <section class="section group-section" id="reisegruppe">
 <div class="group-card reveal"><div class="group-icon" id="groupIcon">🔒</div><div><p class="eyebrow" id="groupIntro">Nur mit Schulkonto</p><h2 id="groupTitle">Bereich für die Reisegruppe</h2><p>Fotoupload und Schülergalerie liegen geschützt in Microsoft 365. Auf der öffentlichen Website werden keine Schülerfotos gespeichert.</p>
 <div class="student-actions"><a aria-disabled="true" class="button button-blue disabled" id="uploadButton">📤 Fotos hochladen</a><a aria-disabled="true" class="button button-dark disabled" id="galleryButton">📸 Schülergalerie öffnen</a></div><small id="uploadNote">Microsoft-365-Links werden eingerichtet.</small></div></div>
+</section>
+
+<section class="section emergency-section" id="notfall">
+<div class="emergency-card reveal">
+<div class="emergency-heading"><span class="emergency-symbol">🛟</span><div><p class="eyebrow" id="emergencyEyebrow">Hilfe unterwegs</p><h2 id="emergencyTitle">Wichtige Kontakte</h2><p id="emergencyIntro">Nur für den Fall, dass unterwegs rasch Hilfe benötigt wird.</p></div></div>
+<div class="emergency-grid" id="emergencyGrid"></div>
+</div>
 </section>
 <section class="section faq-section" id="faq"><div class="section-title reveal"><p class="eyebrow" id="faqEyebrow">Kurz erklärt</p><h2 id="faqTitle">Häufige Fragen</h2></div><div class="faq-list" id="faqList"></div></section>
 <section class="section admin-teaser"><div class="admin-card reveal"><div><p class="eyebrow" id="adminEyebrow">Für Lehrkräfte</p><h2 id="adminTitle">Inhalte einfach verwalten</h2><p id="adminIntro">News, Programm, Galerie, Orte, Downloads und FAQ können über den Redaktionsbereich gepflegt werden.</p></div><a class="button button-dark" href="/admin/" id="adminButton">Redaktionsbereich öffnen</a></div></section>

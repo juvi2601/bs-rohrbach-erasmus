@@ -1,9 +1,17 @@
-KORREKTUR VERSION 4.1.1
+BS Rohrbach Erasmus+ – Version 4.2
 
-1. Den gesamten Inhalt dieses Ordners in das GitHub-Repository hochladen.
-2. Vorhandene Dateien package.json und wrangler.jsonc ersetzen.
-3. Der neue Ordner public muss direkt in der Hauptansicht des Repositories liegen.
-4. Danach in Cloudflare den fehlgeschlagenen Deploy erneut starten.
+Enthalten:
+- bisheriges Erscheinungsbild bleibt erhalten
+- Wetter in Brüssel: aktuell + 4-Tage-Vorschau
+- dezenter Hilfe-/Notfallbereich
+- Microsoft-Links bleiben aktiv
+- Cloudflare-Struktur mit public-Ordner
 
-Die Website-Dateien werden nun ausschließlich aus ./public veröffentlicht.
-Dadurch werden alte oder zu große Dateien außerhalb von public beim Deploy ignoriert.
+Upload in GitHub:
+1. Den Ordner public sowie package.json und wrangler.jsonc hochladen.
+2. Vorhandene Dateien ersetzen.
+3. Commit-Nachricht: Version 4.2 – Wetter und Notfall
+4. Cloudflare startet anschließend automatisch einen neuen Deploy.
+
+Hinweis zum CMS:
+Der Redaktionsbereich ist vorbereitet. Für die Anmeldung fehlt weiterhin der GitHub-OAuth-Worker; der Platzhalter in public/admin/config.yml bleibt deshalb zunächst bestehen.

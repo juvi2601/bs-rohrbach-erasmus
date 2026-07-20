@@ -42,6 +42,11 @@
       "target": "#downloads"
     },
     {
+      "label": "Hilfe",
+      "target": "#notfall",
+      "emergency": true
+    },
+    {
       "label": "Reisegruppe 🔒",
       "target": "#reisegruppe",
       "highlight": true
@@ -205,5 +210,40 @@
     "topLink": "Nach oben ↑",
     "privacy": "Keine personenbezogenen Reisedaten öffentlich"
   },
-  "notice": "Noch nicht endgültig bestätigte Punkte sind entsprechend markiert."
+  "notice": "Noch nicht endgültig bestätigte Punkte sind entsprechend markiert.",
+  "emergency": {
+    "eyebrow": "Hilfe unterwegs",
+    "title": "Wichtige Kontakte",
+    "intro": "Nur für den Fall, dass unterwegs rasch Hilfe benötigt wird.",
+    "items": [
+      {
+        "icon": "📞",
+        "title": "Europäischer Notruf",
+        "text": "112 – Polizei, Rettung und Feuerwehr",
+        "url": "tel:112",
+        "button": "112 anrufen"
+      },
+      {
+        "icon": "🏨",
+        "title": "Hotel",
+        "text": "ibis Brussels City Centre · Rue Joseph Plateau 2, 1000 Bruxelles",
+        "url": "https://www.google.com/maps/search/?api=1&query=ibis+Brussels+City+Centre",
+        "button": "Route öffnen"
+      },
+      {
+        "icon": "🇦🇹",
+        "title": "Österreichische Vertretung",
+        "text": "Kontaktdaten werden vor der Reise ergänzt.",
+        "url": "",
+        "button": ""
+      },
+      {
+        "icon": "👨‍🏫",
+        "title": "Lehrkräfte",
+        "text": "Kontaktdaten werden nur für die Reisegruppe hinterlegt.",
+        "url": "",
+        "button": ""
+      }
+    ]
+  }
 }
