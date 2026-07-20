@@ -15,3 +15,6 @@ Upload in GitHub:
 
 Hinweis zum CMS:
 Der Redaktionsbereich ist vorbereitet. Für die Anmeldung fehlt weiterhin der GitHub-OAuth-Worker; der Platzhalter in public/admin/config.yml bleibt deshalb zunächst bestehen.
+
+
+Version 4.2.1: Wettertitel, Heute-in-Brüssel-Anzeige, automatischer Reisetipp sowie vollständige Hotel- und Botschaftskontaktdaten ergänzt.

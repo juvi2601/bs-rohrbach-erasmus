@@ -61,10 +61,21 @@ async function loadWeather(places=[]){
   try{
     const u=`https://api.open-meteo.com/v1/forecast?latitude=${primary.lat}&longitude=${primary.lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=4&timezone=Europe%2FBrussels`;
     const x=await(await fetch(u)).json(),c=x.current||{},w=weatherInfo(c.weather_code),d=x.daily||{};
-    current.innerHTML=`<article class="weather-card weather-now"><div><small>Aktuell in ${esc(primary.name)}</small><strong>${Math.round(c.temperature_2m??0)} °C</strong><span>Gefühlt ${Math.round(c.apparent_temperature??0)} °C · Wind ${Math.round(c.wind_speed_10m??0)} km/h</span><span>${w.text}</span></div><div class="weather-icon">${w.icon}</div></article>`;
+    const tip=weatherTip({temperature:c.temperature_2m,wind:c.wind_speed_10m,precipitation:(d.precipitation_probability_max||[])[0],code:c.weather_code});
+    current.innerHTML=`<article class="weather-card weather-now"><div><small>📍 Heute in ${esc(primary.name)}</small><strong>${Math.round(c.temperature_2m??0)} °C</strong><span>Gefühlt ${Math.round(c.apparent_temperature??0)} °C · Wind ${Math.round(c.wind_speed_10m??0)} km/h</span><span>${w.text}</span><div class="weather-tip"><b>💡 Reisetipp</b><span>${esc(tip)}</span></div></div><div class="weather-icon">${w.icon}</div></article>`;
     const labels=["Heute","Morgen","Übermorgen"];
     forecast.innerHTML=(d.time||[]).slice(0,4).map((day,i)=>{const info=weatherInfo((d.weather_code||[])[i]);const label=labels[i]||new Intl.DateTimeFormat("de-AT",{weekday:"long"}).format(new Date(day+"T12:00:00"));return `<article class="forecast-day"><small>${esc(label)}</small><div class="forecast-icon">${info.icon}</div><strong>${Math.round((d.temperature_2m_max||[])[i]??0)}°</strong><span>${Math.round((d.temperature_2m_min||[])[i]??0)}° min</span><span>${Math.round((d.precipitation_probability_max||[])[i]??0)} % Regen</span><b>${info.text}</b></article>`}).join("");
   }catch{current.innerHTML='<div class="empty-state">Wetterdaten sind derzeit nicht verfügbar.</div>';forecast.innerHTML=""}
+}
+
+
+function weatherTip({temperature=0,wind=0,precipitation=0,code=0}={}){
+  if(precipitation>=50||code>=51&&code<=82)return "Regenjacke oder Schirm mitnehmen.";
+  if(temperature<8)return "Warme Kleidung und eine wetterfeste Jacke empfohlen.";
+  if(wind>=30)return "Es wird windig – eine windfeste Jacke ist sinnvoll.";
+  if(temperature>=25)return "Sonnencreme und Trinkflasche nicht vergessen.";
+  if(temperature<14)return "Eine zusätzliche Jacke ist empfehlenswert.";
+  return "Angenehmes Reisewetter – trotzdem eine leichte Jacke einpacken.";
 }
 
 function weatherInfo(code=0){if(code===0)return{icon:"☀️",text:"Klar"};if([1,2].includes(code))return{icon:"🌤️",text:"Leicht bewölkt"};if(code===3)return{icon:"☁️",text:"Bewölkt"};if([45,48].includes(code))return{icon:"🌫️",text:"Nebel"};if(code>=51&&code<=67)return{icon:"🌧️",text:"Regen"};if(code>=71&&code<=77)return{icon:"🌨️",text:"Schnee"};if(code>=80&&code<=82)return{icon:"🌦️",text:"Regenschauer"};if(code>=95)return{icon:"⛈️",text:"Gewitter"};return{icon:"🌥️",text:"Wechselhaft"}}

@@ -106,8 +106,8 @@
     },
     "weather": {
       "eyebrow": "Aktuelle Vorschau",
-      "title": "Wetter an unseren Reisezielen",
-      "intro": "Die Wetterdaten werden automatisch aktualisiert."
+      "title": "Wetter in Brüssel",
+      "intro": "Aktuelle Wetterinformationen für unsere Reise nach Brüssel."
     },
     "gallery": {
       "eyebrow": "Vorfreude in Bildern",
@@ -219,30 +219,30 @@
       {
         "icon": "📞",
         "title": "Europäischer Notruf",
-        "text": "112 – Polizei, Rettung und Feuerwehr",
-        "url": "tel:112",
-        "button": "112 anrufen"
+        "text": "112 – gilt europaweit für Polizei, Rettung und Feuerwehr.",
+        "button": "112 anrufen",
+        "url": "tel:112"
       },
       {
         "icon": "🏨",
         "title": "Hotel",
-        "text": "ibis Brussels City Centre · Rue Joseph Plateau 2, 1000 Bruxelles",
-        "url": "https://www.google.com/maps/search/?api=1&query=ibis+Brussels+City+Centre",
-        "button": "Route öffnen"
+        "text": "ibis Brussels City Centre · Rue Joseph Plateau 2, 1000 Brüssel · Tel. +32 2 620 04 26",
+        "button": "Route öffnen",
+        "url": "https://www.google.com/maps/search/?api=1&query=ibis+Brussels+City+Centre%2C+Rue+Joseph+Plateau+2%2C+1000+Brussels"
       },
       {
         "icon": "🇦🇹",
-        "title": "Österreichische Vertretung",
-        "text": "Kontaktdaten werden vor der Reise ergänzt.",
-        "url": "",
-        "button": ""
+        "title": "Österreichische Botschaft Brüssel",
+        "text": "Avenue de Cortenbergh 4–10, 1040 Brüssel · Tel. +32 2 289 07 00",
+        "button": "Route öffnen",
+        "url": "https://www.google.com/maps/search/?api=1&query=Österreichische+Botschaft+Brüssel%2C+Avenue+de+Cortenbergh+4-10%2C+1040+Brüssel"
       },
       {
         "icon": "👨‍🏫",
         "title": "Lehrkräfte",
-        "text": "Kontaktdaten werden nur für die Reisegruppe hinterlegt.",
-        "url": "",
-        "button": ""
+        "text": "Kontaktdaten sind nach Anmeldung im internen Bereich sichtbar.",
+        "button": "",
+        "url": ""
       }
     ]
   }
