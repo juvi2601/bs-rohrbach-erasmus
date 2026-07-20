@@ -1,0 +1,209 @@
+{
+  "meta": {
+    "pageTitle": "Brüssel 2026 · BS Rohrbach Erasmus+",
+    "description": "Digitaler Reisebegleiter der Berufsschule Rohrbach für die Brüsselreise 2026."
+  },
+  "tripTitle": "Brüssel 2026",
+  "school": "BS Rohrbach Erasmus+",
+  "brandSubtitle": "Brüssel · 21.–26. November 2026",
+  "subtitle": "Europa erleben, Antwerpen entdecken und gemeinsame Erinnerungen festhalten.",
+  "departure": "2026-11-21T20:00:00+01:00",
+  "returnDate": "2026-11-26T23:59:00+01:00",
+  "hero": "/images/hero.jpg",
+  "heroEyebrow": "Berufsschule Rohrbach unterwegs",
+  "heroTitle": "Brüssel 2026",
+  "heroPrimaryButton": "Reiseprogramm",
+  "heroSecondaryButton": "Reisegruppe öffnen",
+  "countdownLabel": "🚌 Abfahrt in Rohrbach",
+  "countdownDateText": "Samstag, 21. November · 20:00 Uhr",
+  "navigation": [
+    {
+      "label": "Heute",
+      "target": "#heute"
+    },
+    {
+      "label": "News",
+      "target": "#news"
+    },
+    {
+      "label": "Programm",
+      "target": "#programm"
+    },
+    {
+      "label": "Karte",
+      "target": "#karte"
+    },
+    {
+      "label": "Galerie",
+      "target": "#galerie"
+    },
+    {
+      "label": "Downloads",
+      "target": "#downloads"
+    },
+    {
+      "label": "Reisegruppe 🔒",
+      "target": "#reisegruppe",
+      "highlight": true
+    }
+  ],
+  "quickLinks": [
+    {
+      "icon": "📅",
+      "title": "Programm",
+      "subtitle": "Tag für Tag",
+      "target": "#programm"
+    },
+    {
+      "icon": "🗺️",
+      "title": "Karte",
+      "subtitle": "Alle Reiseziele",
+      "target": "#karte"
+    },
+    {
+      "icon": "🌤️",
+      "title": "Wetter",
+      "subtitle": "Brüssel & Ausflüge",
+      "target": "#wetter"
+    },
+    {
+      "icon": "🔒",
+      "title": "Reisegruppe",
+      "subtitle": "Fotos & Galerie",
+      "target": "#reisegruppe"
+    }
+  ],
+  "today": {
+    "eyebrow": "Digitaler Reisebegleiter",
+    "beforeTitle": "Die Reise beginnt bald",
+    "beforeText": "Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.",
+    "beforeLabel": "Vorfreude",
+    "dateRange": "21.–26. November 2026",
+    "afterTitle": "Schöne Erinnerungen an Brüssel",
+    "afterText": "Die Reise ist abgeschlossen. Die geschützte Galerie bleibt für die Reisegruppe erreichbar.",
+    "afterLabel": "Reise abgeschlossen"
+  },
+  "sections": {
+    "news": {
+      "eyebrow": "Aktuelles zur Reise",
+      "title": "News & Hinweise",
+      "intro": "Neue Informationen werden hier laufend ergänzt."
+    },
+    "program": {
+      "eyebrow": "Tag für Tag",
+      "title": "Unser Reiseprogramm",
+      "intro": "Noch nicht endgültig bestätigte Punkte sind entsprechend markiert."
+    },
+    "map": {
+      "eyebrow": "Orientierung vor Ort",
+      "title": "Interaktive Reisekarte",
+      "intro": "Klicke auf einen Pin für Adresse, Beschreibung und Navigation."
+    },
+    "weather": {
+      "eyebrow": "Aktuelle Vorschau",
+      "title": "Wetter an unseren Reisezielen",
+      "intro": "Die Wetterdaten werden automatisch aktualisiert."
+    },
+    "gallery": {
+      "eyebrow": "Vorfreude in Bildern",
+      "title": "Unsere Reiseziele",
+      "intro": "Die öffentliche Galerie zeigt ausschließlich allgemeine Reisemotive. Schülerfotos bleiben geschützt."
+    },
+    "culinary": {
+      "eyebrow": "Typisch Belgien",
+      "title": "Genuss unterwegs"
+    },
+    "downloads": {
+      "eyebrow": "Wichtige Unterlagen",
+      "title": "Downloads",
+      "intro": "Hier erscheinen nur Dokumente, die ausdrücklich öffentlich freigegeben wurden."
+    },
+    "faq": {
+      "eyebrow": "Kurz erklärt",
+      "title": "Häufige Fragen"
+    }
+  },
+  "culinaryItems": [
+    {
+      "image": "/images/pommes.jpg",
+      "title": "Belgische Pommes",
+      "text": "Doppelt frittiert, außen knusprig und innen weich."
+    },
+    {
+      "image": "/images/waffeln.jpg",
+      "title": "Belgische Waffeln",
+      "text": "Ein süßer Klassiker für unsere Freizeit in der Altstadt."
+    },
+    {
+      "image": "/images/schokolade.jpg",
+      "title": "Schokolade",
+      "text": "Pralinen und Chocolatiers gehören zu Brüssel einfach dazu."
+    }
+  ],
+  "hotel": {
+    "eyebrow": "Unser Zuhause in Brüssel",
+    "title": "ibis Brussels City Centre",
+    "image": "/images/hotel-ibis.jpg",
+    "address": "Rue Joseph Plateau 2\n1000 Bruxelles, Belgien",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=ibis+Brussels+City+Centre",
+    "mapsButton": "In Google Maps öffnen",
+    "details": [
+      {
+        "icon": "📍",
+        "title": "Zentrale Lage",
+        "text": "Grand Place in wenigen Gehminuten"
+      },
+      {
+        "icon": "🥐",
+        "title": "Frühstück inklusive",
+        "text": "Mo–Fr 06:30–10:00 · Wochenende bis 11:00"
+      },
+      {
+        "icon": "🛏️",
+        "title": "16 Twin- und 6 Einzelzimmer",
+        "text": "Zimmer nach Möglichkeit nahe beieinander"
+      }
+    ]
+  },
+  "weatherLocations": [
+    {
+      "name": "Brüssel",
+      "lat": 50.8503,
+      "lon": 4.3517
+    },
+    {
+      "name": "Antwerpen",
+      "lat": 51.2194,
+      "lon": 4.4025
+    },
+    {
+      "name": "Waterloo",
+      "lat": 50.7147,
+      "lon": 4.3991
+    }
+  ],
+  "studentArea": {
+    "icon": "🔒",
+    "eyebrow": "Nur mit Schulkonto",
+    "title": "Bereich für die Reisegruppe",
+    "text": "Fotoupload und Schülergalerie liegen geschützt in Microsoft 365. Auf der öffentlichen Website werden keine Schülerfotos gespeichert.",
+    "uploadButton": "📤 Fotos hochladen",
+    "galleryButton": "📸 Schülergalerie öffnen",
+    "note": "Anmeldung mit dem schulischen Microsoft-365-Konto erforderlich. Hochgeladene Fotos werden vor der Veröffentlichung geprüft.",
+    "uploadUrl": "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=Z9b4aaCZ2k6zc0ILJIznMvKDmvvfCnpDoqGfIp0BMCJUQ1RXMjdKWEJVTTBMQ005WVRWSUw5NllNSS4u",
+    "galleryUrl": "https://bsrohrbach.sharepoint.com/sites/BSRohrbachBrsselreise2026?market=de-DE"
+  },
+  "adminArea": {
+    "eyebrow": "Für Lehrkräfte",
+    "title": "Inhalte einfach verwalten",
+    "text": "Alle sichtbaren Texte, Fotos, Links, Programmpunkte, Orte, Downloads und FAQ können über den Redaktionsbereich gepflegt werden.",
+    "button": "Redaktionsbereich öffnen"
+  },
+  "footer": {
+    "title": "BS Rohrbach Erasmus+",
+    "subtitle": "Brüsselreise 2026 · Erasmus+",
+    "topLink": "Nach oben ↑",
+    "privacy": "Keine personenbezogenen Reisedaten öffentlich"
+  },
+  "notice": "Noch nicht endgültig bestätigte Punkte sind entsprechend markiert."
+}

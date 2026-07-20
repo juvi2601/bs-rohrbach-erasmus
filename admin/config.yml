@@ -1,0 +1,585 @@
+backend:
+  name: github
+  repo: juvi2601/bruesselreise-2026
+  branch: main
+  base_url: https://REPLACE-WITH-CMS-AUTH-WORKER.workers.dev
+locale: de
+media_folder: images/uploads
+public_folder: /images/uploads
+site_url: https://bruesselreise-2026.pages.dev
+display_url: https://bruesselreise-2026.pages.dev
+logo_url: /images/hero.jpg
+collections:
+- name: site
+  label: Startseite & allgemeine Inhalte
+  files:
+  - name: site
+    label: Alle Seitentexte & Bilder
+    file: content/site.json
+    format: json
+    fields:
+    - label: Browser & Grunddaten
+      name: meta
+      widget: object
+      fields:
+      - label: Seitentitel im Browser
+        name: pageTitle
+        widget: string
+      - label: Beschreibung für Suchmaschinen
+        name: description
+        widget: text
+    - label: Reisetitel
+      name: tripTitle
+      widget: string
+    - label: Schule/Portalname
+      name: school
+      widget: string
+    - label: Unterzeile im Kopf
+      name: brandSubtitle
+      widget: string
+    - label: Untertitel im Titelbild
+      name: subtitle
+      widget: text
+    - label: Abfahrt
+      name: departure
+      widget: datetime
+    - label: Rückkehr
+      name: returnDate
+      widget: datetime
+    - label: Großes Titelbild
+      name: hero
+      widget: image
+    - label: Kleine Zeile über Titel
+      name: heroEyebrow
+      widget: string
+    - label: Großer Titel
+      name: heroTitle
+      widget: string
+    - label: Button Reiseprogramm
+      name: heroPrimaryButton
+      widget: string
+    - label: Button Reisegruppe
+      name: heroSecondaryButton
+      widget: string
+    - label: Countdown-Überschrift
+      name: countdownLabel
+      widget: string
+    - label: Countdown-Datum als Text
+      name: countdownDateText
+      widget: string
+    - label: Navigation
+      name: navigation
+      widget: list
+      fields:
+      - label: Beschriftung
+        name: label
+        widget: string
+      - label: 'Ziel (z. B. #programm)'
+        name: target
+        widget: string
+      - label: Hervorheben
+        name: highlight
+        widget: boolean
+        required: false
+        default: false
+    - label: Schnellzugriffe
+      name: quickLinks
+      widget: list
+      fields:
+      - label: Icon/Emoji
+        name: icon
+        widget: string
+      - label: Titel
+        name: title
+        widget: string
+      - label: Untertitel
+        name: subtitle
+        widget: string
+      - label: Ziel
+        name: target
+        widget: string
+    - label: Heute-Bereich
+      name: today
+      widget: object
+      fields:
+      - label: Kleine Überschrift
+        name: eyebrow
+        widget: string
+      - label: Titel vor Reisebeginn
+        name: beforeTitle
+        widget: string
+      - label: Text vor Reisebeginn
+        name: beforeText
+        widget: text
+      - label: Status vor Reisebeginn
+        name: beforeLabel
+        widget: string
+      - label: Datumsbereich
+        name: dateRange
+        widget: string
+      - label: Titel nach Reiseende
+        name: afterTitle
+        widget: string
+      - label: Text nach Reiseende
+        name: afterText
+        widget: text
+      - label: Status nach Reiseende
+        name: afterLabel
+        widget: string
+    - label: Bereichsüberschriften
+      name: sections
+      widget: object
+      fields:
+      - label: News
+        name: news
+        widget: object
+        fields:
+        - label: Kleine Überschrift
+          name: eyebrow
+          widget: string
+        - label: Hauptüberschrift
+          name: title
+          widget: string
+        - label: Einleitung
+          name: intro
+          widget: text
+      - label: Programm
+        name: program
+        widget: object
+        fields:
+        - label: Kleine Überschrift
+          name: eyebrow
+          widget: string
+        - label: Hauptüberschrift
+          name: title
+          widget: string
+        - label: Einleitung
+          name: intro
+          widget: text
+      - label: Karte
+        name: map
+        widget: object
+        fields:
+        - label: Kleine Überschrift
+          name: eyebrow
+          widget: string
+        - label: Hauptüberschrift
+          name: title
+          widget: string
+        - label: Einleitung
+          name: intro
+          widget: text
+      - label: Wetter
+        name: weather
+        widget: object
+        fields:
+        - label: Kleine Überschrift
+          name: eyebrow
+          widget: string
+        - label: Hauptüberschrift
+          name: title
+          widget: string
+        - label: Einleitung
+          name: intro
+          widget: text
+      - label: Galerie
+        name: gallery
+        widget: object
+        fields:
+        - label: Kleine Überschrift
+          name: eyebrow
+          widget: string
+        - label: Hauptüberschrift
+          name: title
+          widget: string
+        - label: Einleitung
+          name: intro
+          widget: text
+      - label: Genuss
+        name: culinary
+        widget: object
+        fields:
+        - label: Kleine Überschrift
+          name: eyebrow
+          widget: string
+        - label: Hauptüberschrift
+          name: title
+          widget: string
+      - label: Downloads
+        name: downloads
+        widget: object
+        fields:
+        - label: Kleine Überschrift
+          name: eyebrow
+          widget: string
+        - label: Hauptüberschrift
+          name: title
+          widget: string
+        - label: Einleitung
+          name: intro
+          widget: text
+      - label: FAQ
+        name: faq
+        widget: object
+        fields:
+        - label: Kleine Überschrift
+          name: eyebrow
+          widget: string
+        - label: Hauptüberschrift
+          name: title
+          widget: string
+    - label: Programmhinweis
+      name: notice
+      widget: text
+    - label: Genuss-Karten
+      name: culinaryItems
+      widget: list
+      fields:
+      - label: Foto
+        name: image
+        widget: image
+      - label: Titel
+        name: title
+        widget: string
+      - label: Text
+        name: text
+        widget: text
+    - label: Hotel
+      name: hotel
+      widget: object
+      fields:
+      - label: Kleine Überschrift
+        name: eyebrow
+        widget: string
+      - label: Hotelname
+        name: title
+        widget: string
+      - label: Hotelfoto
+        name: image
+        widget: image
+      - label: Adresse
+        name: address
+        widget: text
+      - label: Google-Maps-Link
+        name: mapsUrl
+        widget: string
+      - label: Buttontext
+        name: mapsButton
+        widget: string
+      - label: Hotel-Details
+        name: details
+        widget: list
+        fields:
+        - label: Icon
+          name: icon
+          widget: string
+        - label: Titel
+          name: title
+          widget: string
+        - label: Text
+          name: text
+          widget: string
+    - label: Wetterorte
+      name: weatherLocations
+      widget: list
+      fields:
+      - label: Ort
+        name: name
+        widget: string
+      - label: Breitengrad
+        name: lat
+        widget: number
+        value_type: float
+      - label: Längengrad
+        name: lon
+        widget: number
+        value_type: float
+    - label: Geschützter Schülerbereich
+      name: studentArea
+      widget: object
+      fields:
+      - label: Icon
+        name: icon
+        widget: string
+      - label: Kleine Überschrift
+        name: eyebrow
+        widget: string
+      - label: Titel
+        name: title
+        widget: string
+      - label: Beschreibung
+        name: text
+        widget: text
+      - label: Upload-Button
+        name: uploadButton
+        widget: string
+      - label: Galerie-Button
+        name: galleryButton
+        widget: string
+      - label: Hinweis
+        name: note
+        widget: text
+      - label: Microsoft-Forms-Link
+        name: uploadUrl
+        widget: string
+      - label: SharePoint-Galerie-Link
+        name: galleryUrl
+        widget: string
+    - label: Admin-Hinweis
+      name: adminArea
+      widget: object
+      fields:
+      - label: Kleine Überschrift
+        name: eyebrow
+        widget: string
+      - label: Titel
+        name: title
+        widget: string
+      - label: Text
+        name: text
+        widget: text
+      - label: Buttontext
+        name: button
+        widget: string
+    - label: Fußzeile
+      name: footer
+      widget: object
+      fields:
+      - label: Titel
+        name: title
+        widget: string
+      - label: Untertitel
+        name: subtitle
+        widget: string
+      - label: Nach-oben-Link
+        name: topLink
+        widget: string
+      - label: Datenschutzhinweis
+        name: privacy
+        widget: string
+- name: news
+  label: News & Hinweise
+  files:
+  - name: news
+    label: News & Hinweise
+    file: content/news.json
+    format: json
+    fields:
+    - label: Meldungen
+      name: news
+      widget: list
+      summary: '{{fields.date}} – {{fields.title}}'
+      fields:
+      - label: Überschrift
+        name: title
+        widget: string
+      - label: Datum
+        name: date
+        widget: datetime
+        format: YYYY-MM-DD
+        date_format: DD.MM.YYYY
+        time_format: false
+      - label: Text
+        name: text
+        widget: text
+      - label: Wichtig hervorheben
+        name: important
+        widget: boolean
+        default: false
+        required: false
+      - label: Veröffentlicht
+        name: published
+        widget: boolean
+        default: true
+- name: program
+  label: Tagesprogramm
+  files:
+  - name: program
+    label: Tagesprogramm
+    file: content/program.json
+    format: json
+    fields:
+    - label: Reisetage
+      name: days
+      widget: list
+      summary: '{{fields.short}} {{fields.date}} – {{fields.title}}'
+      fields:
+      - label: Technische ID
+        name: id
+        widget: string
+        hint: z. B. mo
+      - label: Kurzname
+        name: short
+        widget: string
+      - label: Datum
+        name: date
+        widget: string
+      - label: Tagnummer
+        name: dayNumber
+        widget: number
+        value_type: int
+      - label: Titel
+        name: title
+        widget: string
+      - label: Untertitel
+        name: subtitle
+        widget: text
+      - label: Icon
+        name: icon
+        widget: string
+        required: false
+      - label: Titelbild
+        name: cover
+        widget: image
+        required: false
+      - label: Bilderreihe
+        name: gallery
+        widget: list
+        required: false
+        field:
+          label: Bild
+          name: image
+          widget: image
+      - label: Programmpunkte
+        name: events
+        widget: list
+        summary: '{{fields.time}} – {{fields.title}}'
+        fields:
+        - label: Zeit
+          name: time
+          widget: string
+        - label: Titel
+          name: title
+          widget: string
+        - label: Beschreibung
+          name: text
+          widget: text
+        - label: Status
+          name: status
+          widget: select
+          options:
+          - label: Normal
+            value: ''
+          - label: Bestätigt
+            value: confirmed
+          - label: Noch nicht bestätigt
+            value: pending
+          required: false
+- name: gallery
+  label: Öffentliche Galerie
+  files:
+  - name: gallery
+    label: Öffentliche Galerie
+    file: content/gallery.json
+    format: json
+    fields:
+    - label: Fotos
+      name: photos
+      widget: list
+      summary: '{{fields.day}} – {{fields.title}}'
+      fields:
+      - label: Titel
+        name: title
+        widget: string
+      - label: Kategorie/Reisetag
+        name: day
+        widget: string
+      - label: Bild
+        name: image
+        widget: image
+      - label: Beschreibung
+        name: description
+        widget: text
+        required: false
+- name: places
+  label: Karte & Orte
+  files:
+  - name: places
+    label: Karte & Orte
+    file: content/places.json
+    format: json
+    fields:
+    - label: Orte
+      name: places
+      widget: list
+      summary: '{{fields.category}} – {{fields.title}}'
+      fields:
+      - label: Name
+        name: title
+        widget: string
+      - label: Kategorie
+        name: category
+        widget: string
+      - label: Breitengrad
+        name: lat
+        widget: number
+        value_type: float
+      - label: Längengrad
+        name: lng
+        widget: number
+        value_type: float
+      - label: Adresse
+        name: address
+        widget: string
+      - label: Gehzeit/Hinweis
+        name: walk
+        widget: string
+      - label: Bild
+        name: image
+        widget: image
+      - label: Beschreibung
+        name: description
+        widget: text
+      - label: Google-Maps-Link
+        name: maps
+        widget: string
+- name: downloads
+  label: Downloads
+  files:
+  - name: downloads
+    label: Downloads
+    file: content/downloads.json
+    format: json
+    fields:
+    - label: Dokumente
+      name: downloads
+      widget: list
+      summary: '{{fields.title}}'
+      fields:
+      - label: Titel
+        name: title
+        widget: string
+      - label: Beschreibung
+        name: description
+        widget: text
+      - label: Datei
+        name: file
+        widget: file
+        required: false
+      - label: Icon
+        name: icon
+        widget: string
+        default: 📄
+      - label: Öffentlich anzeigen
+        name: published
+        widget: boolean
+        default: false
+- name: faq
+  label: FAQ
+  files:
+  - name: faq
+    label: FAQ
+    file: content/faq.json
+    format: json
+    fields:
+    - label: Fragen
+      name: items
+      widget: list
+      summary: '{{fields.question}}'
+      fields:
+      - label: Frage
+        name: question
+        widget: string
+      - label: Antwort
+        name: answer
+        widget: text

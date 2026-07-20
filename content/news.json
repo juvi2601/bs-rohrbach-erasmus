@@ -1,0 +1,18 @@
+{
+  "news": [
+    {
+      "title": "Das neue Reiseportal ist online",
+      "date": "2026-07-19",
+      "text": "Programm, Hotelinformationen und wichtige Hinweise sind nun übersichtlich an einem Ort verfügbar.",
+      "important": false,
+      "published": true
+    },
+    {
+      "title": "Noch offene Programmpunkte",
+      "date": "2026-07-19",
+      "text": "Der Besuch des Plenarsaals, die Ständige Vertretung und die Details zu Waterloo werden noch bestätigt.",
+      "important": true,
+      "published": true
+    }
+  ]
+}
