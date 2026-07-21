@@ -3,9 +3,9 @@ backend:
   repo: juvi2601/bs-rohrbach-erasmus
   branch: main
   base_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
-auth_endpoint: auth
+  auth_endpoint: auth
 locale: de
-media_folder: images/uploads
+media_folder: public/images/uploads
 public_folder: /images/uploads
 site_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
 display_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
@@ -16,7 +16,7 @@ collections:
   files:
   - name: site
     label: Alle Seitentexte & Bilder
-    file: content/site.json
+    file: public/content/site.json
     format: json
     fields:
     - label: Browser & Grunddaten
@@ -397,7 +397,7 @@ collections:
   files:
   - name: news
     label: News & Hinweise
-    file: content/news.json
+    file: public/content/news.json
     format: json
     fields:
     - label: Meldungen
@@ -431,7 +431,7 @@ collections:
   files:
   - name: program
     label: Tagesprogramm
-    file: content/program.json
+    file: public/content/program.json
     format: json
     fields:
     - label: Reisetage
@@ -505,7 +505,7 @@ collections:
   files:
   - name: gallery
     label: Öffentliche Galerie
-    file: content/gallery.json
+    file: public/content/gallery.json
     format: json
     fields:
     - label: Fotos
@@ -531,7 +531,7 @@ collections:
   files:
   - name: places
     label: Karte & Orte
-    file: content/places.json
+    file: public/content/places.json
     format: json
     fields:
     - label: Orte
@@ -573,7 +573,7 @@ collections:
   files:
   - name: downloads
     label: Downloads
-    file: content/downloads.json
+    file: public/content/downloads.json
     format: json
     fields:
     - label: Dokumente
@@ -604,7 +604,7 @@ collections:
   files:
   - name: faq
     label: FAQ
-    file: content/faq.json
+    file: public/content/faq.json
     format: json
     fields:
     - label: Fragen

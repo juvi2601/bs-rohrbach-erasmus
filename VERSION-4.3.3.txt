@@ -1,0 +1,8 @@
+Version 4.3.3
+
+- Decap-CMS-OAuth-Handshake korrigiert.
+- Callback meldet zuerst "authorizing:github" und übermittelt das Token erst nach Antwort des CMS.
+- Popup-Fallback für Browser mit strenger Popup-/Tracking-Behandlung.
+- Verbesserte OAuth-Fehlermeldungen.
+- OAuth-State-Cookie wird nach der Anmeldung gelöscht.
+- Berechtigung für das öffentliche Repository auf public_repo begrenzt.

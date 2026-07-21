@@ -40,3 +40,7 @@ Das GitHub Client Secret liegt nur als Cloudflare-Secret vor und wird nicht in d
 ## Hinweis zu Version 4.3.2
 
 Die dynamischen Routen `/auth`, `/callback` und `/api/*` sind mit `run_worker_first` ausdrücklich als Worker-Routen konfiguriert. Dadurch greift bei diesen Adressen nicht mehr die statische 404-Seite.
+
+
+## Version 4.3.4
+Der Decap-Callback wurde korrigiert. Zusätzlich liegen `auth_endpoint` und alle Repository-Dateipfade nun an der von Decap erwarteten Stelle. Nach dem Upload bitte `/admin/cms/` mit Strg+F5 neu laden.

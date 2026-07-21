@@ -1,0 +1,8 @@
+Version 4.3.4
+
+Korrekturen:
+- auth_endpoint steht nun korrekt innerhalb des backend-Blocks.
+- OAuth-Erfolgsmeldung enthält den von Decap erwarteten provider: github.
+- Callback reagiert nur auf den korrekten Decap-Handshake.
+- CMS-Dateipfade zeigen auf public/content/*.json.
+- Medien-Uploads werden korrekt unter public/images/uploads gespeichert.
