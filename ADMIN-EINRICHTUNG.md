@@ -36,3 +36,7 @@ Beim Speichern legt Decap CMS einen Commit im Branch `main` an. GitHub löst aut
 ## Sicherheit
 
 Das GitHub Client Secret liegt nur als Cloudflare-Secret vor und wird nicht in den Browser oder das Repository geschrieben.
+
+## Hinweis zu Version 4.3.2
+
+Die dynamischen Routen `/auth`, `/callback` und `/api/*` sind mit `run_worker_first` ausdrücklich als Worker-Routen konfiguriert. Dadurch greift bei diesen Adressen nicht mehr die statische 404-Seite.

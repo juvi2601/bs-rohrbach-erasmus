@@ -1,0 +1,6 @@
+BS Rohrbach Erasmus+ – Version 4.3.2
+
+Korrektur GitHub-OAuth / Decap CMS:
+- Cloudflare führt den Worker für /auth, /callback und /api/* nun vor den statischen Dateien aus.
+- Dadurch werden diese Routen nicht mehr von der statischen 404-Seite abgefangen.
+- Bestehende GitHub-OAuth-App und Cloudflare-Secrets können unverändert bleiben.
