@@ -83,7 +83,7 @@ async function handleAuth(url, env) {
     return oauthCallbackPage('error', { message: 'Ungültiger OAuth-Anbieter.' });
   }
 
-  const callbackUrl = `${url.origin}/callback?provider=github`;
+  const callbackUrl = `${url.origin}/callback`;
   const githubUrl = new URL('https://github.com/login/oauth/authorize');
   githubUrl.searchParams.set('response_type', 'code');
   githubUrl.searchParams.set('client_id', clientId);
@@ -116,7 +116,7 @@ async function handleCallback(url, env) {
     return oauthCallbackPage('error', { message: 'GitHub hat keinen Anmeldecode zurückgegeben.' });
   }
 
-  const callbackUrl = `${url.origin}/callback?provider=github`;
+  const callbackUrl = `${url.origin}/callback`;
   let tokenResponse;
   try {
     tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
@@ -170,7 +170,7 @@ export default {
         clientSecretConfigured: Boolean(clientSecret),
         repo: REPO,
         branch: 'main',
-        version: '4.3.6'
+        version: '4.3.7'
       });
     }
 

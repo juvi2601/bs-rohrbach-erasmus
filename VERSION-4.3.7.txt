@@ -1,0 +1,5 @@
+Version 4.3.7
+
+- OAuth redirect_uri korrigiert: exakt /callback ohne Query-Parameter.
+- Ursache für GitHub-404 behoben.
+- CMS-Status auf Version 4.3.7 aktualisiert.
