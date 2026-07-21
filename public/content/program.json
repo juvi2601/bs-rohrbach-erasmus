@@ -182,9 +182,9 @@
       "events": [
         {
           "time": "Vormittag",
-          "title": "Ständige Vertretung Österreichs",
+          "title": "Ständige Vertretung Österreichs und Fahrt nach Waterloo",
           "text": "Abschließender offizieller Programmpunkt der BS Rohrbach.",
-          "status": "confirmed"
+          "status": "pending"
         },
         {
           "time": "Mittag",
