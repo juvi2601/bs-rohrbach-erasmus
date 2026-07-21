@@ -1,0 +1,11 @@
+BS Rohrbach Erasmus+ – Version 4.2.2
+
+Reisekarte:
+- 70/30-Layout auf Desktop
+- Startansicht auf Brüssel
+- farbige Kategorien und Legende
+- klickbare Ortsliste mit Zoom
+- überarbeitete Pop-ups mit Bild, Adresse und Route
+- neue Kategorien Metro, Essen und Notfall
+- optimierte Tablet- und Mobilansicht
+- Service-Worker-Cache auf Version 4.2.2 aktualisiert

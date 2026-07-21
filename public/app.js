@@ -53,7 +53,50 @@ function activateDay(id){qsa(".day-tab").forEach(b=>{const on=b.dataset.day===id
 
 function renderToday(days){const site=window.__SITE||{};const t=site.today||{};const now=new Date(),start=new Date(site.departure||"2026-11-21T20:00:00+01:00"),end=new Date(site.returnDate||"2026-11-26T23:59:00+01:00");let pct=0,label="Vorfreude",day=null;if(now>=start&&now<=end){pct=Math.min(100,Math.max(0,(now-start)/(end-start)*100));label=`Tag ${Math.max(1,Math.ceil((now-start)/86400000))} von 5`;const ids=["sa","so","mo","di","mi","do"];day=days.find(d=>d.id===ids[Math.min(ids.length-1,Math.floor((now-start)/86400000))])}else if(now>end){pct=100;label=t.afterLabel||"Reise abgeschlossen"}qs("#progressBar").style.width=`${pct}%`;qs("#progressValue").textContent=`${Math.round(pct)} %`;qs("#progressLabel").textContent=label;if(day){qs("#todayTitle").textContent=day.title;qs("#todayText").textContent=day.subtitle;qs("#progressDate").textContent=`${day.short}, ${day.date}`;qs("#todaySchedule").innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");activateDay(day.id)}else if(now>end){qs("#todayTitle").textContent=t.afterTitle||"Schöne Erinnerungen an Brüssel";qs("#todayText").textContent=t.afterText||"Die Reise ist abgeschlossen. Die geschützte Galerie bleibt für die Reisegruppe erreichbar."}}
 
-function renderMap(places){if(!window.L||!places.length){qs("#map").innerHTML='<div class="empty-state">Karte konnte nicht geladen werden.</div>';return}const map=L.map("map",{scrollWheelZoom:false}).setView([50.85,4.36],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);const bounds=[];const list=qs("#placeList");list.innerHTML=places.map((p,i)=>`<article class="place-card" data-place="${i}" tabindex="0"><img src="${esc(p.image)}" alt="${esc(p.title)}"><div><small>${esc(p.category)}</small><h3>${esc(p.title)}</h3><small>${esc(p.walk)}</small></div></article>`).join("");const markers=places.map(p=>{bounds.push([p.lat,p.lng]);return L.marker([p.lat,p.lng]).addTo(map).bindPopup(`<img src="${esc(p.image)}" alt=""><h3>${esc(p.title)}</h3><p>${esc(p.description)}</p><small>${esc(p.address)} · ${esc(p.walk)}</small><p><a href="${esc(p.maps)}" target="_blank" rel="noopener"><b>Google Maps öffnen</b></a></p>`) });qsa(".place-card",list).forEach(card=>{const open=()=>{const i=Number(card.dataset.place);map.setView(markers[i].getLatLng(),14,{animate:true});markers[i].openPopup()};card.addEventListener("click",open);card.addEventListener("keydown",e=>{if(e.key==="Enter")open()})});if(bounds.length)map.fitBounds(bounds,{padding:[25,25]})}
+function renderMap(places){
+  const canvas=qs("#map"),list=qs("#placeList"),legend=qs("#mapLegend");
+  if(!window.L||!places.length){canvas.innerHTML='<div class="empty-state">Karte konnte nicht geladen werden.</div>';return}
+
+  const categories={
+    "Hotel":{color:"#e63946",icon:"H"},
+    "EU":{color:"#1557b0",icon:"EU"},
+    "Sehenswürdigkeit":{color:"#7b2cbf",icon:"★"},
+    "Metro":{color:"#f59e0b",icon:"M"},
+    "Essen":{color:"#16a34a",icon:"🍴"},
+    "Notfall":{color:"#dc2626",icon:"!"},
+    "Antwerpen":{color:"#0f766e",icon:"A"},
+    "Waterloo":{color:"#64748b",icon:"W"}
+  };
+  const styleFor=cat=>categories[cat]||{color:"#334155",icon:"•"};
+  const markerIcon=cat=>{const c=styleFor(cat);return L.divIcon({className:"travel-marker-wrap",html:`<span class="travel-marker" style="--marker:${c.color}"><b>${esc(c.icon)}</b></span>`,iconSize:[38,46],iconAnchor:[19,43],popupAnchor:[0,-40]})};
+  const map=L.map("map",{scrollWheelZoom:false,zoomControl:true}).setView([50.8503,4.3517],13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+
+  const brusselsBounds=[];
+  const allBounds=[];
+  const markers=[];
+  const categoryOrder=[...new Set(places.map(p=>p.category))];
+  legend.innerHTML=categoryOrder.map(cat=>{const c=styleFor(cat);return `<span class="legend-item"><i style="--legend:${c.color}"></i>${esc(cat)}</span>`}).join("");
+
+  list.innerHTML=places.map((p,i)=>{const c=styleFor(p.category);return `<article class="place-card" data-place="${i}" tabindex="0" role="button" aria-label="${esc(p.title)} auf der Karte anzeigen"><img src="${esc(p.image)}" alt="${esc(p.title)}"><div class="place-card-copy"><span class="place-category" style="--category:${c.color}">${esc(p.category)}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
+
+  places.forEach((p,i)=>{
+    const point=[Number(p.lat),Number(p.lng)];allBounds.push(point);
+    if(point[0]>50.80&&point[0]<50.93&&point[1]>4.28&&point[1]<4.45)brusselsBounds.push(point);
+    const route=p.maps||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address||p.title)}`;
+    const popup=`<div class="travel-popup"><img src="${esc(p.image)}" alt="${esc(p.title)}"><div class="travel-popup-body"><span class="popup-category">${esc(p.category)}</span><h3>${esc(p.title)}</h3><p>${esc(p.description||"")}</p><div class="popup-address">📍 ${esc(p.address||"")}</div>${p.walk?`<div class="popup-distance">🚶 ${esc(p.walk)}</div>`:""}<a class="popup-route" href="${esc(route)}" target="_blank" rel="noopener">Route öffnen ↗</a></div></div>`;
+    const marker=L.marker(point,{icon:markerIcon(p.category),title:p.title}).addTo(map).bindPopup(popup,{maxWidth:320,minWidth:270});
+    marker.on("click",()=>setActive(i));markers.push(marker);
+  });
+
+  function setActive(index){qsa(".place-card",list).forEach((card,i)=>card.classList.toggle("active",i===index));const card=qsa(".place-card",list)[index];if(card)card.scrollIntoView({block:"nearest",behavior:"smooth"})}
+  function openPlace(index){const marker=markers[index];if(!marker)return;setActive(index);map.flyTo(marker.getLatLng(),15,{duration:.7});marker.openPopup()}
+  qsa(".place-card",list).forEach(card=>{const open=()=>openPlace(Number(card.dataset.place));card.addEventListener("click",open);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})});
+  const showBrussels=()=>{if(brusselsBounds.length)map.fitBounds(brusselsBounds,{padding:[45,45],maxZoom:14});else map.setView([50.8503,4.3517],13)};
+  qs("#mapReset")?.addEventListener("click",showBrussels);
+  showBrussels();
+  setTimeout(()=>map.invalidateSize(),150);
+}
 
 async function loadWeather(places=[]){
   const primary=places[0]||{name:"Brüssel",lat:50.8503,lon:4.3517};
