@@ -170,7 +170,7 @@ export default {
         clientSecretConfigured: Boolean(clientSecret),
         repo: REPO,
         branch: 'main',
-        version: '4.3.5'
+        version: '4.3.6'
       });
     }
 

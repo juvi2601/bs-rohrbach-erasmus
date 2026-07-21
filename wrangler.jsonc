@@ -3,6 +3,9 @@
   "name": "bs-rohrbach-erasmus",
   "main": "src/index.js",
   "compatibility_date": "2026-07-20",
+  "vars": {
+    "GITHUB_CLIENT_ID": "Ov23liCC5S0hcSdn0yBs"
+  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",

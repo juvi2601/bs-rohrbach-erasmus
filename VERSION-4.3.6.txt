@@ -1,0 +1,6 @@
+Version 4.3.6
+
+- GITHUB_CLIENT_ID dauerhaft in wrangler.jsonc hinterlegt.
+- Cloudflare entfernt die Client-ID dadurch bei GitHub-Deployments nicht mehr.
+- GITHUB_CLIENT_SECRET bleibt ausschließlich als verschlüsseltes Cloudflare-Secret gespeichert.
+- /api/cms-status meldet Version 4.3.6.
