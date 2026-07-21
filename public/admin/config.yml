@@ -3,7 +3,7 @@ backend:
   repo: juvi2601/bs-rohrbach-erasmus
   branch: main
   base_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
-  auth_endpoint: auth
+  auth_endpoint: /auth
 locale: de
 media_folder: public/images/uploads
 public_folder: /images/uploads

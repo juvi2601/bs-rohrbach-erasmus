@@ -1,0 +1,8 @@
+BS Rohrbach Erasmus+ – Version 4.3.5
+
+OAuth-Neuaufbau auf Basis des etablierten Decap-CMS-Proxy-Ablaufs:
+- /auth leitet mit provider=github zu GitHub weiter
+- /callback tauscht den Code gegen ein Token
+- exakter Decap-postMessage-Handshake
+- Token-Nachricht im erwarteten Format { token }
+- Diagnose unter /api/cms-status

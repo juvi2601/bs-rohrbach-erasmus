@@ -1,46 +1,27 @@
-# Admin-Bereich einmalig aktivieren
+# Admin-/CMS-Einrichtung – Version 4.3.5
 
-Die Programmierung ist bereits enthalten. Für die Anmeldung benötigt GitHub einmalig eine OAuth-App.
+## Bereits eingerichtet und unverändert lassen
 
-## 1. GitHub OAuth-App anlegen
+In Cloudflare müssen vorhanden sein:
 
-GitHub öffnen → Settings → Developer settings → OAuth Apps → New OAuth App
+- `GITHUB_CLIENT_ID` als Plaintext
+- `GITHUB_CLIENT_SECRET` als Secret
 
-- Application name: `BS Rohrbach Erasmus Admin`
-- Homepage URL: `https://bs-rohrbach-erasmus.j-vierlinger.workers.dev`
-- Authorization callback URL: `https://bs-rohrbach-erasmus.j-vierlinger.workers.dev/callback`
+In der GitHub OAuth App muss die Callback-URL lauten:
 
-Danach die angezeigte **Client ID** notieren und ein **Client Secret** erzeugen.
+`https://bs-rohrbach-erasmus.j-vierlinger.workers.dev/callback`
 
-## 2. Zugangsdaten bei Cloudflare eintragen
+GitHub akzeptiert dabei den vom Worker ergänzten Query-Parameter `?provider=github`.
 
-Cloudflare Dashboard → Workers & Pages → `bs-rohrbach-erasmus` → Settings → Variables and Secrets
+## Nach dem Upload
 
-Eintragen:
-
-- Variable/Secret `GITHUB_CLIENT_ID` = Client ID von GitHub
-- Secret `GITHUB_CLIENT_SECRET` = Client Secret von GitHub
-
-Anschließend das Deployment nötigenfalls noch einmal starten.
-
-## 3. Admin öffnen
-
-`https://bs-rohrbach-erasmus.j-vierlinger.workers.dev/admin/`
-
-Dann auf **Redaktion öffnen** klicken und mit dem GitHub-Konto anmelden, das Schreibrechte für das Repository `juvi2601/bs-rohrbach-erasmus` besitzt.
-
-## Funktionsweise
-
-Beim Speichern legt Decap CMS einen Commit im Branch `main` an. GitHub löst automatisch das Cloudflare-Deployment aus. Nach kurzer Zeit ist die Änderung öffentlich sichtbar.
+1. Dateien in GitHub ersetzen und committen.
+2. Cloudflare-Deployment abwarten.
+3. Diese Diagnoseadresse öffnen:
+   `https://bs-rohrbach-erasmus.j-vierlinger.workers.dev/api/cms-status`
+4. Dort müssen `ready`, `clientIdConfigured` und `clientSecretConfigured` jeweils `true` sein.
+5. Danach `/admin/cms/` in einem Inkognito-Fenster öffnen und mit GitHub anmelden.
 
 ## Sicherheit
 
-Das GitHub Client Secret liegt nur als Cloudflare-Secret vor und wird nicht in den Browser oder das Repository geschrieben.
-
-## Hinweis zu Version 4.3.2
-
-Die dynamischen Routen `/auth`, `/callback` und `/api/*` sind mit `run_worker_first` ausdrücklich als Worker-Routen konfiguriert. Dadurch greift bei diesen Adressen nicht mehr die statische 404-Seite.
-
-
-## Version 4.3.4
-Der Decap-Callback wurde korrigiert. Zusätzlich liegen `auth_endpoint` und alle Repository-Dateipfade nun an der von Decap erwarteten Stelle. Nach dem Upload bitte `/admin/cms/` mit Strg+F5 neu laden.
+Der Client Secret darf niemals in GitHub, Screenshots oder den Chat kopiert werden.
