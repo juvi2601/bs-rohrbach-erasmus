@@ -1,10 +1,197 @@
 {
   "days": [
-    {"id":"sa","short":"Sa","date":"21.11.","dayNumber":0,"title":"Abreise aus Rohrbach","subtitle":"Der Start unserer gemeinsamen Reise.","icon":"🚌","cover":"","events":[{"time":"20:00","title":"Abfahrt bei der Berufsschule Rohrbach","text":"Gepäck verladen und gemeinsame Nachtfahrt Richtung Brüssel.","status":"confirmed"}]},
-    {"id":"so","short":"So","date":"22.11.","dayNumber":1,"title":"Ankommen in Brüssel","subtitle":"Altstadt, Freizeit, Essen und Check-in.","cover":"/images/grand-place.webp","events":[{"time":"08:00","title":"Ankunft beim Hotel","text":"Gepäck deponieren, kurze Pause und nach Möglichkeit einzelne Zimmer früher beziehen."},{"time":"08:30–10:30","title":"Altstadtspaziergang · ca. 2 km","text":"Grand Place · Galeries Royales Saint-Hubert · Manneken Pis · Mont des Arts"},{"time":"10:30–12:00","title":"Freizeit in 4er-Gruppen","text":"Waffeln, Schokolade, Souvenirs oder Kaffee. Treffpunkt anschließend wieder am Grand Place."},{"time":"12:00","title":"Mittagessen","text":"Vorgesehen ist der Wolf Food Market mit großer Auswahl und ausreichend Sitzplätzen."},{"time":"13:30–15:30","title":"Nachmittagsspaziergang","text":"Brüsseler Börse, Weihnachtsbeleuchtung und eventuell erste Weihnachtsmärkte."},{"time":"15:30–16:00","title":"Check-in und Zimmerbezug","text":"Der Abend steht anschließend zur freien Verfügung."}]},
-    {"id":"mo","short":"Mo","date":"23.11.","dayNumber":2,"title":"Antwerpen","subtitle":"Hafen, Hauptbahnhof und Diamantenviertel.","cover":"/images/antwerpen-hafen.jpg","gallery":["/images/antwerpen-hafen.jpg","/images/antwerpen-centraal.jpg","/images/diamantenviertel.jpg"],"events":[{"time":"08:00","title":"Abfahrt nach Antwerpen","text":"Fahrzeit ungefähr eine Stunde."},{"time":"09:30–13:00","title":"Geführte Hafenrundfahrt","text":"Containerterminals, Schleusen, Chemiehafen, Logistik sowie Binnen- und Seeschifffahrt.","status":"confirmed"},{"time":"13:30–14:30","title":"Mittagspause","text":"Food Court beim Bahnhof Antwerpen-Centraal."},{"time":"14:30–15:00","title":"Antwerpen-Centraal","text":"Besichtigung, Gruppenfoto und kurze Pause."},{"time":"15:15–16:15","title":"Diamantenviertel","text":"Diamantenhandel, Bewertung, Weltzentrum Antwerpen und Sicherheitsmaßnahmen."},{"time":"16:30","title":"Rückfahrt nach Brüssel","text":"Voraussichtliche Ankunft zwischen 17:45 und 18:00 Uhr."}]},
-    {"id":"di","short":"Di","date":"24.11.","dayNumber":3,"title":"Europäische Union","subtitle":"Parlamentarium, Parlament und Europäischer Rat.","cover":"/images/europaeisches-parlament.webp","gallery":["/images/parlamentarium.jpg","/images/europaeisches-parlament.webp","/images/europaeischer-rat.jpg"],"events":[{"time":"09:30–11:00","title":"Parlamentarium","text":"Gemeinsam mit dem BSZ Waldkirchen.","status":"confirmed"},{"time":"11:30–12:30","title":"Plenarsaal des Europäischen Parlaments","text":"Der Besuch ist angefragt.","status":"pending"},{"time":"12:45–13:45","title":"Mittagessen","text":"Vorgesehen ist „The Meeting Point“, abhängig vom tatsächlichen Zeitplan."},{"time":"14:10","title":"Akkreditierung und Sicherheitskontrolle","text":"Gemeinsames Eintreffen mit dem BSZ Waldkirchen."},{"time":"15:00–17:00","title":"Besichtigung des Europäischen Rates","text":"Einblicke in die Arbeit der Staats- und Regierungschefs.","status":"confirmed"}]},
-    {"id":"mi","short":"Mi","date":"25.11.","dayNumber":4,"title":"Brüssel & Europa","subtitle":"Einblicke in die Arbeit in Brüssel.","cover":"/images/europaeischer-rat.jpg","events":[{"time":"Vormittag","title":"Vortrag und Einblicke mit Andi","text":"Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel."},{"time":"Nachmittag","title":"Stadtprogramm und Freizeit","text":"Zeit für weitere Eindrücke, Einkäufe und gemeinsames Abendessen."}]},
-    {"id":"do","short":"Do","date":"26.11.","dayNumber":5,"title":"Abschluss & Heimreise","subtitle":"Österreichische Vertretung und Rückfahrt.","cover":"/images/waterloo.jpg","events":[{"time":"Vormittag","title":"Ständige Vertretung Österreichs","text":"Abschließender offizieller Programmpunkt der BS Rohrbach.","status":"confirmed"},{"time":"Mittag","title":"Beginn der Heimreise","text":"Rückfahrt nach Rohrbach mit Pausen nach Bedarf."}]}
+    {
+      "dayNumber": 0,
+      "date": "21.11.",
+      "cover": "",
+      "subtitle": "Der Start unserer gemeinsamen Reise.",
+      "title": "Abreise aus Rohrbach",
+      "icon": "🚌",
+      "events": [
+        {
+          "time": "20:00",
+          "title": "Abfahrt bei der Berufsschule Rohrbach",
+          "text": "Gepäck verladen und gemeinsame Nachtfahrt Richtung Brüssel.",
+          "status": "confirmed"
+        }
+      ],
+      "id": "sa",
+      "short": "Sa"
+    },
+    {
+      "id": "so",
+      "short": "So",
+      "date": "22.11.",
+      "dayNumber": 1,
+      "title": "Ankommen in Brüssel",
+      "subtitle": "Altstadt, Freizeit, Essen und Check-in.",
+      "cover": "/images/grand-place.webp",
+      "events": [
+        {
+          "time": "08:00",
+          "title": "Ankunft beim Hotel",
+          "text": "Gepäck deponieren, kurze Pause und nach Möglichkeit einzelne Zimmer früher beziehen."
+        },
+        {
+          "time": "08:30–10:30",
+          "title": "Altstadtspaziergang · ca. 2 km",
+          "text": "Grand Place · Galeries Royales Saint-Hubert · Manneken Pis · Mont des Arts"
+        },
+        {
+          "time": "10:30–12:00",
+          "title": "Freizeit in 4er-Gruppen",
+          "text": "Waffeln, Schokolade, Souvenirs oder Kaffee. Treffpunkt anschließend wieder am Grand Place."
+        },
+        {
+          "time": "12:00",
+          "title": "Mittagessen",
+          "text": "Vorgesehen ist der Wolf Food Market mit großer Auswahl und ausreichend Sitzplätzen."
+        },
+        {
+          "time": "13:30–15:30",
+          "title": "Nachmittagsspaziergang",
+          "text": "Brüsseler Börse, Weihnachtsbeleuchtung und eventuell erste Weihnachtsmärkte."
+        },
+        {
+          "time": "15:30–16:00",
+          "title": "Check-in und Zimmerbezug",
+          "text": "Der Abend steht anschließend zur freien Verfügung."
+        }
+      ]
+    },
+    {
+      "dayNumber": 2,
+      "date": "23.11.",
+      "gallery": [
+        "/images/antwerpen-hafen.jpg",
+        "/images/antwerpen-centraal.jpg",
+        "/images/diamantenviertel.jpg"
+      ],
+      "cover": "/images/antwerpen-hafen.jpg",
+      "subtitle": "Hafen, Hauptbahnhof und Diamantenviertel.",
+      "title": "Antwerpen",
+      "events": [
+        {
+          "time": "08:00",
+          "title": "Abfahrt nach Antwerpen",
+          "text": "Fahrzeit ungefähr eine Stunde."
+        },
+        {
+          "time": "09:30–13:00",
+          "title": "Geführte Hafenrundfahrt",
+          "text": "Containerterminals, Schleusen, Chemiehafen, Logistik sowie Binnen- und Seeschifffahrt.",
+          "status": "confirmed"
+        },
+        {
+          "time": "13:30–14:30",
+          "title": "Mittagspause",
+          "text": "Food Court beim Bahnhof Antwerpen-Centraal."
+        },
+        {
+          "time": "14:30–15:00",
+          "title": "Antwerpen-Centraal",
+          "text": "Besichtigung, Gruppenfoto und kurze Pause."
+        },
+        {
+          "time": "15:15–16:15",
+          "title": "Diamantenviertel",
+          "text": "Diamantenhandel, Bewertung, Weltzentrum Antwerpen und Sicherheitsmaßnahmen."
+        },
+        {
+          "time": "16:30",
+          "title": "Rückfahrt nach Brüssel",
+          "text": "Voraussichtliche Ankunft zwischen 17:45 und 18:00 Uhr."
+        }
+      ],
+      "id": "mo",
+      "short": "Mo"
+    },
+    {
+      "dayNumber": 3,
+      "date": "24.11.",
+      "gallery": [
+        "/images/parlamentarium.jpg",
+        "/images/europaeisches-parlament.webp",
+        "/images/europaeischer-rat.jpg"
+      ],
+      "cover": "/images/europaeisches-parlament.webp",
+      "subtitle": "Parlamentarium, Parlament und Europäischer Rat.",
+      "title": "Europäische Union",
+      "events": [
+        {
+          "time": "09:30–11:00",
+          "title": "Parlamentarium",
+          "text": "Gemeinsam mit dem BSZ Waldkirchen.",
+          "status": "confirmed"
+        },
+        {
+          "time": "11:30–12:30",
+          "title": "Plenarsaal des Europäischen Parlaments",
+          "text": "Der Besuch ist angefragt.",
+          "status": "pending"
+        },
+        {
+          "time": "12:45–13:45",
+          "title": "Mittagessen",
+          "text": "Vorgesehen ist „The Meeting Point“, abhängig vom tatsächlichen Zeitplan."
+        },
+        {
+          "time": "14:10",
+          "title": "Akkreditierung und Sicherheitskontrolle",
+          "text": "Gemeinsames Eintreffen mit dem BSZ Waldkirchen."
+        },
+        {
+          "time": "15:00–17:00",
+          "title": "Besichtigung des Europäischen Rates",
+          "text": "Einblicke in die Arbeit der Staats- und Regierungschefs.",
+          "status": "confirmed"
+        }
+      ],
+      "id": "di",
+      "short": "Di"
+    },
+    {
+      "id": "mi",
+      "short": "Mi",
+      "date": "25.11.",
+      "dayNumber": 4,
+      "title": "Brüssel & Europa",
+      "subtitle": "Einblicke in die Arbeit in Brüssel.",
+      "cover": "/images/europaeischer-rat.jpg",
+      "events": [
+        {
+          "time": "Vormittag",
+          "title": "Vortrag und Einblicke mit Andi",
+          "text": "Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel."
+        },
+        {
+          "time": "Nachmittag",
+          "title": "Stadtprogramm und Freizeit",
+          "text": "Zeit für weitere Eindrücke, Einkäufe und gemeinsames Abendessen."
+        }
+      ]
+    },
+    {
+      "id": "do",
+      "short": "Do",
+      "date": "26.11.",
+      "dayNumber": 5,
+      "title": "Abschluss & Heimreise",
+      "subtitle": "Österreichische Vertretung, Waterloo und Rückfahrt.",
+      "cover": "/images/waterloo.jpg",
+      "events": [
+        {
+          "time": "Vormittag",
+          "title": "Ständige Vertretung Österreichs",
+          "text": "Abschließender offizieller Programmpunkt der BS Rohrbach.",
+          "status": "confirmed"
+        },
+        {
+          "time": "Mittag",
+          "title": "Beginn der Heimreise",
+          "text": "Rückfahrt nach Rohrbach mit Pausen nach Bedarf."
+        }
+      ]
+    }
   ]
 }
