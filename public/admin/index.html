@@ -3,22 +3,64 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>Reiseredaktion – BS Rohrbach Erasmus+</title>
+  <title>Admin-Dashboard – BS Rohrbach Erasmus+</title>
+  <link rel="stylesheet" href="/admin/admin.css">
 </head>
 <body>
-<script>
-  // Verhindert, dass eine alte CMS-Konfiguration aus Browser-/PWA-Caches geladen wird.
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(regs){
-      regs.forEach(function(reg){
-        if (reg.scope && location.pathname.startsWith('/admin')) reg.unregister();
-      });
-    });
-  }
-</script>
-<script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Zur öffentlichen Website">
+      <span class="brand-mark">E+</span>
+      <span><strong>BS Rohrbach Erasmus+</strong><small>Reiseredaktion</small></span>
+    </a>
+    <div class="top-actions">
+      <a class="button ghost" href="/" target="_blank" rel="noopener">Website ansehen</a>
+      <a class="button primary" href="/admin/cms.html">Redaktion öffnen</a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="welcome">
+      <div>
+        <p class="eyebrow">Brüssel 2026</p>
+        <h1>Admin-Dashboard</h1>
+        <p>Hier verwaltest du die Inhalte des Reiseportals. Änderungen werden nach dem Speichern über GitHub veröffentlicht.</p>
+      </div>
+      <div class="status-card">
+        <span class="status-dot"></span>
+        <div><strong>Portal bereit</strong><small>Öffentliche Website ist erreichbar</small></div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Inhaltsübersicht">
+      <article><span>News</span><strong id="count-news">–</strong><small>Beiträge</small></article>
+      <article><span>Programm</span><strong id="count-program">–</strong><small>Reisetage</small></article>
+      <article><span>Galerie</span><strong id="count-gallery">–</strong><small>Fotos</small></article>
+      <article><span>Downloads</span><strong id="count-downloads">–</strong><small>Dokumente</small></article>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <div><p class="eyebrow">Inhalte</p><h2>Was möchtest du bearbeiten?</h2></div>
+      </div>
+      <div class="grid">
+        <a class="tile" href="/admin/cms.html#/collections/news"><span class="icon">📰</span><div><h3>News</h3><p>Aktuelle Hinweise und Meldungen bearbeiten.</p></div><b>→</b></a>
+        <a class="tile" href="/admin/cms.html#/collections/program"><span class="icon">📅</span><div><h3>Programm</h3><p>Reisetage, Uhrzeiten und Programmpunkte verwalten.</p></div><b>→</b></a>
+        <a class="tile" href="/admin/cms.html#/collections/gallery"><span class="icon">📷</span><div><h3>Galerie</h3><p>Fotos, Titel und Beschreibungen pflegen.</p></div><b>→</b></a>
+        <a class="tile" href="/admin/cms.html#/collections/downloads"><span class="icon">📥</span><div><h3>Downloads</h3><p>PDFs und wichtige Dokumente veröffentlichen.</p></div><b>→</b></a>
+        <a class="tile" href="/admin/cms.html#/collections/places"><span class="icon">📍</span><div><h3>Karte & Orte</h3><p>Orte, Adressen, Bilder und Kartenlinks ändern.</p></div><b>→</b></a>
+        <a class="tile" href="/admin/cms.html#/collections/faq"><span class="icon">❓</span><div><h3>FAQ</h3><p>Häufige Fragen und Antworten aktualisieren.</p></div><b>→</b></a>
+        <a class="tile" href="/admin/cms.html#/collections/site"><span class="icon">⚙️</span><div><h3>Startseite & Einstellungen</h3><p>Texte, Bilder, Countdown, Hotel und Notfallinfos.</p></div><b>→</b></a>
+        <a class="tile disabled" href="#" aria-disabled="true"><span class="icon">👥</span><div><h3>Teilnehmer & Microsoft 365</h3><p>Folgt in einer späteren Ausbaustufe mit Login.</p></div><span class="badge">geplant</span></a>
+      </div>
+    </section>
+
+    <section class="notice">
+      <span>🔐</span>
+      <div><strong>Hinweis zum Login</strong><p>Die Redaktion benötigt die eingerichtete GitHub-Anmeldung über den CMS-Auth-Worker. Ohne diese Einrichtung öffnet sich das Dashboard, Speichern ist aber noch nicht möglich.</p></div>
+    </section>
+  </main>
+  <script src="/admin/admin.js"></script>
 </body>
 </html>

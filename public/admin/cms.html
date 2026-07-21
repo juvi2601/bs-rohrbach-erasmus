@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Reiseredaktion – BS Rohrbach Erasmus+</title>
+  <style>
+    .admin-back{position:fixed;right:18px;bottom:18px;z-index:99999;background:#123a63;color:#fff;text-decoration:none;padding:10px 14px;border-radius:999px;font:600 14px system-ui;box-shadow:0 8px 24px #0003}
+  </style>
+</head>
+<body>
+<a class="admin-back" href="/admin/">← Dashboard</a>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      regs.forEach(function(reg){ if (reg.scope && location.pathname.startsWith('/admin')) reg.unregister(); });
+    });
+  }
+</script>
+<script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+</body>
+</html>

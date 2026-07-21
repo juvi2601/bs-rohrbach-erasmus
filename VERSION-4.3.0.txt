@@ -1,0 +1,14 @@
+BS Rohrbach Erasmus+ – Version 4.3.0
+
+Neu:
+- Eigenes, responsives Admin-Dashboard unter /admin/
+- Direktzugriffe auf News, Programm, Galerie, Downloads, Karte, FAQ und Seiteneinstellungen
+- Automatische Inhaltszähler für News, Reisetage, Fotos und Downloads
+- Öffentliche Website kann direkt aus dem Dashboard geöffnet werden
+- Decap CMS wurde nach /admin/cms.html verschoben
+- Rückkehr-Button vom CMS zum Dashboard
+- Klarer Hinweis zur noch erforderlichen CMS-Authentifizierung
+
+Unverändert:
+- Öffentliche Website und bestehende Inhalte
+- Bestehende Decap-CMS-Konfiguration
