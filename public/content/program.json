@@ -40,17 +40,17 @@
         {
           "time": "10:30–12:00",
           "title": "Freizeit in 4er-Gruppen",
-          "text": "Waffeln, Schokolade, Souvenirs oder Kaffee. Treffpunkt anschließend wieder am Grand Place."
+          "text": "Waffeln, Schokolade, Souvenirs oder Kaffee. Treffpunkt anschließend wieder am Grand Place. Aufgabe für Schüler*innen: Eindrücke visuell festhalten."
         },
         {
-          "time": "12:00",
+          "time": "12:00–13:30",
           "title": "Mittagessen",
           "text": "Vorgesehen ist der Wolf Food Market mit großer Auswahl und ausreichend Sitzplätzen."
         },
         {
           "time": "13:30–15:30",
           "title": "Nachmittagsspaziergang",
-          "text": "Brüsseler Börse, Weihnachtsbeleuchtung und eventuell erste Weihnachtsmärkte."
+          "text": "Brüsseler Börse, Weihnachtsbeleuchtung und eventuell erste Weihnachtsmärkte. Eindrücke sammeln. Treffpunkt abschließend im Hotel."
         },
         {
           "time": "15:30–16:00",
@@ -138,7 +138,8 @@
         {
           "time": "14:10",
           "title": "Akkreditierung und Sicherheitskontrolle",
-          "text": "Gemeinsames Eintreffen mit dem BSZ Waldkirchen."
+          "text": "Gemeinsames Eintreffen mit dem BSZ Waldkirchen.",
+          "status": "confirmed"
         },
         {
           "time": "15:00–17:00",
@@ -161,8 +162,9 @@
       "events": [
         {
           "time": "Vormittag",
-          "title": "Vortrag und Einblicke mit Andi",
-          "text": "Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel."
+          "title": "Vortrag und Einblicke mit Andreas Gahleitner",
+          "text": "Besuch des Hauses der Europäischen Geschichte und anschließend \ngemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel von Andreas Gahleitner.",
+          "status": "pending"
         },
         {
           "time": "Nachmittag",
