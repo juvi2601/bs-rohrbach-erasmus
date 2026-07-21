@@ -1,0 +1,13 @@
+BS Rohrbach Erasmus+ – Version 4.3.1
+
+Admin/CMS funktional vorbereitet:
+- GitHub-OAuth-Endpunkte direkt im Cloudflare Worker (/auth und /callback)
+- Decap CMS verwendet nun dieselbe Website-Domain für die Anmeldung
+- CMS-Statusanzeige im Dashboard
+- Inhalte News, Programm, Galerie, Downloads, Orte, FAQ und Startseite sind über Decap CMS pflegbar
+- Medien-Uploads werden nach public/images/uploads gespeichert
+
+Einmalige Einrichtung nötig:
+1. GitHub OAuth App anlegen
+2. GITHUB_CLIENT_ID und GITHUB_CLIENT_SECRET in Cloudflare als Variablen/Secrets hinterlegen
+Details: ADMIN-EINRICHTUNG.md
