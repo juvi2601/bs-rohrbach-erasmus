@@ -182,14 +182,14 @@
       "events": [
         {
           "time": "Vormittag",
-          "title": "Ständige Vertretung Österreichs und Fahrt nach Waterloo",
+          "title": "Ständige Vertretung Österreichs",
           "text": "Abschließender offizieller Programmpunkt der BS Rohrbach.",
           "status": "pending"
         },
         {
           "time": "Mittag",
-          "title": "Beginn der Heimreise",
-          "text": "Rückfahrt nach Rohrbach mit Pausen nach Bedarf."
+          "title": "Beginn der Heimreise mit Fahrt via Waterloo",
+          "text": "Rückfahrt nach Rohrbach mit Waterloo als Abschlussprogramm.\n\nPausen nach Bedarf.\n\nAnkunft in Rohrbach ca. Mitternacht."
         }
       ]
     }
