@@ -1,0 +1,5 @@
+Version 4.4.1
+
+- EU-Kürzel im Kopfbereich durch das Logo der Berufsschule Rohrbach ersetzt.
+- Logo für Desktop und Smartphone optimiert.
+- Keine Änderungen an CMS, OAuth, Cloudflare oder Inhalten.
