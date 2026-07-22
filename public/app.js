@@ -48,7 +48,44 @@ function activateExternal(id,url){const a=qs("#"+id);if(a&&url){a.href=url;a.tar
 function renderNews(items){const grid=qs("#newsGrid");const rows=items.filter(x=>x.published!==false).sort((a,b)=>(b.date||"").localeCompare(a.date||""));if(!rows.length){grid.innerHTML='<div class="empty-state">Noch keine Meldungen veröffentlicht.</div>';return}grid.innerHTML=rows.map(n=>`<article class="news-card ${n.important?'important':''}"><time>${formatDate(n.date)}</time><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p></article>`).join("")}
 function formatDate(v){if(!v)return"";return new Intl.DateTimeFormat("de-AT",{day:"2-digit",month:"long",year:"numeric"}).format(new Date(v+"T12:00:00"))}
 
-function renderProgram(days){const tabs=qs("#dayTabs"),panels=qs("#dayPanels");tabs.innerHTML=days.map((d,i)=>`<button class="day-tab ${i===0?'active':''}" data-day="${esc(d.id)}" role="tab" aria-selected="${i===0}"><b>${esc(d.short)}</b><span>${esc(d.date)}</span></button>`).join("");panels.innerHTML=days.map((d,i)=>`<article class="day-panel ${i===0?'active':''}" id="day-${esc(d.id)}" role="tabpanel"><div class="day-cover ${d.cover?'photo-cover':''}" ${d.cover?`style="--bg:url('${esc(d.cover)}')"`:''}><div><small>Tag ${Number(d.dayNumber)||0}</small><h3>${esc(d.title)}</h3><p>${esc(d.subtitle)}</p></div>${d.icon?`<span class="day-icon">${esc(d.icon)}</span>`:''}</div>${(d.gallery||[]).length?`<div class="gallery-row">${d.gallery.map((x,j)=>`<img src="${esc(x)}" alt="${esc(d.title)} ${j+1}" loading="lazy">`).join("")}</div>`:''}<div class="timeline">${(d.events||[]).map(e=>`<div class="timeline-row ${e.status==='pending'?'pending':''}"><time>${esc(e.time)}</time><div><h4>${esc(e.title)}</h4><p>${esc(e.text)}</p>${e.status?`<span class="badge ${esc(e.status)}">${e.status==='confirmed'?'bereits gebucht':'noch nicht bestätigt'}</span>`:''}</div></div>`).join("")}</div></article>`).join("");qsa(".day-tab",tabs).forEach(btn=>btn.addEventListener("click",()=>activateDay(btn.dataset.day)))}
+function renderProgram(days){
+  const tabs=qs("#dayTabs"),panels=qs("#dayPanels");
+  const eventCount=day=>(day.events||[]).length;
+  tabs.innerHTML=days.map((d,i)=>`<button class="day-tab ${i===0?'active':''}" data-day="${esc(d.id)}" role="tab" aria-controls="day-${esc(d.id)}" aria-selected="${i===0}"><span class="day-tab-weekday">${esc(d.short)}</span><span class="day-tab-date">${esc(d.date)}</span><span class="day-tab-title">${esc(d.title)}</span></button>`).join("");
+  panels.innerHTML=days.map((d,i)=>{
+    const events=d.events||[];
+    const dayLabel=Number(d.dayNumber)===0?'Anreisetag':`Reisetag ${Number(d.dayNumber)||i}`;
+    return `<article class="day-panel ${i===0?'active':''}" id="day-${esc(d.id)}" role="tabpanel" aria-label="${esc(d.short)} ${esc(d.date)} – ${esc(d.title)}">
+      <header class="day-cover ${d.cover?'photo-cover':''}" ${d.cover?`style="--bg:url('${esc(d.cover)}')"`:''}>
+        <div class="day-cover-content">
+          <div class="day-kicker"><span>${esc(dayLabel)}</span><span>${eventCount(d)} Programmpunkt${eventCount(d)===1?'':'e'}</span></div>
+          <h3>${esc(d.title)}</h3>
+          <p>${esc(d.subtitle)}</p>
+        </div>
+        ${d.icon?`<span class="day-icon" aria-hidden="true">${esc(d.icon)}</span>`:''}
+      </header>
+      ${(d.gallery||[]).length?`<div class="gallery-row">${d.gallery.map((x,j)=>`<img src="${esc(x)}" alt="${esc(d.title)} – Eindruck ${j+1}" loading="lazy">`).join("")}</div>`:''}
+      <div class="program-overview">
+        <div><span class="overview-label">Datum</span><strong>${esc(d.short)}, ${esc(d.date)}2026</strong></div>
+        <div><span class="overview-label">Schwerpunkt</span><strong>${esc(d.title)}</strong></div>
+        <div><span class="overview-label">Umfang</span><strong>${events.length} ${events.length===1?'Programmpunkt':'Programmpunkte'}</strong></div>
+      </div>
+      <div class="timeline" aria-label="Tagesablauf">
+        ${events.map((e,index)=>`<article class="timeline-row ${e.status==='pending'?'pending':''}">
+          <div class="timeline-marker" aria-hidden="true"><span>${String(index+1).padStart(2,'0')}</span></div>
+          <time>${esc(e.time)}</time>
+          <div class="timeline-content">
+            <h4>${esc(e.title)}</h4>
+            <p>${esc(e.text)}</p>
+            ${e.status?`<span class="badge ${esc(e.status)}"><span aria-hidden="true">${e.status==='confirmed'?'✓':'○'}</span>${e.status==='confirmed'?'Bereits gebucht':'Noch nicht bestätigt'}</span>`:''}
+          </div>
+        </article>`).join("")}
+      </div>
+    </article>`
+  }).join("");
+  qsa(".day-tab",tabs).forEach(btn=>btn.addEventListener("click",()=>activateDay(btn.dataset.day)));
+}
+
 function activateDay(id){qsa(".day-tab").forEach(b=>{const on=b.dataset.day===id;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on))});qsa(".day-panel").forEach(p=>p.classList.toggle("active",p.id===`day-${id}`))}
 
 function renderToday(days){const site=window.__SITE||{};const t=site.today||{};const now=new Date(),start=new Date(site.departure||"2026-11-21T20:00:00+01:00"),end=new Date(site.returnDate||"2026-11-26T23:59:00+01:00");let pct=0,label="Vorfreude",day=null;if(now>=start&&now<=end){pct=Math.min(100,Math.max(0,(now-start)/(end-start)*100));label=`Tag ${Math.max(1,Math.ceil((now-start)/86400000))} von 5`;const ids=["sa","so","mo","di","mi","do"];day=days.find(d=>d.id===ids[Math.min(ids.length-1,Math.floor((now-start)/86400000))])}else if(now>end){pct=100;label=t.afterLabel||"Reise abgeschlossen"}qs("#progressBar").style.width=`${pct}%`;qs("#progressValue").textContent=`${Math.round(pct)} %`;qs("#progressLabel").textContent=label;if(day){qs("#todayTitle").textContent=day.title;qs("#todayText").textContent=day.subtitle;qs("#progressDate").textContent=`${day.short}, ${day.date}`;qs("#todaySchedule").innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");activateDay(day.id)}else if(now>end){qs("#todayTitle").textContent=t.afterTitle||"Schöne Erinnerungen an Brüssel";qs("#todayText").textContent=t.afterText||"Die Reise ist abgeschlossen. Die geschützte Galerie bleibt für die Reisegruppe erreichbar."}}

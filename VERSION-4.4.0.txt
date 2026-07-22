@@ -1,0 +1,10 @@
+BS Rohrbach Erasmus+ – Version 4.4.0
+
+Änderungen:
+- Tagesprogramm vollständig als moderne Timeline neu gestaltet
+- Tagesnavigation für Desktop und Smartphone optimiert
+- Neue Tagesübersicht mit Datum, Schwerpunkt und Anzahl der Programmpunkte
+- Deutlich verbesserte Lesbarkeit der einzelnen Programmpunkte
+- Statushinweise für gebuchte und noch nicht bestätigte Termine überarbeitet
+- Bestehende CMS-Inhalte unverändert übernommen
+- OAuth, GitHub-Login, Cloudflare Worker und Decap CMS nicht verändert
