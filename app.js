@@ -64,42 +64,86 @@ function eventIcon(event){
 function renderProgram(days){
   const tabs=qs("#dayTabs"),panels=qs("#dayPanels");
   const eventCount=day=>(day.events||[]).length;
-  tabs.innerHTML=days.map((d,i)=>`<button class="day-tab ${i===0?'active':''}" data-day="${esc(d.id)}" role="tab" aria-controls="day-${esc(d.id)}" aria-selected="${i===0}"><span class="day-tab-weekday">${esc(d.short)}</span><span class="day-tab-date">${esc(d.date)}</span><span class="day-tab-title">${esc(d.title)}</span></button>`).join("");
+  const totalEvents=days.reduce((sum,day)=>sum+eventCount(day),0);
+  const statusCount=(day,status)=>(day.events||[]).filter(event=>event.status===status).length;
+  const firstTime=day=>((day.events||[])[0]||{}).time||"–";
+  const lastTime=day=>((day.events||[]).slice(-1)[0]||{}).time||"–";
+
+  tabs.innerHTML=days.map((d,i)=>`<button class="day-tab ${i===0?'active':''}" data-day="${esc(d.id)}" role="tab" aria-controls="day-${esc(d.id)}" aria-selected="${i===0}">
+    <span class="day-tab-index">${String(i+1).padStart(2,'0')}</span>
+    <span class="day-tab-weekday">${esc(d.short)}</span>
+    <span class="day-tab-date">${esc(d.date)}</span>
+    <span class="day-tab-title">${esc(d.title)}</span>
+    <span class="day-tab-count">${eventCount(d)} Stopps</span>
+  </button>`).join("");
+
   panels.innerHTML=days.map((d,i)=>{
     const events=d.events||[];
     const dayLabel=Number(d.dayNumber)===0?'Anreisetag':`Reisetag ${Number(d.dayNumber)||i}`;
+    const confirmed=statusCount(d,'confirmed');
+    const pending=statusCount(d,'pending');
+    const progress=Math.round(((i+1)/days.length)*100);
     return `<article class="day-panel ${i===0?'active':''}" id="day-${esc(d.id)}" role="tabpanel" aria-label="${esc(d.short)} ${esc(d.date)} – ${esc(d.title)}">
       <header class="day-cover ${d.cover?'photo-cover':''}" ${d.cover?`style="--bg:url('${esc(d.cover)}')"`:''}>
+        <div class="day-cover-topline"><span>${esc(dayLabel)}</span><span>Etappe ${i+1} von ${days.length}</span></div>
         <div class="day-cover-content">
-          <div class="day-kicker"><span>${esc(dayLabel)}</span><span>${eventCount(d)} Programmpunkt${eventCount(d)===1?'':'e'}</span></div>
+          <p class="day-date-large">${esc(d.short)} · ${esc(d.date)}2026</p>
           <h3>${esc(d.title)}</h3>
           <p>${esc(d.subtitle)}</p>
+          <div class="day-cover-chips">
+            <span>⏱ ${esc(firstTime(d))} – ${esc(lastTime(d))}</span>
+            <span>📍 ${events.length} ${events.length===1?'Programmpunkt':'Programmpunkte'}</span>
+            ${confirmed?`<span class="chip-confirmed">✓ ${confirmed} bestätigt</span>`:''}
+            ${pending?`<span class="chip-pending">○ ${pending} offen</span>`:''}
+          </div>
         </div>
         ${d.icon?`<span class="day-icon" aria-hidden="true">${esc(d.icon)}</span>`:''}
       </header>
-      ${(d.gallery||[]).length?`<div class="gallery-row">${d.gallery.map((x,j)=>`<img src="${esc(x)}" alt="${esc(d.title)} – Eindruck ${j+1}" loading="lazy">`).join("")}</div>`:''}
+
+      ${(d.gallery||[]).length?`<div class="day-photo-strip">${d.gallery.map((x,j)=>`<figure><img src="${esc(x)}" alt="${esc(d.title)} – Eindruck ${j+1}" loading="lazy"><figcaption>${String(j+1).padStart(2,'0')}</figcaption></figure>`).join("")}</div>`:''}
+
+      <div class="trip-progress" aria-label="Fortschritt innerhalb der Reise">
+        <div class="trip-progress-copy"><span>Reiseverlauf</span><strong>${progress}%</strong></div>
+        <div class="trip-progress-track"><span style="width:${progress}%"></span></div>
+        <small>${i===0?'Abfahrt':i===days.length-1?'Heimreise':`${days.length-i-1} Reisetage folgen`}</small>
+      </div>
+
       <div class="program-overview">
         <div><span class="overview-label">Datum</span><strong>${esc(d.short)}, ${esc(d.date)}2026</strong></div>
-        <div><span class="overview-label">Schwerpunkt</span><strong>${esc(d.title)}</strong></div>
-        <div><span class="overview-label">Umfang</span><strong>${events.length} ${events.length===1?'Programmpunkt':'Programmpunkte'}</strong></div>
+        <div><span class="overview-label">Tagesfokus</span><strong>${esc(d.title)}</strong></div>
+        <div><span class="overview-label">Reise gesamt</span><strong>${totalEvents} Programmpunkte</strong></div>
       </div>
+
+      <div class="timeline-heading"><div><span class="eyebrow">Tagesablauf</span><h4>Unser Programm im Überblick</h4></div><span>${events.length} Stopps</span></div>
       <div class="timeline" aria-label="Tagesablauf">
-        ${events.map((e,index)=>`<article class="timeline-row ${e.status==='pending'?'pending':''}">
+        ${events.map((e,index)=>`<article class="timeline-row ${e.status==='pending'?'pending':''} ${e.status==='confirmed'?'confirmed':''}">
           <div class="timeline-marker" aria-hidden="true"><span class="timeline-icon">${eventIcon(e)}</span><small>${String(index+1).padStart(2,'0')}</small></div>
           <time>${esc(e.time)}</time>
           <div class="timeline-content">
+            <div class="timeline-card-head"><span class="timeline-step">Stopp ${String(index+1).padStart(2,'0')}</span>${e.status?`<span class="status-dot ${esc(e.status)}">${e.status==='confirmed'?'Bestätigt':'In Planung'}</span>`:''}</div>
             <h4>${esc(e.title)}</h4>
             <p>${esc(e.text)}</p>
             ${e.status?`<span class="badge ${esc(e.status)}"><span aria-hidden="true">${e.status==='confirmed'?'✓':'○'}</span>${e.status==='confirmed'?'Bereits gebucht':'Noch nicht bestätigt'}</span>`:''}
           </div>
         </article>`).join("")}
       </div>
+
+      <nav class="program-pager" aria-label="Zwischen Reisetagen wechseln">
+        <button type="button" class="program-pager-button prev" data-target="${i>0?esc(days[i-1].id):''}" ${i===0?'disabled':''}><span>←</span><small>${i>0?esc(days[i-1].short+' · '+days[i-1].date):'Start'}</small><strong>${i>0?esc(days[i-1].title):'Abreise'}</strong></button>
+        <button type="button" class="program-pager-button next" data-target="${i<days.length-1?esc(days[i+1].id):''}" ${i===days.length-1?'disabled':''}><span>→</span><small>${i<days.length-1?esc(days[i+1].short+' · '+days[i+1].date):'Ziel'}</small><strong>${i<days.length-1?esc(days[i+1].title):'Heimreise'}</strong></button>
+      </nav>
     </article>`
   }).join("");
-  qsa(".day-tab",tabs).forEach(btn=>btn.addEventListener("click",()=>activateDay(btn.dataset.day)));
+
+  qsa(".day-tab",tabs).forEach(btn=>btn.addEventListener("click",()=>activateDay(btn.dataset.day,true)));
+  qsa(".program-pager-button",panels).forEach(btn=>btn.addEventListener("click",()=>{if(btn.dataset.target)activateDay(btn.dataset.target,true)}));
 }
 
-function activateDay(id){qsa(".day-tab").forEach(b=>{const on=b.dataset.day===id;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on))});qsa(".day-panel").forEach(p=>p.classList.toggle("active",p.id===`day-${id}`))}
+function activateDay(id,scroll=false){
+  qsa(".day-tab").forEach(b=>{const on=b.dataset.day===id;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on));if(on)b.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})});
+  qsa(".day-panel").forEach(p=>p.classList.toggle("active",p.id===`day-${id}`));
+  if(scroll){const section=qs('#programm');if(section)window.scrollTo({top:section.offsetTop+110,behavior:'smooth'})}
+}
 
 function renderToday(days){const site=window.__SITE||{};const t=site.today||{};const now=new Date(),start=new Date(site.departure||"2026-11-21T20:00:00+01:00"),end=new Date(site.returnDate||"2026-11-26T23:59:00+01:00");let pct=0,label="Vorfreude",day=null;if(now>=start&&now<=end){pct=Math.min(100,Math.max(0,(now-start)/(end-start)*100));label=`Tag ${Math.max(1,Math.ceil((now-start)/86400000))} von 5`;const ids=["sa","so","mo","di","mi","do"];day=days.find(d=>d.id===ids[Math.min(ids.length-1,Math.floor((now-start)/86400000))])}else if(now>end){pct=100;label=t.afterLabel||"Reise abgeschlossen"}qs("#progressBar").style.width=`${pct}%`;qs("#progressValue").textContent=`${Math.round(pct)} %`;qs("#progressLabel").textContent=label;if(day){qs("#todayTitle").textContent=day.title;qs("#todayText").textContent=day.subtitle;qs("#progressDate").textContent=`${day.short}, ${day.date}`;qs("#todaySchedule").innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");activateDay(day.id)}else if(now>end){qs("#todayTitle").textContent=t.afterTitle||"Schöne Erinnerungen an Brüssel";qs("#todayText").textContent=t.afterText||"Die Reise ist abgeschlossen. Die geschützte Galerie bleibt für die Reisegruppe erreichbar."}}
 

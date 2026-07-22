@@ -1,0 +1,11 @@
+Version 4.5 – Tagesprogramm komplett neu
+
+- Reise-App-Navigation für alle sechs Reisetage
+- großflächige Tagescover mit Tagesdaten und Status-Chips
+- Reise-Fortschrittsanzeige je Tag
+- neu gestaltete Timeline mit Stopps, Symbolen und Status
+- Vor-/Zurück-Navigation zwischen den Reisetagen
+- neue Bilderleiste für Tage mit mehreren Motiven
+- vollständig responsive Smartphone-Darstellung
+- bestehende CMS-Inhalte unverändert übernommen
+- Admin, OAuth, Cloudflare und Wrangler unverändert
