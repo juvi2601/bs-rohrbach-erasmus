@@ -1,0 +1,17 @@
+BS Rohrbach Erasmus+ – Version 4.4.2
+
+Sichtbares Startseiten-Upgrade:
+- BS-Logo im Header kleiner und sauberer ausgerichtet
+- hochwertiger, kompakter Sticky-Header
+- Hero-Bereich mit stärkerer Bildwirkung und besserem Kontrast
+- Jahreszahl 2026 als gelber Akzent (weiterhin aus CMS-Titel erzeugt)
+- Countdown als moderne Glas-Karte
+- größere, klarere Aktionsbuttons
+- modernisierte Schnellzugriffskarten
+- deutlich verbesserte Tablet- und Smartphone-Darstellung
+
+Unverändert:
+- Decap CMS und Adminbereich
+- GitHub OAuth
+- Cloudflare Worker / wrangler.jsonc
+- sämtliche CMS-Inhalte und Reisedaten

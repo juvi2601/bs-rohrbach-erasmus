@@ -25,7 +25,7 @@ function applySite(site){
   window.__SITE=site;
   if(site.meta){document.title=site.meta.pageTitle||document.title;const m=qs('meta[name="description"]');if(m&&site.meta.description)m.content=site.meta.description}
   setText("brandTitle",site.school);setText("brandSubtitle",site.brandSubtitle);
-  setText("heroEyebrow",site.heroEyebrow);setText("heroTitle",site.heroTitle||site.tripTitle);setText("heroSubtitle",site.subtitle);
+  setText("heroEyebrow",site.heroEyebrow);const heroTitle=site.heroTitle||site.tripTitle||"";const heroTitleEl=qs("#heroTitle");if(heroTitleEl){const match=heroTitle.match(/^(.*?)(\s+\d{4})$/);if(match){heroTitleEl.textContent=match[1]+" ";const accent=document.createElement("span");accent.textContent=match[2].trim();heroTitleEl.appendChild(accent)}else{heroTitleEl.textContent=heroTitle}}setText("heroSubtitle",site.subtitle);
   setText("heroPrimaryButton",site.heroPrimaryButton);setText("heroSecondaryButton",site.heroSecondaryButton);
   if(site.hero){const hm=qs("#heroMedia");if(hm)hm.style.backgroundImage=`url('${site.hero.replace(/'/g,"%27")}')`}
   setText("countdownLabel",site.countdownLabel);setText("countdownDateText",site.countdownDateText);
