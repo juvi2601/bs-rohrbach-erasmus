@@ -48,6 +48,19 @@ function activateExternal(id,url){const a=qs("#"+id);if(a&&url){a.href=url;a.tar
 function renderNews(items){const grid=qs("#newsGrid");const rows=items.filter(x=>x.published!==false).sort((a,b)=>(b.date||"").localeCompare(a.date||""));if(!rows.length){grid.innerHTML='<div class="empty-state">Noch keine Meldungen veröffentlicht.</div>';return}grid.innerHTML=rows.map(n=>`<article class="news-card ${n.important?'important':''}"><time>${formatDate(n.date)}</time><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p></article>`).join("")}
 function formatDate(v){if(!v)return"";return new Intl.DateTimeFormat("de-AT",{day:"2-digit",month:"long",year:"numeric"}).format(new Date(v+"T12:00:00"))}
 
+
+function eventIcon(event){
+  const text=`${event.title||''} ${event.text||''}`.toLowerCase();
+  if(/bus|abfahrt|ankunft|heimreise|rückfahrt|fahrt/.test(text)) return '🚌';
+  if(/hotel|check-in|check in|zimmer|frühstück/.test(text)) return '🏨';
+  if(/parlament|kommission|europäisch|vertretung|vortrag/.test(text)) return '🇪🇺';
+  if(/antwerpen|hafen|diamant|rundfahrt|stadtführung/.test(text)) return '⚓';
+  if(/essen|mittag|abendessen|pommes|waffel|restaurant/.test(text)) return '🍽️';
+  if(/freizeit|shopping|bummeln|zentrum|grand.place|sightseeing/.test(text)) return '📍';
+  if(/museum|parlamentarium|atomium|waterloo/.test(text)) return '🏛️';
+  return '✦';
+}
+
 function renderProgram(days){
   const tabs=qs("#dayTabs"),panels=qs("#dayPanels");
   const eventCount=day=>(day.events||[]).length;
@@ -72,7 +85,7 @@ function renderProgram(days){
       </div>
       <div class="timeline" aria-label="Tagesablauf">
         ${events.map((e,index)=>`<article class="timeline-row ${e.status==='pending'?'pending':''}">
-          <div class="timeline-marker" aria-hidden="true"><span>${String(index+1).padStart(2,'0')}</span></div>
+          <div class="timeline-marker" aria-hidden="true"><span class="timeline-icon">${eventIcon(e)}</span><small>${String(index+1).padStart(2,'0')}</small></div>
           <time>${esc(e.time)}</time>
           <div class="timeline-content">
             <h4>${esc(e.title)}</h4>

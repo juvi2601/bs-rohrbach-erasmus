@@ -1,0 +1,8 @@
+Version 4.4.3
+
+- „2026“ im Hero deutlich in BS-Gelb hervorgehoben
+- gelben Hauptbutton durch hochwertigen dunkelblauen Button ersetzt
+- Tagesnavigation und Tagescover optisch modernisiert
+- Reise-App-Timeline mit passenden Symbolen je Programmpunkt
+- stärkere Zeitachse, neue Karten und verbesserte mobile Darstellung
+- CMS-, OAuth- und Cloudflare-Konfiguration unverändert
