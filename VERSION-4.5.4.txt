@@ -1,0 +1,9 @@
+VERSION 4.5.4
+
+- Tagesnavigation bleibt auf Desktop und in kleineren Edge-Fenstern stabil ausgerichtet.
+- Automatisches horizontales Nachscrollen nur noch auf Smartphones.
+- Responsive Breiten und horizontaler Überlauf im Tagesprogramm korrigiert.
+- Sonntag: Gruppen-, Spaziergang- und Hotel-Symbole präzisiert.
+- Montag: Essen-, Bahnhof- und Diamant-Symbole ergänzt.
+- Dienstag und Mittwoch: EU-Flagge als Symbol im Tageskopf und bei EU-Programmpunkten.
+- CMS, OAuth, Cloudflare-Konfiguration und Programminhalte unverändert.
