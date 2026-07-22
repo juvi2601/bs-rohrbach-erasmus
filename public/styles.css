@@ -271,3 +271,24 @@ nav a:not(.nav-upload):not(.nav-emergency):hover::after{right:0}
   .timeline-row time{grid-column:2;padding:0 3px;font-size:13px}.timeline-content{grid-column:2;padding:19px 18px 18px;border-radius:21px}.timeline-content::before{left:-6px;top:17px;width:11px;height:11px}.timeline-card-head{margin-bottom:6px}.status-dot{font-size:7px;padding:4px 6px}.timeline-row h4{font-size:18px}.timeline-row p{font-size:14px;line-height:1.55}.badge{margin-top:12px}
   .program-pager{gap:8px;margin-top:20px}.program-pager-button{min-height:75px;padding:12px;border-radius:18px;column-gap:8px}.program-pager-button>span{width:35px;height:35px;border-radius:12px;font-size:17px}.program-pager-button small{font-size:7px}.program-pager-button strong{font-size:12px}
 }
+
+
+/* Version 4.5.1 – ruhigeres Tagesprogramm */
+.day-tab{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:76px;padding:13px 15px 12px}
+.day-tab-weekday,.day-tab-date,.day-tab-title{grid-column:auto;grid-row:auto}
+.day-tab-index,.day-tab-count{display:none!important}
+.day-tab-title{margin-top:4px;width:100%}
+.day-photo-strip{gap:14px;margin:-38px 32px 0}
+.day-photo-strip figure{border:0;border-radius:20px;box-shadow:0 14px 34px rgba(7,29,73,.14);background:transparent}
+.day-photo-strip img{height:150px;border-radius:20px}
+.day-photo-strip figcaption{display:none!important}
+.trip-progress-track{height:5px}
+.timeline-heading{justify-content:flex-start}
+.timeline-heading>span{display:none!important}
+@media(max-width:700px){
+  .day-tab{flex-basis:106px;min-height:69px;padding:10px 11px}
+  .day-tab-title{display:block;font-size:10px;margin-top:3px}
+  .day-photo-strip{gap:7px;margin:-25px 12px 0}
+  .day-photo-strip figure,.day-photo-strip img{border-radius:13px}
+  .day-photo-strip img{height:82px}
+}

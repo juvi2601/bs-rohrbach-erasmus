@@ -1,0 +1,11 @@
+VERSION 4.5.1
+
+Feinschliff Tagesprogramm:
+- Zahlen und Stopp-Anzahlen in der Tagesnavigation entfernt
+- Anzahl der Programmpunkte im Tagescover entfernt
+- Bildnummern entfernt
+- weiße Bildumrandungen entfernt
+- Bilder mit dezentem Schatten und ruhigerem Abstand
+- Fortschrittsbalken feiner gestaltet
+- Gesamtzahl der Programmpunkte durch Reisezeitraum ersetzt
+- CMS, OAuth, Cloudflare und Inhalte unverändert

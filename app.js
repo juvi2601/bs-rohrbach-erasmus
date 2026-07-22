@@ -70,11 +70,9 @@ function renderProgram(days){
   const lastTime=day=>((day.events||[]).slice(-1)[0]||{}).time||"–";
 
   tabs.innerHTML=days.map((d,i)=>`<button class="day-tab ${i===0?'active':''}" data-day="${esc(d.id)}" role="tab" aria-controls="day-${esc(d.id)}" aria-selected="${i===0}">
-    <span class="day-tab-index">${String(i+1).padStart(2,'0')}</span>
     <span class="day-tab-weekday">${esc(d.short)}</span>
     <span class="day-tab-date">${esc(d.date)}</span>
     <span class="day-tab-title">${esc(d.title)}</span>
-    <span class="day-tab-count">${eventCount(d)} Stopps</span>
   </button>`).join("");
 
   panels.innerHTML=days.map((d,i)=>{
@@ -92,7 +90,6 @@ function renderProgram(days){
           <p>${esc(d.subtitle)}</p>
           <div class="day-cover-chips">
             <span>⏱ ${esc(firstTime(d))} – ${esc(lastTime(d))}</span>
-            <span>📍 ${events.length} ${events.length===1?'Programmpunkt':'Programmpunkte'}</span>
             ${confirmed?`<span class="chip-confirmed">✓ ${confirmed} bestätigt</span>`:''}
             ${pending?`<span class="chip-pending">○ ${pending} offen</span>`:''}
           </div>
@@ -100,7 +97,7 @@ function renderProgram(days){
         ${d.icon?`<span class="day-icon" aria-hidden="true">${esc(d.icon)}</span>`:''}
       </header>
 
-      ${(d.gallery||[]).length?`<div class="day-photo-strip">${d.gallery.map((x,j)=>`<figure><img src="${esc(x)}" alt="${esc(d.title)} – Eindruck ${j+1}" loading="lazy"><figcaption>${String(j+1).padStart(2,'0')}</figcaption></figure>`).join("")}</div>`:''}
+      ${(d.gallery||[]).length?`<div class="day-photo-strip">${d.gallery.map((x,j)=>`<figure><img src="${esc(x)}" alt="${esc(d.title)} – Eindruck ${j+1}" loading="lazy"></figure>`).join("")}</div>`:''}
 
       <div class="trip-progress" aria-label="Fortschritt innerhalb der Reise">
         <div class="trip-progress-copy"><span>Reiseverlauf</span><strong>${progress}%</strong></div>
@@ -111,10 +108,10 @@ function renderProgram(days){
       <div class="program-overview">
         <div><span class="overview-label">Datum</span><strong>${esc(d.short)}, ${esc(d.date)}2026</strong></div>
         <div><span class="overview-label">Tagesfokus</span><strong>${esc(d.title)}</strong></div>
-        <div><span class="overview-label">Reise gesamt</span><strong>${totalEvents} Programmpunkte</strong></div>
+        <div><span class="overview-label">Reisezeitraum</span><strong>21.–26. November 2026</strong></div>
       </div>
 
-      <div class="timeline-heading"><div><span class="eyebrow">Tagesablauf</span><h4>Unser Programm im Überblick</h4></div><span>${events.length} Stopps</span></div>
+      <div class="timeline-heading"><div><span class="eyebrow">Tagesablauf</span><h4>Unser Programm im Überblick</h4></div></div>
       <div class="timeline" aria-label="Tagesablauf">
         ${events.map((e,index)=>`<article class="timeline-row ${e.status==='pending'?'pending':''} ${e.status==='confirmed'?'confirmed':''}">
           <div class="timeline-marker" aria-hidden="true"><span class="timeline-icon">${eventIcon(e)}</span><small>${String(index+1).padStart(2,'0')}</small></div>
