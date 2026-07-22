@@ -292,3 +292,34 @@ nav a:not(.nav-upload):not(.nav-emergency):hover::after{right:0}
   .day-photo-strip figure,.day-photo-strip img{border-radius:13px}
   .day-photo-strip img{height:82px}
 }
+
+/* Version 4.5.2 – ruhigerer Tageskopf und eindeutiger Reiseverlauf */
+.day-cover-topline{right:auto}
+.day-cover-chips:empty{display:none}
+.trip-progress-copy{white-space:nowrap}
+.trip-progress small{min-width:72px;text-align:right}
+@media(max-width:700px){
+  .day-cover-topline{right:auto}
+  .trip-progress{grid-template-columns:auto minmax(100px,1fr) auto}
+  .trip-progress-track{grid-column:auto;grid-row:auto}
+  .trip-progress small{display:block;min-width:auto;font-size:11px}
+}
+
+
+/* Version 4.5.3 – einheitliche SVG-Icons im Tagesprogramm */
+.program-svg-icon{display:block;width:24px;height:24px;color:currentColor}
+.timeline-marker .program-svg-icon{width:25px;height:25px;color:#0a4fa9}
+.timeline-row.pending .timeline-marker .program-svg-icon{color:#a16900}
+.timeline-row.confirmed .timeline-marker .program-svg-icon{color:#13805a}
+.day-icon{width:104px;height:104px;display:grid;place-items:center;border-radius:31px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(12px);box-shadow:0 18px 45px rgba(3,18,49,.22)}
+.day-icon .program-svg-icon{width:58px;height:58px;color:#fff;filter:drop-shadow(0 7px 16px rgba(3,18,49,.28))}
+.timeline-marker small{display:none!important}
+.timeline-marker{background:linear-gradient(145deg,#fff,#edf5fd)}
+.timeline-content{box-shadow:0 13px 34px rgba(7,29,73,.065)}
+.timeline-row{padding:15px 0}
+@media(max-width:700px){
+  .day-icon{width:70px;height:70px;border-radius:23px}
+  .day-icon .program-svg-icon{width:39px;height:39px}
+  .timeline-marker .program-svg-icon{width:20px;height:20px}
+  .timeline-row{padding:11px 0}
+}

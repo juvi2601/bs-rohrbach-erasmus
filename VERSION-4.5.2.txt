@@ -1,0 +1,8 @@
+Version 4.5.2
+
+- Uhrzeit-Spanne im großen Tageskopf entfernt
+- Etappenanzeige rechts oben entfernt
+- Prozentangabe im Reiseverlauf entfernt
+- Reiseverlauf zeigt nun klar „Tag X von 6“
+- Fortschrittsleiste bleibt als rein visuelle Orientierung erhalten
+- CMS-Inhalte und technische Konfiguration unverändert

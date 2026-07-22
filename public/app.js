@@ -83,13 +83,12 @@ function renderProgram(days){
     const progress=Math.round(((i+1)/days.length)*100);
     return `<article class="day-panel ${i===0?'active':''}" id="day-${esc(d.id)}" role="tabpanel" aria-label="${esc(d.short)} ${esc(d.date)} – ${esc(d.title)}">
       <header class="day-cover ${d.cover?'photo-cover':''}" ${d.cover?`style="--bg:url('${esc(d.cover)}')"`:''}>
-        <div class="day-cover-topline"><span>${esc(dayLabel)}</span><span>Etappe ${i+1} von ${days.length}</span></div>
+        <div class="day-cover-topline"><span>${esc(dayLabel)}</span></div>
         <div class="day-cover-content">
           <p class="day-date-large">${esc(d.short)} · ${esc(d.date)}2026</p>
           <h3>${esc(d.title)}</h3>
           <p>${esc(d.subtitle)}</p>
           <div class="day-cover-chips">
-            <span>⏱ ${esc(firstTime(d))} – ${esc(lastTime(d))}</span>
             ${confirmed?`<span class="chip-confirmed">✓ ${confirmed} bestätigt</span>`:''}
             ${pending?`<span class="chip-pending">○ ${pending} offen</span>`:''}
           </div>
@@ -100,9 +99,9 @@ function renderProgram(days){
       ${(d.gallery||[]).length?`<div class="day-photo-strip">${d.gallery.map((x,j)=>`<figure><img src="${esc(x)}" alt="${esc(d.title)} – Eindruck ${j+1}" loading="lazy"></figure>`).join("")}</div>`:''}
 
       <div class="trip-progress" aria-label="Fortschritt innerhalb der Reise">
-        <div class="trip-progress-copy"><span>Reiseverlauf</span><strong>${progress}%</strong></div>
+        <div class="trip-progress-copy"><span>Reiseverlauf</span></div>
         <div class="trip-progress-track"><span style="width:${progress}%"></span></div>
-        <small>${i===0?'Abfahrt':i===days.length-1?'Heimreise':`${days.length-i-1} Reisetage folgen`}</small>
+        <small>Tag ${i+1} von ${days.length}</small>
       </div>
 
       <div class="program-overview">

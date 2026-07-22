@@ -292,3 +292,15 @@ nav a:not(.nav-upload):not(.nav-emergency):hover::after{right:0}
   .day-photo-strip figure,.day-photo-strip img{border-radius:13px}
   .day-photo-strip img{height:82px}
 }
+
+/* Version 4.5.2 – ruhigerer Tageskopf und eindeutiger Reiseverlauf */
+.day-cover-topline{right:auto}
+.day-cover-chips:empty{display:none}
+.trip-progress-copy{white-space:nowrap}
+.trip-progress small{min-width:72px;text-align:right}
+@media(max-width:700px){
+  .day-cover-topline{right:auto}
+  .trip-progress{grid-template-columns:auto minmax(100px,1fr) auto}
+  .trip-progress-track{grid-column:auto;grid-row:auto}
+  .trip-progress small{display:block;min-width:auto;font-size:11px}
+}

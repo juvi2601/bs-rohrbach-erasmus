@@ -49,16 +49,45 @@ function renderNews(items){const grid=qs("#newsGrid");const rows=items.filter(x=
 function formatDate(v){if(!v)return"";return new Intl.DateTimeFormat("de-AT",{day:"2-digit",month:"long",year:"numeric"}).format(new Date(v+"T12:00:00"))}
 
 
+function svgIcon(name,extraClass=''){
+  const icons={
+    bus:'<path d="M5 17h14M6 17V7.8A2.8 2.8 0 0 1 8.8 5h6.4A2.8 2.8 0 0 1 18 7.8V17M7 10h10M8 20h.01M16 20h.01M7 17v2M17 17v2"/>',
+    hotel:'<path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M8 7h2M8 11h2M8 15h2M3 21h18"/>',
+    eu:'<path d="M4 20h16M6 17h12M8 17V9M12 17V9M16 17V9M5 9h14L12 4 5 9Z"/>',
+    anchor:'<path d="M12 22V8M5 12H2a10 10 0 0 0 20 0h-3M8 8a4 4 0 1 1 8 0M5 12l-3 3M19 12l3 3"/>',
+    food:'<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M16 3v18M16 3c3 2 4 5 4 8h-4"/>',
+    pin:'<path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+    museum:'<path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18M12 3l9 5H3l9-5Z"/>',
+    talk:'<path d="M4 4h16v12H8l-4 4V4ZM8 8h8M8 12h5"/>',
+    walk:'<circle cx="13" cy="4" r="2"/><path d="m10 22 2-7-3-3 2-5 4 3 3 1M6 22l3-6M15 22l-2-7"/>',
+    train:'<path d="M6 17h12M7 17l-2 4M17 17l2 4M8 21h8M6 3h12v14H6V3ZM8 7h8M9 13h.01M15 13h.01"/>',
+    star:'<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/>'
+  };
+  return `<svg class="program-svg-icon ${extraClass}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${icons[name]||icons.star}</svg>`;
+}
+
 function eventIcon(event){
   const text=`${event.title||''} ${event.text||''}`.toLowerCase();
-  if(/bus|abfahrt|ankunft|heimreise|rückfahrt|fahrt/.test(text)) return '🚌';
-  if(/hotel|check-in|check in|zimmer|frühstück/.test(text)) return '🏨';
-  if(/parlament|kommission|europäisch|vertretung|vortrag/.test(text)) return '🇪🇺';
-  if(/antwerpen|hafen|diamant|rundfahrt|stadtführung/.test(text)) return '⚓';
-  if(/essen|mittag|abendessen|pommes|waffel|restaurant/.test(text)) return '🍽️';
-  if(/freizeit|shopping|bummeln|zentrum|grand.place|sightseeing/.test(text)) return '📍';
-  if(/museum|parlamentarium|atomium|waterloo/.test(text)) return '🏛️';
-  return '✦';
+  if(/bus|abfahrt|ankunft|heimreise|rückfahrt|fahrt/.test(text)) return svgIcon('bus');
+  if(/hotel|check-in|check in|zimmer|frühstück/.test(text)) return svgIcon('hotel');
+  if(/vortrag|präsentation|besprechung/.test(text)) return svgIcon('talk');
+  if(/parlament|kommission|europäisch|vertretung|rat/.test(text)) return svgIcon('eu');
+  if(/antwerpen|hafen|diamant|rundfahrt|schiff/.test(text)) return svgIcon('anchor');
+  if(/essen|mittag|abendessen|pommes|waffel|restaurant/.test(text)) return svgIcon('food');
+  if(/freizeit|shopping|bummeln|spaziergang|sightseeing/.test(text)) return svgIcon('walk');
+  if(/bahnhof|zug|metro/.test(text)) return svgIcon('train');
+  if(/museum|parlamentarium|atomium|waterloo/.test(text)) return svgIcon('museum');
+  if(/zentrum|grand.place|ort|treffpunkt/.test(text)) return svgIcon('pin');
+  return svgIcon('star');
+}
+
+function dayIcon(day){
+  const text=`${day.id||''} ${day.title||''} ${day.subtitle||''}`.toLowerCase();
+  if(/antwerpen|hafen|diamant/.test(text)) return svgIcon('anchor','day-svg');
+  if(/parlament|kommission|eu|vertretung|brüssel/.test(text)) return svgIcon('eu','day-svg');
+  if(/heimreise|anreise|rohrbach|abfahrt|bus/.test(text)) return svgIcon('bus','day-svg');
+  if(/vortrag/.test(text)) return svgIcon('talk','day-svg');
+  return svgIcon('pin','day-svg');
 }
 
 function renderProgram(days){
@@ -83,26 +112,25 @@ function renderProgram(days){
     const progress=Math.round(((i+1)/days.length)*100);
     return `<article class="day-panel ${i===0?'active':''}" id="day-${esc(d.id)}" role="tabpanel" aria-label="${esc(d.short)} ${esc(d.date)} – ${esc(d.title)}">
       <header class="day-cover ${d.cover?'photo-cover':''}" ${d.cover?`style="--bg:url('${esc(d.cover)}')"`:''}>
-        <div class="day-cover-topline"><span>${esc(dayLabel)}</span><span>Etappe ${i+1} von ${days.length}</span></div>
+        <div class="day-cover-topline"><span>${esc(dayLabel)}</span></div>
         <div class="day-cover-content">
           <p class="day-date-large">${esc(d.short)} · ${esc(d.date)}2026</p>
           <h3>${esc(d.title)}</h3>
           <p>${esc(d.subtitle)}</p>
           <div class="day-cover-chips">
-            <span>⏱ ${esc(firstTime(d))} – ${esc(lastTime(d))}</span>
             ${confirmed?`<span class="chip-confirmed">✓ ${confirmed} bestätigt</span>`:''}
             ${pending?`<span class="chip-pending">○ ${pending} offen</span>`:''}
           </div>
         </div>
-        ${d.icon?`<span class="day-icon" aria-hidden="true">${esc(d.icon)}</span>`:''}
+        <span class="day-icon" aria-hidden="true">${dayIcon(d)}</span>
       </header>
 
       ${(d.gallery||[]).length?`<div class="day-photo-strip">${d.gallery.map((x,j)=>`<figure><img src="${esc(x)}" alt="${esc(d.title)} – Eindruck ${j+1}" loading="lazy"></figure>`).join("")}</div>`:''}
 
       <div class="trip-progress" aria-label="Fortschritt innerhalb der Reise">
-        <div class="trip-progress-copy"><span>Reiseverlauf</span><strong>${progress}%</strong></div>
+        <div class="trip-progress-copy"><span>Reiseverlauf</span></div>
         <div class="trip-progress-track"><span style="width:${progress}%"></span></div>
-        <small>${i===0?'Abfahrt':i===days.length-1?'Heimreise':`${days.length-i-1} Reisetage folgen`}</small>
+        <small>Tag ${i+1} von ${days.length}</small>
       </div>
 
       <div class="program-overview">

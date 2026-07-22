@@ -1,0 +1,9 @@
+Version 4.5.3
+
+- Bunte Emojis im Tagesprogramm durch einheitliche, direkt eingebettete SVG-Icons ersetzt
+- Passende Symbole für Bus, Hotel, EU-Termine, Antwerpen/Hafen, Essen, Vortrag, Freizeit und Sehenswürdigkeiten
+- Großes Tages-Icon im Titelbild wird automatisch passend zum jeweiligen Reisetag gewählt
+- Nummern in den Timeline-Symbolen entfernt
+- Timeline etwas luftiger und Karten optisch leichter gestaltet
+- Keine externen Icon-Dateien oder Bibliotheken erforderlich
+- CMS-Inhalte, OAuth und Cloudflare-Konfiguration unverändert
