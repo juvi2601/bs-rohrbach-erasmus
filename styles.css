@@ -323,3 +323,29 @@ nav a:not(.nav-upload):not(.nav-emergency):hover::after{right:0}
   .timeline-marker .program-svg-icon{width:20px;height:20px}
   .timeline-row{padding:11px 0}
 }
+
+
+/* Version 4.5.4 – stabile Ausrichtung und präzisere Programmsymbole */
+html{scrollbar-gutter:stable}
+body{overflow-x:hidden}
+.program-section{overflow-x:clip}
+.program-section>.section-title,.day-tabs,.day-panels{width:min(100%,1240px)}
+.day-tabs,.day-panels{margin-left:auto;margin-right:auto}
+.day-tab{min-width:0;max-width:100%}
+.day-panel,.day-cover,.trip-progress,.program-overview,.timeline,.program-pager{min-width:0;max-width:100%}
+.program-svg-icon{overflow:visible}
+.program-svg-icon.day-svg{stroke-width:1.65}
+@media (min-width:701px){
+  .day-tabs{overflow:visible;scroll-behavior:auto}
+}
+@media (max-width:1240px){
+  .program-section{padding-left:clamp(16px,3vw,32px);padding-right:clamp(16px,3vw,32px)}
+  .day-tabs{grid-template-columns:repeat(3,minmax(0,1fr));position:relative;top:auto}
+}
+@media (max-width:700px){
+  html{scrollbar-gutter:auto}
+  .program-section{padding-left:14px;padding-right:14px}
+  .day-tabs{display:flex;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;grid-template-columns:none;overscroll-behavior-inline:contain}
+  .day-tab{flex:0 0 106px}
+  .day-panels{width:100%;max-width:100%}
+}
