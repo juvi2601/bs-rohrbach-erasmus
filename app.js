@@ -165,14 +165,14 @@ function renderProgram(days){
     </article>`
   }).join("");
 
-  qsa(".day-tab",tabs).forEach(btn=>btn.addEventListener("click",()=>activateDay(btn.dataset.day,true)));
+  qsa(".day-tab",tabs).forEach(btn=>btn.addEventListener("click",()=>activateDay(btn.dataset.day,false)));
   qsa(".program-pager-button",panels).forEach(btn=>btn.addEventListener("click",()=>{if(btn.dataset.target)activateDay(btn.dataset.target,true)}));
 }
 
 function activateDay(id,scroll=false){
   qsa(".day-tab").forEach(b=>{const on=b.dataset.day===id;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on));if(on&&window.matchMedia('(max-width:700px)').matches)b.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})});
   qsa(".day-panel").forEach(p=>p.classList.toggle("active",p.id===`day-${id}`));
-  if(scroll){const section=qs('#programm');if(section)window.scrollTo({top:section.offsetTop+110,behavior:'smooth'})}
+  if(scroll){const section=qs('#programm');if(section){const offset=window.matchMedia('(max-width:700px)').matches?76:92;window.scrollTo({top:Math.max(0,section.offsetTop-offset),behavior:'smooth'})}}
 }
 
 function renderToday(days){const site=window.__SITE||{};const t=site.today||{};const now=new Date(),start=new Date(site.departure||"2026-11-21T20:00:00+01:00"),end=new Date(site.returnDate||"2026-11-26T23:59:00+01:00");let pct=0,label="Vorfreude",day=null;if(now>=start&&now<=end){pct=Math.min(100,Math.max(0,(now-start)/(end-start)*100));label=`Tag ${Math.max(1,Math.ceil((now-start)/86400000))} von 5`;const ids=["sa","so","mo","di","mi","do"];day=days.find(d=>d.id===ids[Math.min(ids.length-1,Math.floor((now-start)/86400000))])}else if(now>end){pct=100;label=t.afterLabel||"Reise abgeschlossen"}qs("#progressBar").style.width=`${pct}%`;qs("#progressValue").textContent=`${Math.round(pct)} %`;qs("#progressLabel").textContent=label;if(day){qs("#todayTitle").textContent=day.title;qs("#todayText").textContent=day.subtitle;qs("#progressDate").textContent=`${day.short}, ${day.date}`;qs("#todaySchedule").innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");activateDay(day.id)}else if(now>end){qs("#todayTitle").textContent=t.afterTitle||"Schöne Erinnerungen an Brüssel";qs("#todayText").textContent=t.afterText||"Die Reise ist abgeschlossen. Die geschützte Galerie bleibt für die Reisegruppe erreichbar."}}

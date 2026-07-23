@@ -349,3 +349,68 @@ body{overflow-x:hidden}
   .day-tab{flex:0 0 106px}
   .day-panels{width:100%;max-width:100%}
 }
+
+/* Version 5.0 – Premium UI Refresh und mobile Programmkorrektur */
+:root{
+  --paper:#f7f9fc;
+  --muted:#5d6f89;
+  --line:#d6e1ee;
+  --shadow:0 22px 58px rgba(7,29,73,.11),0 2px 10px rgba(7,29,73,.045);
+}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;background:linear-gradient(180deg,#fbfcfe 0%,#f3f7fb 100%)}
+.section-title h2,.hotel-copy h2,.group-card h2,.today-card h2,.admin-card h2{font-weight:850;letter-spacing:-.045em}
+.section-title p:not(.eyebrow),.hotel-copy p,.group-card p,.admin-card p,.timeline-row p{color:#60718a}
+.site-header{background:rgba(255,255,255,.94);border-bottom-color:rgba(202,216,232,.82);box-shadow:0 1px 0 rgba(7,29,73,.025)}
+.site-header.scrolled{box-shadow:0 12px 34px rgba(7,29,73,.09)}
+.day-tabs{background:rgba(255,255,255,.94);border-color:rgba(198,214,232,.95);box-shadow:0 18px 48px rgba(7,29,73,.10),0 2px 8px rgba(7,29,73,.035)}
+.day-tab{font-weight:760}
+.day-tab.active{box-shadow:0 14px 32px rgba(7,29,73,.28),inset 0 1px 0 rgba(255,255,255,.16)}
+.day-cover{border-color:rgba(255,255,255,.9);box-shadow:0 30px 74px rgba(7,29,73,.20),0 2px 10px rgba(7,29,73,.07)}
+.day-cover h3{font-weight:900;text-shadow:0 5px 24px rgba(0,0,0,.22)}
+.day-cover-content>p:not(.day-date-large){color:rgba(246,250,255,.94);font-weight:480}
+.day-icon{border-color:rgba(255,255,255,.38);background:rgba(255,255,255,.16);box-shadow:0 16px 40px rgba(1,12,35,.28),inset 0 1px 0 rgba(255,255,255,.18)}
+.day-photo-strip figure{box-shadow:0 16px 38px rgba(7,29,73,.16)}
+.timeline-content{border-color:#d9e5f1;background:#fff;box-shadow:0 14px 36px rgba(7,29,73,.075),0 1px 4px rgba(7,29,73,.035)}
+.timeline-row h4{font-weight:820;color:#071d49}
+.timeline-marker{box-shadow:0 12px 28px rgba(7,29,73,.13),0 0 0 1px #cfdfef}
+.status-dot,.badge{letter-spacing:.045em}
+.program-pager-button{border-color:#d5e2ef;box-shadow:0 12px 30px rgba(7,29,73,.07);font-weight:760}
+
+@media(max-width:700px){
+  .site-header{height:72px;padding-inline:15px}
+  .site-header.scrolled{height:68px}
+  .brand-mark{width:44px;height:44px;flex-basis:44px}
+  .brand strong{font-size:15px;letter-spacing:-.02em}
+  .program-section{padding-top:94px;padding-left:13px;padding-right:13px}
+  .program-section .section-title{margin-bottom:24px;padding:0 12px}
+  .program-section .section-title h2{font-size:clamp(36px,10.5vw,44px);line-height:1.02;text-wrap:balance}
+  .program-section .section-title p:not(.eyebrow){font-size:16px;line-height:1.48}
+  .day-tabs{top:68px;margin:0 -1px 22px;padding:7px 8px;scroll-padding-inline:8px;border-radius:22px}
+  .day-tab{flex:0 0 108px;min-height:72px;padding:10px 12px;border-radius:16px}
+  .day-tab.active{transform:none}
+  .day-cover{min-height:390px;padding:92px 22px 29px;border-radius:30px;align-items:flex-end;justify-content:flex-start}
+  .day-cover::after{background:linear-gradient(0deg,rgba(2,14,39,.96) 0%,rgba(2,14,39,.70) 48%,rgba(2,14,39,.20) 100%)}
+  .day-cover-topline{top:19px;left:20px}
+  .day-cover-content{width:100%;padding-right:0}
+  .day-cover h3{max-width:100%;margin-bottom:13px;font-size:clamp(42px,12.8vw,54px);line-height:.95;letter-spacing:-.055em;overflow-wrap:anywhere}
+  .day-cover-content>p:not(.day-date-large){max-width:92%;font-size:16px;line-height:1.45}
+  .day-date-large{font-size:10px!important;letter-spacing:.13em}
+  .day-icon{position:absolute;top:48px;right:18px;width:62px;height:62px;border-radius:21px}
+  .day-icon .program-svg-icon{width:34px;height:34px}
+  .day-cover-chips{margin-top:18px;padding-right:68px}
+  .day-cover-chips span{font-size:9px}
+  .day-photo-strip{gap:8px;margin:12px 8px 0}
+  .day-photo-strip figure,.day-photo-strip img{border-radius:14px}
+  .day-photo-strip img{height:92px}
+  .trip-progress{margin:17px 2px 13px;padding:13px 14px;border-radius:18px}
+  .trip-progress-copy{font-size:10px}
+  .trip-progress small{font-size:10px}
+  .program-overview{display:none}
+  .timeline-heading{margin:25px 5px 7px}
+  .timeline-heading h4{font-size:25px;line-height:1.08}
+  .timeline-row{padding:10px 0}
+  .timeline-content{padding:18px 17px;border-radius:20px}
+  .timeline-row h4{font-size:19px;line-height:1.2}
+  .timeline-row p{font-size:14px;line-height:1.5}
+  .program-pager{display:none}
+}
