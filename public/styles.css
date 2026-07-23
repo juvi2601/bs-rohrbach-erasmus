@@ -414,3 +414,20 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-r
   .timeline-row p{font-size:14px;line-height:1.5}
   .program-pager{display:none}
 }
+
+
+/* Version 5.1 – Premium Timeline Icons */
+.timeline::before{left:42px;width:2px;background:linear-gradient(180deg,rgba(255,194,41,.95) 0%,#1682e8 18%,#8abce9 78%,rgba(207,224,241,.55) 100%)}
+.timeline-row{grid-template-columns:86px 145px minmax(0,1fr);gap:22px;padding:15px 0}
+.timeline-marker{width:62px;height:62px;margin-left:11px;border-radius:20px;background:#fff;border:1px solid #d7e4f1;box-shadow:0 12px 28px rgba(7,29,73,.12),inset 0 1px 0 rgba(255,255,255,.9);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.timeline-row:hover .timeline-marker{transform:translateY(-2px);box-shadow:0 16px 34px rgba(7,29,73,.16);border-color:#bdd4e9}
+.timeline-marker .program-svg-icon{width:27px;height:27px;color:#075ab6;stroke-width:1.85}
+.timeline-row.confirmed .timeline-marker{background:linear-gradient(145deg,#fff,#f0fbf7);border-color:#bce5d4;box-shadow:0 12px 28px rgba(7,29,73,.11),0 0 0 3px rgba(28,161,111,.08)}
+.timeline-row.confirmed .timeline-marker .program-svg-icon{color:#087a55}
+.timeline-row.pending .timeline-marker{background:linear-gradient(145deg,#fff,#fff9ec);border-color:#efd59a;box-shadow:0 12px 28px rgba(7,29,73,.11),0 0 0 3px rgba(245,177,25,.09)}
+.timeline-row.pending .timeline-marker .program-svg-icon{color:#a56b00}
+.timeline-content{border:1px solid #d9e5f0;box-shadow:0 14px 35px rgba(7,29,73,.07),0 2px 5px rgba(7,29,73,.025)}
+.timeline-content::before{border-color:#d9e5f0}
+.timeline-row h4{font-weight:830;letter-spacing:-.025em}
+@media(max-width:980px){.timeline-row{grid-template-columns:78px 125px minmax(0,1fr)}.timeline-marker{width:56px;height:56px;margin-left:9px}.timeline-marker .program-svg-icon{width:25px;height:25px}}
+@media(max-width:700px){.timeline::before{left:25px}.timeline-row{grid-template-columns:54px minmax(0,1fr);gap:10px;padding:10px 0}.timeline-marker{width:44px;height:44px;margin-left:4px;border-radius:14px}.timeline-marker .program-svg-icon{width:21px;height:21px}.timeline-row:hover .timeline-marker{transform:none}}

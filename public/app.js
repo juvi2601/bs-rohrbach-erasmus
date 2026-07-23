@@ -50,41 +50,53 @@ function formatDate(v){if(!v)return"";return new Intl.DateTimeFormat("de-AT",{da
 
 
 function svgIcon(name,extraClass=''){
+  // Einheitliches, an Lucide angelehntes Outline-Set (inline, ohne externe Abhängigkeit)
   const icons={
-    bus:'<path d="M5 17h14M6 17V7.8A2.8 2.8 0 0 1 8.8 5h6.4A2.8 2.8 0 0 1 18 7.8V17M7 10h10M8 20h.01M16 20h.01M7 17v2M17 17v2"/>',
-    hotel:'<path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M8 7h2M8 11h2M8 15h2M3 21h18"/>',
-    eu:'<path d="M4 20h16M6 17h12M8 17V9M12 17V9M16 17V9M5 9h14L12 4 5 9Z"/>',
-    anchor:'<path d="M12 22V8M5 12H2a10 10 0 0 0 20 0h-3M8 8a4 4 0 1 1 8 0M5 12l-3 3M19 12l3 3"/>',
-    food:'<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M16 3v18M16 3c3 2 4 5 4 8h-4"/>',
-    pin:'<path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
-    museum:'<path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18M12 3l9 5H3l9-5Z"/>',
-    talk:'<path d="M4 4h16v12H8l-4 4V4ZM8 8h8M8 12h5"/>',
-    walk:'<circle cx="13" cy="4" r="2"/><path d="m10 22 2-7-3-3 2-5 4 3 3 1M6 22l3-6M15 22l-2-7"/>',
-    train:'<path d="M6 17h12M7 17l-2 4M17 17l2 4M8 21h8M6 3h12v14H6V3ZM8 7h8M9 13h.01M15 13h.01"/>',
-    diamond:'<path d="M3 9h18l-9 12L3 9Zm0 0 4-6h10l4 6M7 3l5 18 5-18M3 9h18"/>',
-    group:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c.5-4 2.7-6 6-6s5.5 2 6 6M14 15c3.1-.5 5.3 1.2 6 4.5"/>',
-    euflag:'<rect x="3" y="5" width="18" height="14" rx="1.5" fill="#1557b0" stroke="none"/><g fill="#ffd43b" stroke="none"><circle cx="12" cy="8" r=".65"/><circle cx="14.6" cy="8.7" r=".65"/><circle cx="16" cy="11" r=".65"/><circle cx="15.4" cy="13.5" r=".65"/><circle cx="12" cy="16" r=".65"/><circle cx="8.6" cy="13.5" r=".65"/><circle cx="8" cy="11" r=".65"/><circle cx="9.4" cy="8.7" r=".65"/></g>',
+    bus:'<path d="M8 6v6m8-6v6M6 17h12M6 17v2m12-2v2M8 21h.01M16 21h.01"/><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14"/>',
+    ship:'<path d="M3 18c1.4 0 2.1-1 3.5-1s2.1 1 3.5 1 2.1-1 3.5-1 2.1 1 3.5 1 2.1-1 3.5-1"/><path d="M5 14 7 7h10l2 7-7 3-7-3Z"/><path d="M12 3v4M9 3h6"/>',
+    train:'<rect x="5" y="3" width="14" height="15" rx="3"/><path d="M8 7h8M8 12h.01M16 12h.01M8 18l-2 3m10-3 2 3M8 21h8"/>',
+    utensils:'<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M16 3v18M16 3c3 2 4 5 4 8h-4"/>',
+    camera:'<path d="M14.5 4 16 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3l1.5-3h5Z"/><circle cx="12" cy="13" r="3.5"/>',
+    diamond:'<path d="m12 21 9-11-4-6H7l-4 6 9 11Z"/><path d="M3 10h18M7 4l5 17 5-17"/>',
+    hotel:'<path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16M17 9h2a2 2 0 0 1 2 2v10M8 7h2M8 11h2M8 15h2M3 21h19"/>',
+    bed:'<path d="M3 5v16M21 21v-8a2 2 0 0 0-2-2H7a4 4 0 0 0-4 4v2h18M7 11V7h5a2 2 0 0 1 2 2v2"/>',
+    landmark:'<path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18M12 3l9 5H3l9-5Z"/>',
+    building:'<path d="M3 21h18M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/>',
+    euflag:'<rect x="3" y="5" width="18" height="14" rx="2" fill="#1557b0" stroke="none"/><g fill="#ffd43b" stroke="none"><circle cx="12" cy="8" r=".68"/><circle cx="14.5" cy="8.8" r=".68"/><circle cx="16" cy="11" r=".68"/><circle cx="14.5" cy="13.2" r=".68"/><circle cx="12" cy="14" r=".68"/><circle cx="9.5" cy="13.2" r=".68"/><circle cx="8" cy="11" r=".68"/><circle cx="9.5" cy="8.8" r=".68"/></g>',
+    shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
+    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h3a3 3 0 0 0 3-3V8a3 3 0 0 1 3-3h-1"/>',
+    mapPin:'<path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+    mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/>',
+    ticket:'<path d="M2 9a3 3 0 0 0 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 0 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2Z"/><path d="M13 5v2M13 17v2M13 11v2"/>',
+    coffee:'<path d="M3 8h13v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Z"/><path d="M16 10h2a3 3 0 0 1 0 6h-2M6 2v2M10 2v2M14 2v2"/>',
     star:'<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/>'
   };
-  return `<svg class="program-svg-icon ${extraClass}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${icons[name]||icons.star}</svg>`;
+  return `<svg class="program-svg-icon ${extraClass}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">${icons[name]||icons.mapPin}</svg>`;
 }
 
 function eventIcon(event){
   const text=`${event.title||''} ${event.text||''}`.toLowerCase();
+  // Spezifische Begriffe stehen bewusst vor allgemeinen Wörtern wie „Fahrt“.
+  if(/hafenrundfahrt|schifffahrt|schiff|hafen/.test(text)) return svgIcon('ship');
+  if(/mittag|abendessen|frühstück|pommes|waffel|restaurant|food court|essen/.test(text)) return svgIcon('utensils');
+  if(/gruppenfoto|foto|fotostopp/.test(text)) return svgIcon('camera');
   if(/diamant/.test(text)) return svgIcon('diamond');
-  if(/bahnhof|zug|metro/.test(text)) return svgIcon('train');
-  if(/hotel|check-in|check in|zimmer|frühstück/.test(text)) return svgIcon('hotel');
-  if(/essen|mittag|abendessen|pommes|waffel|restaurant|food court/.test(text)) return svgIcon('food');
-  if(/freizeit in 4er-gruppen|gruppe|gruppen/.test(text)) return svgIcon('group');
-  if(/parlament|kommission|europäisch|vertretung|rat|parlamentarium/.test(text)) return svgIcon('euflag');
+  if(/bahnhof|central|zug|metro/.test(text)) return svgIcon('train');
+  if(/sicherheitskontrolle|akkreditierung|security|kontrolle/.test(text)) return svgIcon('shield');
+  if(/parlamentarium|plenarsaal|parlament/.test(text)) return svgIcon('landmark');
+  if(/kommission|ständige vertretung|europäischer rat|rat der europäischen/.test(text)) return svgIcon('building');
+  if(/europäisch|eu-|eu /.test(text)) return svgIcon('euflag');
+  if(/hotel|check-in|check in|zimmer/.test(text)) return svgIcon('bed');
+  if(/vortrag|präsentation|besprechung|referat/.test(text)) return svgIcon('mic');
+  if(/freizeit in 4er-gruppen|gruppe|gruppen/.test(text)) return svgIcon('users');
+  if(/spaziergang|sightseeing|altstadt|bummeln|shopping|freizeit/.test(text)) return svgIcon('route');
+  if(/ticket|eintritt/.test(text)) return svgIcon('ticket');
+  if(/pause|kaffee/.test(text)) return svgIcon('coffee');
   if(/bus|abfahrt|ankunft|heimreise|rückfahrt|fahrt/.test(text)) return svgIcon('bus');
-  if(/vortrag|präsentation|besprechung/.test(text)) return svgIcon('talk');
-  if(/antwerpen|hafen|rundfahrt|schiff/.test(text)) return svgIcon('anchor');
-  if(/freizeit|shopping|bummeln|spaziergang|sightseeing|altstadt/.test(text)) return svgIcon('walk');
-  if(/museum|atomium|waterloo/.test(text)) return svgIcon('museum');
-  if(/zentrum|grand.place|ort|treffpunkt/.test(text)) return svgIcon('pin');
-  return svgIcon('star');
+  return svgIcon('mapPin');
 }
+
 
 function dayIcon(day){
   const text=`${day.id||''} ${day.title||''} ${day.subtitle||''}`.toLowerCase();
