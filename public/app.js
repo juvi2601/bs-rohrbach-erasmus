@@ -52,16 +52,16 @@ function formatDate(v){if(!v)return"";return new Intl.DateTimeFormat("de-AT",{da
 function svgIcon(name,extraClass=''){
   // Einheitliches, an Lucide angelehntes Outline-Set (inline, ohne externe Abhängigkeit)
   const icons={
-    bus:'<path d="M8 6v6m8-6v6M6 17h12M6 17v2m12-2v2M8 21h.01M16 21h.01"/><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14"/>',
-    ship:'<path d="M3 18c1.4 0 2.1-1 3.5-1s2.1 1 3.5 1 2.1-1 3.5-1 2.1 1 3.5 1 2.1-1 3.5-1"/><path d="M5 14 7 7h10l2 7-7 3-7-3Z"/><path d="M12 3v4M9 3h6"/>',
-    train:'<rect x="5" y="3" width="14" height="15" rx="3"/><path d="M8 7h8M8 12h.01M16 12h.01M8 18l-2 3m10-3 2 3M8 21h8"/>',
-    utensils:'<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M16 3v18M16 3c3 2 4 5 4 8h-4"/>',
+    bus:'<rect x="4" y="3" width="16" height="15" rx="3.2"/><path d="M7 7h10M4 12h16M7 18v2m10-2v2"/><circle cx="8" cy="15" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="15" r="1" fill="currentColor" stroke="none"/>',
+    ship:'<path d="M4 15.5 7 8h10l3 7.5-8 3.5-8-3.5Z"/><path d="M12 3v5M9 5h6M3 20c1.5 0 2.25-1 3.75-1s2.25 1 3.75 1 2.25-1 3.75-1 2.25 1 3.75 1 2.25-1 3.75-1"/>',
+    train:'<rect x="5" y="2.5" width="14" height="16" rx="3.5"/><path d="M8 6.5h8M5 11h14M8 18.5 6 22m10-3.5 2 3.5M8 22h8"/><circle cx="8.5" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14.5" r="1" fill="currentColor" stroke="none"/>',
+    utensils:'<path d="M6 3v7M3.5 3v4.5A2.5 2.5 0 0 0 6 10m2.5-7v4.5A2.5 2.5 0 0 1 6 10v11M16 3v18M16 3c3 1.8 4.5 5 4 9h-4"/>',
     camera:'<path d="M14.5 4 16 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3l1.5-3h5Z"/><circle cx="12" cy="13" r="3.5"/>',
-    diamond:'<path d="m12 21 9-11-4-6H7l-4 6 9 11Z"/><path d="M3 10h18M7 4l5 17 5-17"/>',
+    diamond:'<path d="M3 9.5 7.5 4h9L21 9.5 12 21 3 9.5Z"/><path d="M3 9.5h18M7.5 4 12 9.5 16.5 4M7.5 9.5 12 21l4.5-11.5"/>',
     hotel:'<path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16M17 9h2a2 2 0 0 1 2 2v10M8 7h2M8 11h2M8 15h2M3 21h19"/>',
     bed:'<path d="M3 5v16M21 21v-8a2 2 0 0 0-2-2H7a4 4 0 0 0-4 4v2h18M7 11V7h5a2 2 0 0 1 2 2v2"/>',
-    landmark:'<path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18M12 3l9 5H3l9-5Z"/>',
-    building:'<path d="M3 21h18M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/>',
+    landmark:'<path d="M3 9h18L12 3 3 9ZM4 21h16M6 9v9m4-9v9m4-9v9m4-9v9M3 18h18"/>',
+    building:'<path d="M4 21h16M6 21V5l6-3 6 3v16M9 7h1m4 0h1M9 11h1m4 0h1M9 15h1m4 0h1M11 21v-3h2v3"/>',
     euflag:'<rect x="3" y="5" width="18" height="14" rx="2" fill="#1557b0" stroke="none"/><g fill="#ffd43b" stroke="none"><circle cx="12" cy="8" r=".68"/><circle cx="14.5" cy="8.8" r=".68"/><circle cx="16" cy="11" r=".68"/><circle cx="14.5" cy="13.2" r=".68"/><circle cx="12" cy="14" r=".68"/><circle cx="9.5" cy="13.2" r=".68"/><circle cx="8" cy="11" r=".68"/><circle cx="9.5" cy="8.8" r=".68"/></g>',
     shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
     users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -72,7 +72,7 @@ function svgIcon(name,extraClass=''){
     coffee:'<path d="M3 8h13v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Z"/><path d="M16 10h2a3 3 0 0 1 0 6h-2M6 2v2M10 2v2M14 2v2"/>',
     star:'<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/>'
   };
-  return `<svg class="program-svg-icon ${extraClass}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">${icons[name]||icons.mapPin}</svg>`;
+  return `<svg class="program-svg-icon icon-${name} ${extraClass}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">${icons[name]||icons.mapPin}</svg>`;
 }
 
 function eventIcon(event){
