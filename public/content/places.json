@@ -9,13 +9,7 @@
       "walk": "Ausgangspunkt",
       "image": "/images/hotel-ibis.jpg",
       "description": "Unser zentral gelegenes Hotel in der Brüsseler Innenstadt.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=ibis+Brussels+City+Centre",
-      "zoom": 18,
-      "order": 10,
-      "published": true,
-      "markerColor": "#e63946",
-      "markerIcon": "H",
-      "streetView": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=50.8514,4.3470"
+      "maps": "https://www.google.com/maps/search/?api=1&query=ibis+Brussels+City+Centre"
     },
     {
       "title": "Grand Place",
@@ -26,13 +20,7 @@
       "walk": "ca. 9 Min. zu Fuß",
       "image": "/images/grand-place.webp",
       "description": "Historisches Zentrum und einer der schönsten Plätze Europas.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Grand+Place+Brussels",
-      "zoom": 18,
-      "order": 20,
-      "published": true,
-      "markerColor": "#7b2cbf",
-      "markerIcon": "★",
-      "streetView": ""
+      "maps": "https://www.google.com/maps/search/?api=1&query=Grand+Place+Brussels"
     },
     {
       "title": "Europäisches Parlament",
@@ -43,13 +31,7 @@
       "walk": "ca. 35 Min. / Metro",
       "image": "/images/europaeisches-parlament.webp",
       "description": "Sitz des Europäischen Parlaments in Brüssel.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=European+Parliament+Brussels",
-      "zoom": 17,
-      "order": 30,
-      "published": true,
-      "markerColor": "#1557b0",
-      "markerIcon": "EU",
-      "streetView": ""
+      "maps": "https://www.google.com/maps/search/?api=1&query=European+Parliament+Brussels"
     },
     {
       "title": "Europäischer Rat",
@@ -60,13 +42,7 @@
       "walk": "ca. 35 Min. / Metro",
       "image": "/images/europaeischer-rat.jpg",
       "description": "Tagungsort der europäischen Staats- und Regierungschefs.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=European+Council+Brussels",
-      "zoom": 17,
-      "order": 40,
-      "published": true,
-      "markerColor": "#1557b0",
-      "markerIcon": "EU",
-      "streetView": ""
+      "maps": "https://www.google.com/maps/search/?api=1&query=European+Council+Brussels"
     },
     {
       "title": "Atomium",
@@ -77,13 +53,7 @@
       "walk": "ca. 25 Min. mit Metro",
       "image": "/images/atomium.jpg",
       "description": "Das berühmte Wahrzeichen der Expo 1958.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Atomium+Brussels",
-      "zoom": 18,
-      "order": 50,
-      "published": true,
-      "markerColor": "#7b2cbf",
-      "markerIcon": "★",
-      "streetView": ""
+      "maps": "https://www.google.com/maps/search/?api=1&query=Atomium+Brussels"
     },
     {
       "title": "Antwerpen-Centraal",
@@ -94,13 +64,7 @@
       "walk": "Tagesausflug",
       "image": "/images/antwerpen-centraal.jpg",
       "description": "Einer der eindrucksvollsten Bahnhöfe der Welt.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Antwerpen+Centraal",
-      "zoom": 16,
-      "order": 60,
-      "published": true,
-      "markerColor": "#0f766e",
-      "markerIcon": "A",
-      "streetView": ""
+      "maps": "https://www.google.com/maps/search/?api=1&query=Antwerpen+Centraal"
     },
     {
       "title": "Waterloo Memorial",
@@ -111,13 +75,7 @@
       "walk": "Ausflug mit Bus",
       "image": "/images/waterloo.jpg",
       "description": "Historischer Schauplatz der Schlacht von Waterloo.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Waterloo+Memorial+1815",
-      "zoom": 15,
-      "order": 70,
-      "published": true,
-      "markerColor": "#64748b",
-      "markerIcon": "W",
-      "streetView": ""
+      "maps": "https://www.google.com/maps/search/?api=1&query=Waterloo+Memorial+1815"
     },
     {
       "title": "Metro De Brouckère",
@@ -128,13 +86,7 @@
       "walk": "ca. 7 Min. vom Hotel",
       "image": "/images/central.jpg",
       "description": "Zentrale Metrostation nahe dem Hotel und praktischer Ausgangspunkt für Fahrten durch Brüssel.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Metro+De+Brouckere+Brussels",
-      "zoom": 17,
-      "order": 80,
-      "published": true,
-      "markerColor": "#f59e0b",
-      "markerIcon": "M",
-      "streetView": ""
+      "maps": "https://www.google.com/maps/search/?api=1&query=Metro+De+Brouckere+Brussels"
     },
     {
       "title": "Chez Léon",
@@ -145,13 +97,7 @@
       "walk": "ca. 10 Min. zu Fuß",
       "image": "/images/fries.jpg",
       "description": "Bekanntes Brüsseler Restaurant in der Nähe der Grand Place.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Chez+Leon+Brussels",
-      "zoom": 18,
-      "order": 90,
-      "published": true,
-      "markerColor": "#16a34a",
-      "markerIcon": "✦",
-      "streetView": ""
+      "maps": "https://www.google.com/maps/search/?api=1&query=Chez+Leon+Brussels"
     },
     {
       "title": "Österreichische Botschaft",
@@ -162,50 +108,7 @@
       "walk": "Notfallkontakt / Metro",
       "image": "/images/europaeischer-rat.jpg",
       "description": "Anlaufstelle für österreichische Staatsbürgerinnen und Staatsbürger in dringenden konsularischen Angelegenheiten.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Avenue+de+Cortenbergh+4-10+Brussels",
-      "zoom": 17,
-      "order": 100,
-      "published": true,
-      "markerColor": "#dc2626",
-      "markerIcon": "!",
-      "streetView": ""
-    }
-  ],
-  "route": [
-    {
-      "title": "BS Rohrbach",
-      "lat": 48.5732,
-      "lng": 13.9894,
-      "order": 10,
-      "published": true
-    },
-    {
-      "title": "Brüssel – ibis Hotel",
-      "lat": 50.8514,
-      "lng": 4.347,
-      "order": 20,
-      "published": true
-    },
-    {
-      "title": "Antwerpen",
-      "lat": 51.2172,
-      "lng": 4.4211,
-      "order": 30,
-      "published": true
-    },
-    {
-      "title": "Brüssel – Rückkehr",
-      "lat": 50.8514,
-      "lng": 4.347,
-      "order": 40,
-      "published": true
-    },
-    {
-      "title": "BS Rohrbach – Heimreise",
-      "lat": 48.5732,
-      "lng": 13.9894,
-      "order": 50,
-      "published": true
+      "maps": "https://www.google.com/maps/search/?api=1&query=Avenue+de+Cortenbergh+4-10+Brussels"
     }
   ]
 }
