@@ -668,3 +668,198 @@ nav a,.button,.day-tab,.program-pager-button{font-weight:680}
     display:none;
   }
 }
+
+/* =========================================================
+   Version 7.0 – Premium Redesign
+   Einheitliche Typografie, ruhigeres Raster, Karten, Buttons,
+   Timeline und robuste Breakpoints von Smartphone bis Desktop.
+   ========================================================= */
+:root{
+  --ink:#071b42;
+  --blue:#0b4f9d;
+  --blue2:#1374d1;
+  --yellow:#f5bd32;
+  --paper:#f5f8fc;
+  --muted:#607089;
+  --line:#dbe5ef;
+  --shadow:0 22px 60px rgba(7,27,66,.11);
+  --shadow-soft:0 10px 30px rgba(7,27,66,.07);
+  --radius:26px;
+}
+body{
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 8% 4%,rgba(19,116,209,.05),transparent 28%),
+    var(--paper);
+  font-size:16px;
+  line-height:1.62;
+}
+::selection{background:rgba(245,189,50,.35);color:var(--ink)}
+
+/* Header & Navigation */
+.site-header{
+  height:74px;
+  padding-inline:clamp(16px,4.4vw,72px);
+  background:rgba(255,255,255,.91);
+  border-bottom:1px solid rgba(210,222,235,.78);
+  backdrop-filter:blur(24px) saturate(1.15);
+}
+.site-header.scrolled{box-shadow:0 8px 28px rgba(7,27,66,.075)}
+.brand{gap:13px}.brand-mark{width:47px;height:47px;flex-basis:47px}
+.brand strong{font-size:15px;font-weight:760;letter-spacing:-.02em}
+.brand small{font-size:10.5px;letter-spacing:.02em}
+nav{gap:clamp(14px,1.7vw,25px)}
+nav a{position:relative;font-size:13px;font-weight:660;letter-spacing:-.01em}
+nav a::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:2px;border-radius:9px;background:var(--blue2);transform:scaleX(0);transition:transform .2s ease}
+nav a:hover::after{transform:scaleX(1)}
+.nav-upload{padding:10px 15px;background:linear-gradient(135deg,#0a285c,#071b42);box-shadow:0 8px 20px rgba(7,27,66,.18)}
+.icon-button{background:#edf3f9;border:1px solid #dfe8f1;border-radius:13px}
+
+/* Typografie-System */
+.hero h1,.section-title h2,.hotel-copy h2,.group-card h2,.today-card h2,.admin-card h2,.day-cover h3,.timeline-heading h4{
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  text-wrap:balance;
+}
+.hero h1{font-weight:720;letter-spacing:-.064em}
+.section-title{max-width:790px;margin-bottom:46px}
+.section-title h2,.hotel-copy h2,.group-card h2,.today-card h2,.admin-card h2{
+  font-size:clamp(38px,4.7vw,64px);
+  font-weight:700;
+  line-height:1.02;
+  letter-spacing:-.045em;
+}
+.section-title p:not(.eyebrow),.hotel-copy p,.group-card p,.admin-card p{
+  max-width:720px;
+  margin-inline:auto;
+  color:var(--muted);
+  font-size:clamp(16px,1.25vw,18px);
+  line-height:1.7;
+}
+.eyebrow{margin-bottom:12px;color:var(--blue2);font-size:10.5px;font-weight:760;letter-spacing:.18em}
+
+/* Hero */
+.hero{min-height:780px;padding-top:142px;padding-bottom:84px;gap:56px}
+.hero-shade{background:linear-gradient(90deg,rgba(2,16,43,.94) 0%,rgba(2,16,43,.57) 57%,rgba(2,16,43,.22)),linear-gradient(0deg,rgba(2,16,43,.72),transparent 48%)}
+.hero h1{font-size:clamp(66px,9.1vw,136px);margin-bottom:26px}
+.hero-text{max-width:650px;font-size:clamp(17px,1.65vw,22px);line-height:1.56;color:rgba(255,255,255,.86)}
+.hero-actions{gap:11px;margin-top:30px}
+.button{min-height:49px;padding-inline:21px;border-radius:14px;font-size:14px;font-weight:680;box-shadow:none}
+.button:hover{transform:translateY(-1px)}
+.hero .button-yellow{background:#f5bd32;color:#071b42;border:0;box-shadow:0 12px 30px rgba(245,189,50,.2)!important}
+.hero .button-yellow:hover{background:#ffd05a;box-shadow:0 15px 34px rgba(245,189,50,.26)!important}
+.hero .button-glass{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.29)}
+.countdown-card{padding:27px;border-radius:27px;background:rgba(255,255,255,.105);border-color:rgba(255,255,255,.2);box-shadow:0 22px 58px rgba(0,0,0,.18)}
+.countdown div{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.09)}
+
+/* Sektionen und Karten */
+.section{padding-block:clamp(78px,8vw,112px)}
+.quick-grid-wrap{margin-top:-42px}
+.quick-grid{gap:13px}
+.quick-grid a,.today-card,.news-card,.download-card,.weather-card,.culinary article,.place-card{
+  border:1px solid rgba(214,225,236,.86);
+  box-shadow:var(--shadow-soft);
+}
+.quick-grid a{border-radius:20px;padding:19px;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.quick-grid a:hover{transform:translateY(-3px);border-color:#c8d9e9;box-shadow:0 18px 42px rgba(7,27,66,.1)}
+.today-card{padding:36px;border-radius:30px;background:linear-gradient(135deg,#fff 0%,#eef6fd 100%)}
+.progress-card{border-radius:20px;background:linear-gradient(145deg,#071b42,#0b356e)}
+.news-grid,.downloads-grid,.weather-grid,.culinary-grid{gap:20px}
+.news-card,.download-card,.weather-card{border-radius:22px;padding:25px;transition:transform .2s ease,box-shadow .2s ease}
+.news-card:hover,.download-card:hover,.weather-card:hover{transform:translateY(-3px);box-shadow:0 18px 44px rgba(7,27,66,.1)}
+.news-card h3,.download-card h3{font-weight:700;letter-spacing:-.025em}
+
+/* Tagesprogramm */
+.program-section{padding-top:104px;background:linear-gradient(180deg,#edf4fb 0%,#fbfdff 40%,#f0f5fa 100%)}
+.day-tabs{top:74px;max-width:1220px;padding:8px;border-radius:22px;background:rgba(250,252,255,.91);border-color:rgba(205,219,233,.9);box-shadow:0 14px 40px rgba(7,27,66,.085)}
+.day-tab{min-height:78px;border-radius:15px;padding:11px 12px;transition:background .18s ease,transform .18s ease,box-shadow .18s ease}
+.day-tab:hover{transform:translateY(-1px)}
+.day-tab.active{background:linear-gradient(135deg,#071b42,#0b4f9d);box-shadow:0 9px 22px rgba(7,27,66,.2)}
+.day-tab-index{border-radius:9px}.day-tab-date{font-weight:720;letter-spacing:-.025em}.day-tab-title{font-weight:620}
+.day-cover{min-height:430px;padding:42px 44px;border-radius:32px;box-shadow:0 26px 68px rgba(7,27,66,.17)}
+.day-cover h3{font-size:clamp(48px,6.2vw,78px);font-weight:700;line-height:.96;letter-spacing:-.052em}
+.day-cover-content>p:not(.day-date-large){font-size:18px;line-height:1.55}
+.day-cover-topline span,.day-cover-chips span{background:rgba(3,20,51,.28);border-color:rgba(255,255,255,.23)}
+.day-icon{width:94px;height:94px;border-radius:28px;background:rgba(5,28,65,.32);box-shadow:0 16px 38px rgba(1,12,35,.22)}
+.day-icon .program-svg-icon{width:52px;height:52px;stroke-width:1.45}
+.day-photo-strip{margin-top:-40px;gap:9px}.day-photo-strip figure{border-width:4px;border-radius:19px;box-shadow:0 14px 34px rgba(7,27,66,.13)}
+
+/* Timeline: ruhig, klar, hochwertig */
+.timeline{gap:4px;padding-top:20px}
+.timeline::before{width:2px;background:linear-gradient(180deg,#267acb,#a9c9e6 72%,#dde8f2)}
+.timeline-row{grid-template-columns:76px 128px minmax(0,1fr);gap:20px;padding:13px 0}
+.timeline-marker{width:54px;height:54px;margin-left:10px;border-radius:17px;background:#fff;border-color:#d7e3ee;box-shadow:0 8px 22px rgba(7,27,66,.09)}
+.timeline-marker .program-svg-icon{width:27px;height:27px;color:#155caa;stroke-width:1.6}
+.timeline-row.confirmed .timeline-marker{background:#f8fcfa;border-color:#c5e1d5}
+.timeline-row.pending .timeline-marker{background:#fffaf2;border-color:#e7d4ad}
+.timeline-row time{padding-top:16px;font-size:14px;font-weight:720;color:#0b4f9d}
+.timeline-content{padding:23px 25px;border-radius:21px;background:#fff;border-color:#dce6ef;box-shadow:0 8px 24px rgba(7,27,66,.055);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.timeline-row:hover .timeline-content{transform:translateY(-2px);border-color:#cadbea;box-shadow:0 14px 34px rgba(7,27,66,.085)}
+.timeline-row:hover .timeline-marker{transform:translateY(-1px);box-shadow:0 12px 26px rgba(7,27,66,.11)}
+.timeline-content::before{top:20px;border-color:#dce6ef}
+.timeline-row h4{font-size:20px;font-weight:680;line-height:1.25;letter-spacing:-.025em}
+.timeline-row p{font-size:15px;line-height:1.65;color:#66758c}
+.badge{margin-top:11px;padding:6px 10px;font-size:10px}
+
+/* Galerie, Karte und Formulare */
+.gallery-grid{column-gap:16px}.gallery-item{margin-bottom:16px;border-radius:21px;box-shadow:var(--shadow-soft)}
+.gallery-item img{transition:transform .35s ease}.gallery-item:hover img{transform:scale(1.025)}
+.map-canvas{border-radius:24px;box-shadow:var(--shadow)}
+.place-card{border-radius:17px;background:#fff;transition:transform .18s ease,box-shadow .18s ease}
+.place-card:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(7,27,66,.09)}
+
+/* Mittlere Fensterbreiten */
+@media (min-width:701px) and (max-width:1100px){
+  .site-header{padding-inline:20px}
+  nav{gap:12px}nav a{font-size:12px}
+  .hero{grid-template-columns:minmax(0,1fr) 330px;gap:28px;padding-inline:34px}
+  .hero h1{font-size:clamp(60px,9vw,92px)}
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+  .day-tabs{grid-template-columns:repeat(3,1fr);position:relative;top:auto}
+  .day-cover{min-height:380px;padding:92px 32px 34px}
+  .day-cover-content{padding-right:96px}
+  .day-cover h3{font-size:clamp(42px,6vw,59px)}
+  .day-icon{right:24px;bottom:28px;width:76px;height:76px;border-radius:22px}
+  .day-icon .program-svg-icon{width:41px;height:41px}
+  .timeline-row{grid-template-columns:68px 105px minmax(0,1fr);gap:14px}
+}
+
+/* Smartphone */
+@media(max-width:700px){
+  body{font-size:15px}
+  .site-header{height:68px;padding-inline:13px}.brand-mark{width:43px;height:43px;flex-basis:43px}
+  .hero{min-height:auto;padding:112px 17px 78px;gap:26px}
+  .hero h1{font-size:clamp(54px,17vw,78px);line-height:.9;letter-spacing:-.058em}
+  .hero-text{font-size:16px;line-height:1.55}
+  .section{padding-block:72px;padding-inline:15px}
+  .section-title{margin-bottom:32px}
+  .section-title h2,.hotel-copy h2,.group-card h2,.today-card h2,.admin-card h2{font-size:clamp(33px,9.5vw,42px);line-height:1.05}
+  .section-title p:not(.eyebrow),.hotel-copy p,.group-card p,.admin-card p{font-size:15px;line-height:1.65}
+  .quick-grid-wrap{padding-inline:10px}.quick-grid{gap:9px}.quick-grid a{border-radius:17px;box-shadow:0 8px 22px rgba(7,27,66,.075)}
+  .today-card{padding:23px;border-radius:24px}
+  .day-tabs{top:68px;padding:7px;border-radius:17px;gap:7px}
+  .day-tab{min-width:138px;min-height:72px;border-radius:13px}
+  .day-cover{min-height:328px;padding:72px 20px 25px;border-radius:24px}
+  .day-cover h3{font-size:clamp(38px,11.4vw,49px);line-height:.98}
+  .day-cover-content>p:not(.day-date-large){font-size:15px;line-height:1.5}
+  .day-cover-topline{top:18px;left:18px;right:18px}.day-cover-topline span{font-size:8px;padding:6px 8px}
+  .day-icon{width:64px;height:64px;right:18px;bottom:20px;border-radius:19px;opacity:.92}
+  .day-icon .program-svg-icon{width:34px;height:34px}
+  .day-photo-strip{margin:-23px 9px 0;gap:6px}.day-photo-strip figure{border-width:3px;border-radius:14px}.day-photo-strip img{height:92px}
+  .timeline{padding-top:15px}.timeline::before{left:23px;width:2px}
+  .timeline-row{grid-template-columns:48px minmax(0,1fr);gap:9px;padding:9px 0}
+  .timeline-marker{width:39px;height:39px;margin-left:3px;border-radius:13px}
+  .timeline-marker .program-svg-icon{width:20px;height:20px}
+  .timeline-row time{padding-top:0;font-size:12px}
+  .timeline-content{padding:17px 16px;border-radius:17px;box-shadow:0 6px 18px rgba(7,27,66,.055)}
+  .timeline-content::before{top:14px}
+  .timeline-row h4{font-size:17px;line-height:1.28}.timeline-row p{font-size:14px;line-height:1.58}
+  .timeline-row:hover .timeline-content,.timeline-row:hover .timeline-marker{transform:none}
+  .news-grid,.downloads-grid,.weather-grid,.culinary-grid{gap:13px}
+}
+
+@media(max-width:390px){
+  .hero h1{font-size:52px}
+  .day-tab{min-width:126px}
+  .day-cover h3{font-size:37px}
+  .timeline-content{padding:16px 14px}
+}
