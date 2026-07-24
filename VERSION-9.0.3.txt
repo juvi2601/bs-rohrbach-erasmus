@@ -1,1 +1,0 @@
-Version 9.0.3 – Leaflet CSS sauber zurückgesetzt, Zoomsteuerung repariert, Cache erneuert.
