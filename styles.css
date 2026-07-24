@@ -1064,8 +1064,7 @@ nav a:hover::after{transform:scaleX(1)}
 .travel-map-label small,.travel-map-label strong{display:block}
 .travel-map-label small{margin-bottom:2px;color:#6b7a90;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.09em}
 .travel-map-label strong{color:#071d49;font-size:14px;line-height:1.25}
-/* Alte Leaflet-Ebenen und Bedienelemente dürfen nicht mehr sichtbar werden. */
-.map-canvas>.leaflet-pane,.map-canvas>.leaflet-control-container{display:none!important}
+/* Version 9.0.2: native Leaflet-Ebenen und Bedienelemente bleiben sichtbar. */
 @media(max-width:1100px){.map-canvas,.map-canvas.leaflet-container{height:570px!important;min-height:570px!important}}
 @media(max-width:760px){.map-canvas,.map-canvas.leaflet-container{height:470px!important;min-height:470px!important;border-radius:22px!important}.travel-map-label{left:12px;bottom:12px;max-width:calc(100% - 24px);padding:10px 13px 10px 10px}.travel-map-label>span{width:38px;height:38px;flex-basis:38px;border-radius:12px}.travel-map-label strong{font-size:13px}}
 
