@@ -1,2 +1,0 @@
-BS Rohrbach Erasmus+ Version 9.0.1
-Hotfix: Leaflet-CSS-Prüfwert korrigiert; Reisekarte wieder sichtbar.
