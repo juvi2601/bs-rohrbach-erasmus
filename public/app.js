@@ -228,8 +228,31 @@ function renderMap(places){
   const styleFor=cat=>categories[cat]||{color:"#334155",icon:"•"};
   const markerIcon=cat=>{const c=styleFor(cat);return L.divIcon({className:"travel-marker-wrap",html:`<span class="travel-marker" style="--marker:${c.color}"><b>${esc(c.icon)}</b></span>`,iconSize:[42,50],iconAnchor:[21,46],popupAnchor:[0,-43]})};
 
-  const map=L.map("map",{scrollWheelZoom:false,zoomControl:true,preferCanvas:true}).setView([50.8503,4.3517],13);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; OpenStreetMap',updateWhenIdle:false,keepBuffer:4}).addTo(map);
+  // Erst initialisieren, wenn der Kartencontainer seine endgültige Breite besitzt.
+  // Das verhindert die typischen L-förmig bzw. nur teilweise geladenen Kacheln.
+  void canvas.offsetWidth;
+  const map=L.map("map",{scrollWheelZoom:false,zoomControl:true,preferCanvas:false,fadeAnimation:true,zoomAnimation:true}).setView([50.8503,4.3517],13);
+
+  const voyager=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{
+    subdomains:"abcd",maxZoom:20,tileSize:256,zoomOffset:0,detectRetina:true,
+    attribution:'&copy; OpenStreetMap contributors &copy; CARTO',
+    updateWhenIdle:false,updateWhenZooming:true,keepBuffer:6,crossOrigin:true
+  });
+  const osm=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    subdomains:"abc",maxZoom:19,tileSize:256,zoomOffset:0,detectRetina:true,
+    attribution:'&copy; OpenStreetMap contributors',
+    updateWhenIdle:false,updateWhenZooming:true,keepBuffer:6,crossOrigin:true
+  });
+  let tileErrors=0;
+  voyager.on("tileerror",()=>{
+    tileErrors+=1;
+    if(tileErrors===4&&map.hasLayer(voyager)){
+      map.removeLayer(voyager);
+      osm.addTo(map);
+      requestAnimationFrame(()=>map.invalidateSize({pan:false,animate:false}));
+    }
+  });
+  voyager.addTo(map);
   map.attributionControl.setPrefix(false);
 
   const markerRows=[];
@@ -302,11 +325,31 @@ function renderMap(places){
 
   showCity();
   selectPlace(0,false);
-  const refresh=()=>map.invalidateSize({pan:false,animate:false});
-  map.whenReady(()=>{requestAnimationFrame(()=>{refresh();showCity()})});
-  [80,250,600,1200].forEach(delay=>setTimeout(()=>{refresh();if(delay===600)showCity()},delay));
-  window.addEventListener("load",refresh,{once:true});
-  if('ResizeObserver' in window){let resizeTimer;const ro=new ResizeObserver(()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(refresh,60)});ro.observe(canvas)}
+  const refresh=()=>{
+    map.invalidateSize({pan:false,animate:false,debounceMoveend:true});
+    // Redraw forces Leaflet to request every currently visible raster tile again.
+    if(map.hasLayer(voyager))voyager.redraw();
+    if(map.hasLayer(osm))osm.redraw();
+  };
+  const refreshAndFit=()=>{
+    refresh();
+    const activeView=qs('button.active',viewSwitch)?.dataset.view;
+    activeView==='trip'?showTrip():showCity();
+  };
+  map.whenReady(()=>requestAnimationFrame(()=>requestAnimationFrame(refreshAndFit)));
+  [100,350,900,1800].forEach(delay=>setTimeout(refreshAndFit,delay));
+  window.addEventListener("load",refreshAndFit,{once:true});
+  window.addEventListener("orientationchange",()=>setTimeout(refreshAndFit,250));
+  if('ResizeObserver' in window){
+    let resizeTimer;
+    const ro=new ResizeObserver(entries=>{
+      const box=entries[0]?.contentRect;
+      if(!box||box.width<100||box.height<100)return;
+      clearTimeout(resizeTimer);
+      resizeTimer=setTimeout(refreshAndFit,120);
+    });
+    ro.observe(canvas);
+  }
 }
 
 async function loadWeather(places=[]){

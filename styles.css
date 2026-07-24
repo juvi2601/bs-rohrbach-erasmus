@@ -939,17 +939,25 @@ nav a:hover::after{transform:scaleX(1)}
 /* =========================================================
    VERSION 8.1 — KARTE VOLLFLÄCHIG, OHNE INTERNE SCROLLLEISTE
    ========================================================= */
-/* Leaflet-Kacheln dürfen nicht durch die globale Bildregel verkleinert werden. */
-.map-canvas.leaflet-container img,
-.map-canvas.leaflet-container .leaflet-tile{
+/* Leaflet muss seine Kacheln mit festen Pixelmaßen positionieren können. */
+.map-canvas.leaflet-container img{
   max-width:none!important;
   max-height:none!important;
 }
+.map-canvas.leaflet-container .leaflet-tile{
+  width:256px!important;
+  height:256px!important;
+  max-width:none!important;
+  max-height:none!important;
+}
+/* Keine eigenen Breiten/Höhen für Leaflet-Panes setzen – Leaflet positioniert sie per Transform. */
+.map-canvas .leaflet-pane,
 .map-canvas .leaflet-map-pane,
 .map-canvas .leaflet-tile-pane,
 .map-canvas .leaflet-tile-container{
-  width:auto!important;
-  height:auto!important;
+  position:absolute;
+  left:0;
+  top:0;
 }
 
 /* Die Karte ist das Hauptelement und nutzt die volle Breite. */
@@ -1021,3 +1029,14 @@ nav a:hover::after{transform:scaleX(1)}
   .place-list-items{grid-template-columns:1fr;padding:10px}
   .place-card{width:100%;min-height:82px}
 }
+
+
+/* =========================================================
+   VERSION 8.2 — STABILE, VOLLFLÄCHIGE KARTENKACHELN
+   ========================================================= */
+.map-canvas.leaflet-container{background:#e9eef5!important}
+.map-canvas .leaflet-tile-pane{z-index:200}
+.map-canvas .leaflet-overlay-pane{z-index:400}
+.map-canvas .leaflet-marker-pane{z-index:600}
+.map-canvas .leaflet-tooltip-pane{z-index:650}
+.map-canvas .leaflet-popup-pane{z-index:700}
