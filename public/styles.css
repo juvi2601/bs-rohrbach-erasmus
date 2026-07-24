@@ -620,3 +620,51 @@ nav a,.button,.day-tab,.program-pager-button{font-weight:680}
   .timeline-row h4{font-size:18px}
   .timeline-row:hover .timeline-marker{transform:none}
 }
+
+/* Version 6.1 – Fix für kleine Desktop- und Tabletbreiten
+   Verhindert, dass Tagesnavigation und große Überschrift im Cover überlappen. */
+@media (min-width:701px) and (max-width:1100px){
+  .program-section{
+    padding-left:clamp(18px,3vw,30px);
+    padding-right:clamp(18px,3vw,30px);
+  }
+  .day-cover{
+    min-height:390px;
+    padding:96px 34px 36px;
+    align-items:flex-end;
+  }
+  .day-cover-content{
+    width:min(100%,680px);
+    min-width:0;
+    padding-right:108px;
+  }
+  .day-cover h3{
+    max-width:100%;
+    font-size:clamp(44px,6.2vw,62px);
+    line-height:.94;
+    letter-spacing:-.05em;
+    overflow-wrap:normal;
+    text-wrap:balance;
+  }
+  .day-cover-content>p:not(.day-date-large){
+    max-width:620px;
+    font-size:17px;
+  }
+  .day-icon{
+    position:absolute;
+    right:28px;
+    bottom:32px;
+    width:82px;
+    height:82px;
+    border-radius:26px;
+  }
+  .day-icon .program-svg-icon{
+    width:45px;
+    height:45px;
+  }
+  /* Die Tageskarten oben reichen als Navigation; der zusätzliche Pager
+     wird in diesem engen Zwischenbereich ausgeblendet. */
+  .program-pager{
+    display:none;
+  }
+}
