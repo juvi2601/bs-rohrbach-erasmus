@@ -1040,3 +1040,31 @@ nav a:hover::after{transform:scaleX(1)}
 .map-canvas .leaflet-marker-pane{z-index:600}
 .map-canvas .leaflet-tooltip-pane{z-index:650}
 .map-canvas .leaflet-popup-pane{z-index:700}
+
+/* =========================================================
+   VERSION 8.3 — ROBUSTE PREMIUM-KARTE OHNE LEAFLET-KACHELN
+   Die Karte wird als vollständig isolierte OpenStreetMap-Ansicht geladen.
+   Dadurch können globale Website-Regeln keine Kartenkacheln mehr verzerren.
+   ========================================================= */
+.map-canvas,
+.map-canvas.leaflet-container{
+  position:relative!important;
+  width:100%!important;
+  height:620px!important;
+  min-height:620px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border-radius:30px!important;
+  background:linear-gradient(135deg,#eaf2f8,#dfeaf3)!important;
+}
+.travel-map-frame{position:absolute;inset:0;background:#e6eef5}
+.travel-map-frame iframe{display:block;width:100%;height:100%;border:0;background:#e6eef5}
+.travel-map-label{position:absolute;left:20px;bottom:20px;z-index:2;display:flex;align-items:center;gap:12px;max-width:min(430px,calc(100% - 40px));padding:12px 16px 12px 12px;border:1px solid rgba(255,255,255,.72);border-radius:18px;background:rgba(255,255,255,.92);box-shadow:0 14px 34px rgba(7,29,73,.18);backdrop-filter:blur(16px);pointer-events:none}
+.travel-map-label>span{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:14px;background:var(--pin);color:#fff;font-size:12px;font-weight:950;box-shadow:0 7px 18px color-mix(in srgb,var(--pin) 28%,transparent)}
+.travel-map-label small,.travel-map-label strong{display:block}
+.travel-map-label small{margin-bottom:2px;color:#6b7a90;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.09em}
+.travel-map-label strong{color:#071d49;font-size:14px;line-height:1.25}
+/* Alte Leaflet-Ebenen und Bedienelemente dürfen nicht mehr sichtbar werden. */
+.map-canvas>.leaflet-pane,.map-canvas>.leaflet-control-container{display:none!important}
+@media(max-width:1100px){.map-canvas,.map-canvas.leaflet-container{height:570px!important;min-height:570px!important}}
+@media(max-width:760px){.map-canvas,.map-canvas.leaflet-container{height:470px!important;min-height:470px!important;border-radius:22px!important}.travel-map-label{left:12px;bottom:12px;max-width:calc(100% - 24px);padding:10px 13px 10px 10px}.travel-map-label>span{width:38px;height:38px;flex-basis:38px;border-radius:12px}.travel-map-label strong{font-size:13px}}

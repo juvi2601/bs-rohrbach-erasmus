@@ -213,159 +213,95 @@ function renderToday(days){const site=window.__SITE||{};const t=site.today||{};c
 
 function renderMap(places){
   const canvas=qs("#map"),list=qs("#placeList"),legend=qs("#mapLegend"),reset=qs("#mapReset");
-  if(!window.L||!places.length){canvas.innerHTML='<div class="empty-state">Karte konnte nicht geladen werden.</div>';return}
+  if(!canvas||!list||!legend||!places.length){if(canvas)canvas.innerHTML='<div class="empty-state">Karte konnte nicht geladen werden.</div>';return}
 
   const categories={
-    "Hotel":{color:"#e63946",icon:"H"},
-    "EU":{color:"#1557b0",icon:"EU"},
-    "Sehenswürdigkeit":{color:"#7b2cbf",icon:"★"},
-    "Metro":{color:"#f59e0b",icon:"M"},
-    "Essen":{color:"#16a34a",icon:"✦"},
-    "Notfall":{color:"#dc2626",icon:"!"},
-    "Antwerpen":{color:"#0f766e",icon:"A"},
-    "Waterloo":{color:"#64748b",icon:"W"}
+    "Hotel":{color:"#e63946",icon:"H"},"EU":{color:"#1557b0",icon:"EU"},
+    "Sehenswürdigkeit":{color:"#7b2cbf",icon:"★"},"Metro":{color:"#f59e0b",icon:"M"},
+    "Essen":{color:"#16a34a",icon:"✦"},"Notfall":{color:"#dc2626",icon:"!"},
+    "Antwerpen":{color:"#0f766e",icon:"A"},"Waterloo":{color:"#64748b",icon:"W"}
   };
   const styleFor=cat=>categories[cat]||{color:"#334155",icon:"•"};
-  const markerIcon=cat=>{const c=styleFor(cat);return L.divIcon({className:"travel-marker-wrap",html:`<span class="travel-marker" style="--marker:${c.color}"><b>${esc(c.icon)}</b></span>`,iconSize:[42,50],iconAnchor:[21,46],popupAnchor:[0,-43]})};
+  const validPlaces=places.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)));
+  if(!validPlaces.length){canvas.innerHTML='<div class="empty-state">Für die Karte fehlen gültige Koordinaten.</div>';return}
 
-  // Erst initialisieren, wenn der Kartencontainer seine endgültige Breite besitzt.
-  // Das verhindert die typischen L-förmig bzw. nur teilweise geladenen Kacheln.
-  void canvas.offsetWidth;
-  const map=L.map("map",{scrollWheelZoom:false,zoomControl:true,preferCanvas:false,fadeAnimation:true,zoomAnimation:true}).setView([50.8503,4.3517],13);
-
-  const voyager=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{
-    subdomains:"abcd",maxZoom:20,tileSize:256,zoomOffset:0,detectRetina:true,
-    attribution:'&copy; OpenStreetMap contributors &copy; CARTO',
-    updateWhenIdle:false,updateWhenZooming:true,keepBuffer:6,crossOrigin:true
-  });
-  const osm=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-    subdomains:"abc",maxZoom:19,tileSize:256,zoomOffset:0,detectRetina:true,
-    attribution:'&copy; OpenStreetMap contributors',
-    updateWhenIdle:false,updateWhenZooming:true,keepBuffer:6,crossOrigin:true
-  });
-  let tileErrors=0;
-  voyager.on("tileerror",()=>{
-    tileErrors+=1;
-    if(tileErrors===4&&map.hasLayer(voyager)){
-      map.removeLayer(voyager);
-      osm.addTo(map);
-      requestAnimationFrame(()=>map.invalidateSize({pan:false,animate:false}));
-    }
-  });
-  voyager.addTo(map);
-  map.attributionControl.setPrefix(false);
-
-  const markerRows=[];
-  const brusselsPoints=[];
-  const tripPoints=[];
-  const isBrussels=p=>Number(p.lat)>50.80&&Number(p.lat)<50.93&&Number(p.lng)>4.28&&Number(p.lng)<4.45;
-
-  places.forEach((p,i)=>{
-    const point=[Number(p.lat),Number(p.lng)];
-    if(!Number.isFinite(point[0])||!Number.isFinite(point[1]))return;
-    tripPoints.push(point);
-    if(isBrussels(p))brusselsPoints.push(point);
-    const marker=L.marker(point,{icon:markerIcon(p.category),title:p.title,keyboard:true}).addTo(map);
-    marker.on("click",()=>selectPlace(i,true));
-    markerRows.push({marker,index:i,place:p});
-  });
-
-  const cityRoute=L.polyline(brusselsPoints,{color:"#087ee8",weight:4,opacity:.72,dashArray:"2 10",lineCap:"round"}).addTo(map);
-  const tripRoute=L.polyline(tripPoints,{color:"#0a49a5",weight:4,opacity:.72,dashArray:"8 11",lineCap:"round"});
-
-  const categoryOrder=[...new Set(places.map(p=>p.category))];
+  const categoryOrder=[...new Set(validPlaces.map(p=>p.category))];
   legend.innerHTML=`<button class="map-filter active" data-category="Alle" type="button"><i style="--legend:#0a49a5"></i>Alle</button>`+
     categoryOrder.map(cat=>{const c=styleFor(cat);return `<button class="map-filter" data-category="${esc(cat)}" type="button"><i style="--legend:${c.color}"></i>${esc(cat)}</button>`}).join("");
 
   list.innerHTML=`<section class="map-detail" id="mapDetail" aria-live="polite"></section><div class="place-list-items" id="placeListItems"></div>`;
   const detail=qs("#mapDetail",list),items=qs("#placeListItems",list);
-  items.innerHTML=places.map((p,i)=>{const c=styleFor(p.category);return `<article class="place-card" data-place="${i}" data-category="${esc(p.category)}" tabindex="0" role="button" aria-label="${esc(p.title)} auf der Karte anzeigen"><img src="${esc(p.image)}" alt="${esc(p.title)}"><div class="place-card-copy"><span class="place-category" style="--category:${c.color}">${esc(p.category)}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
-
-  function renderDetail(index){
-    const p=places[index],c=styleFor(p.category);if(!p)return;
-    const route=p.maps||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address||p.title)}`;
-    detail.innerHTML=`<div class="map-detail-media"><img src="${esc(p.image)}" alt="${esc(p.title)}"><span class="map-detail-badge" style="--detail:${c.color}">${esc(p.category)}</span></div><div class="map-detail-copy"><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}<div class="map-detail-meta">${p.address?`<span><b>Adresse</b>${esc(p.address)}</span>`:""}${p.walk?`<span><b>Entfernung</b>${esc(p.walk)}</span>`:""}</div><a class="map-detail-route" href="${esc(route)}" target="_blank" rel="noopener">Navigation öffnen <span>↗</span></a></div>`;
-  }
-
-  function setActive(index){
-    qsa(".place-card",items).forEach((card,i)=>card.classList.toggle("active",i===index));
-    renderDetail(index);
-    const card=qsa(".place-card",items)[index];
-    if(card&&window.matchMedia('(max-width:980px)').matches)card.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});
-  }
-  function selectPlace(index,fly=true){
-    const row=markerRows.find(x=>x.index===index);if(!row)return;
-    setActive(index);
-    if(fly)map.flyTo(row.marker.getLatLng(),15,{duration:.75});
-    row.marker.openTooltip?.();
-  }
-
-  markerRows.forEach(({marker,index,place})=>marker.bindTooltip(`<strong>${esc(place.title)}</strong>`,{direction:"top",offset:[0,-38],className:"travel-tooltip"}));
-  qsa(".place-card",items).forEach(card=>{const open=()=>selectPlace(Number(card.dataset.place));card.addEventListener("click",open);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})});
-
-  function applyFilter(cat){
-    qsa(".map-filter",legend).forEach(b=>b.classList.toggle("active",b.dataset.category===cat));
-    markerRows.forEach(({marker,place})=>{if(cat==="Alle"||place.category===cat){if(!map.hasLayer(marker))marker.addTo(map)}else if(map.hasLayer(marker))map.removeLayer(marker)});
-    qsa(".place-card",items).forEach(card=>card.hidden=!(cat==="Alle"||card.dataset.category===cat));
-    const first=places.findIndex(p=>cat==="Alle"||p.category===cat);if(first>=0)selectPlace(first,false);
-  }
-  qsa(".map-filter",legend).forEach(btn=>btn.addEventListener("click",()=>applyFilter(btn.dataset.category)));
+  items.innerHTML=validPlaces.map((p,i)=>{const c=styleFor(p.category);return `<article class="place-card" data-place="${i}" data-category="${esc(p.category)}" tabindex="0" role="button" aria-label="${esc(p.title)} auf der Karte anzeigen"><img src="${esc(p.image)}" alt="${esc(p.title)}"><div class="place-card-copy"><span class="place-category" style="--category:${c.color}">${esc(p.category)}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
 
   const toolbar=legend.closest('.map-toolbar');
   let viewSwitch=qs('.map-view-switch',toolbar);
   if(!viewSwitch){
     viewSwitch=document.createElement('div');viewSwitch.className='map-view-switch';
     viewSwitch.innerHTML='<button class="active" data-view="city" type="button">Brüssel</button><button data-view="trip" type="button">Gesamtreise</button>';
-    reset?.replaceWith(viewSwitch);
-    toolbar?.appendChild(viewSwitch);
+    reset?.replaceWith(viewSwitch);toolbar?.appendChild(viewSwitch);
   }
-  const showCity=()=>{if(map.hasLayer(tripRoute))map.removeLayer(tripRoute);if(!map.hasLayer(cityRoute))cityRoute.addTo(map);if(brusselsPoints.length)map.fitBounds(brusselsPoints,{padding:[55,55],maxZoom:14});};
-  const showTrip=()=>{if(map.hasLayer(cityRoute))map.removeLayer(cityRoute);if(!map.hasLayer(tripRoute))tripRoute.addTo(map);if(tripPoints.length)map.fitBounds(tripPoints,{padding:[55,55],maxZoom:10});};
-  qsa('button',viewSwitch).forEach(btn=>btn.addEventListener('click',()=>{qsa('button',viewSwitch).forEach(x=>x.classList.toggle('active',x===btn));btn.dataset.view==='trip'?showTrip():showCity()}));
 
-  showCity();
-  selectPlace(0,false);
-  const refresh=()=>{
-    map.invalidateSize({pan:false,animate:false,debounceMoveend:true});
-    // Redraw forces Leaflet to request every currently visible raster tile again.
-    if(map.hasLayer(voyager))voyager.redraw();
-    if(map.hasLayer(osm))osm.redraw();
+  let activeIndex=0;
+  let currentView='city';
+  let activeCategory='Alle';
+
+  const bboxAround=(lat,lng,spanLat=.045,spanLng=.075)=>[lng-spanLng,lat-spanLat,lng+spanLng,lat+spanLat];
+  const cityBounds=[4.27,50.79,4.48,50.93];
+  const tripBounds=()=>{
+    const lats=validPlaces.map(p=>Number(p.lat)),lngs=validPlaces.map(p=>Number(p.lng));
+    const padLat=Math.max(.16,(Math.max(...lats)-Math.min(...lats))*.16);
+    const padLng=Math.max(.20,(Math.max(...lngs)-Math.min(...lngs))*.16);
+    return [Math.min(...lngs)-padLng,Math.min(...lats)-padLat,Math.max(...lngs)+padLng,Math.max(...lats)+padLat];
   };
-  const refreshAndFit=()=>{
-    refresh();
-    const activeView=qs('button.active',viewSwitch)?.dataset.view;
-    activeView==='trip'?showTrip():showCity();
+  const osmUrl=(bbox,marker)=>{
+    const box=bbox.map(n=>Number(n).toFixed(6)).join('%2C');
+    const pin=marker?`&marker=${Number(marker.lat).toFixed(6)}%2C${Number(marker.lng).toFixed(6)}`:'';
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${box}&layer=mapnik${pin}`;
   };
-  map.whenReady(()=>requestAnimationFrame(()=>requestAnimationFrame(refreshAndFit)));
-  [100,350,900,1800].forEach(delay=>setTimeout(refreshAndFit,delay));
-  window.addEventListener("load",refreshAndFit,{once:true});
-  window.addEventListener("orientationchange",()=>setTimeout(refreshAndFit,250));
-  if('ResizeObserver' in window){
-    let resizeTimer;
-    const ro=new ResizeObserver(entries=>{
-      const box=entries[0]?.contentRect;
-      if(!box||box.width<100||box.height<100)return;
-      clearTimeout(resizeTimer);
-      resizeTimer=setTimeout(refreshAndFit,120);
-    });
-    ro.observe(canvas);
+
+  function renderMapFrame(index=activeIndex){
+    const p=validPlaces[index]||validPlaces[0];
+    const bbox=currentView==='trip'?tripBounds():bboxAround(Number(p.lat),Number(p.lng));
+    canvas.innerHTML=`<div class="travel-map-frame"><iframe title="Interaktive Karte – ${esc(p.title)}" src="${osmUrl(bbox,currentView==='trip'?null:p)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><div class="travel-map-label"><span style="--pin:${styleFor(p.category).color}">${esc(styleFor(p.category).icon)}</span><div><small>${currentView==='trip'?'Gesamtreise':'Aktuell ausgewählt'}</small><strong>${currentView==='trip'?'Brüssel · Antwerpen · Waterloo':esc(p.title)}</strong></div></div></div>`;
   }
+
+  function renderDetail(index){
+    const p=validPlaces[index],c=styleFor(p.category);if(!p)return;
+    const route=p.maps||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address||p.title)}`;
+    detail.innerHTML=`<div class="map-detail-media"><img src="${esc(p.image)}" alt="${esc(p.title)}"><span class="map-detail-badge" style="--detail:${c.color}">${esc(p.category)}</span></div><div class="map-detail-copy"><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}<div class="map-detail-meta">${p.address?`<span><b>Adresse</b>${esc(p.address)}</span>`:""}${p.walk?`<span><b>Entfernung</b>${esc(p.walk)}</span>`:""}</div><a class="map-detail-route" href="${esc(route)}" target="_blank" rel="noopener">Navigation öffnen <span>↗</span></a></div>`;
+  }
+
+  function setActive(index,{refreshMap=true}={}){
+    activeIndex=index;
+    qsa('.place-card',items).forEach((card,i)=>card.classList.toggle('active',i===index));
+    renderDetail(index);
+    if(refreshMap&&currentView==='city')renderMapFrame(index);
+  }
+
+  qsa('.place-card',items).forEach(card=>{
+    const open=()=>setActive(Number(card.dataset.place));
+    card.addEventListener('click',open);
+    card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
+  });
+
+  function applyFilter(cat){
+    activeCategory=cat;
+    qsa('.map-filter',legend).forEach(b=>b.classList.toggle('active',b.dataset.category===cat));
+    qsa('.place-card',items).forEach(card=>card.hidden=!(cat==='Alle'||card.dataset.category===cat));
+    const first=validPlaces.findIndex(p=>cat==='Alle'||p.category===cat);
+    if(first>=0)setActive(first,{refreshMap:currentView==='city'});
+  }
+  qsa('.map-filter',legend).forEach(btn=>btn.addEventListener('click',()=>applyFilter(btn.dataset.category)));
+
+  qsa('button',viewSwitch).forEach(btn=>btn.addEventListener('click',()=>{
+    currentView=btn.dataset.view;
+    qsa('button',viewSwitch).forEach(b=>b.classList.toggle('active',b===btn));
+    renderMapFrame(activeIndex);
+  }));
+
+  setActive(0,{refreshMap:false});
+  renderMapFrame(0);
 }
-
-async function loadWeather(places=[]){
-  const primary=places[0]||{name:"Brüssel",lat:50.8503,lon:4.3517};
-  const current=qs("#weatherCurrent"),forecast=qs("#weatherForecast");
-  try{
-    const u=`https://api.open-meteo.com/v1/forecast?latitude=${primary.lat}&longitude=${primary.lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=4&timezone=Europe%2FBrussels`;
-    const x=await(await fetch(u)).json(),c=x.current||{},w=weatherInfo(c.weather_code),d=x.daily||{};
-    const tip=weatherTip({temperature:c.temperature_2m,wind:c.wind_speed_10m,precipitation:(d.precipitation_probability_max||[])[0],code:c.weather_code});
-    current.innerHTML=`<article class="weather-card weather-now"><div><small>📍 Heute in ${esc(primary.name)}</small><strong>${Math.round(c.temperature_2m??0)} °C</strong><span>Gefühlt ${Math.round(c.apparent_temperature??0)} °C · Wind ${Math.round(c.wind_speed_10m??0)} km/h</span><span>${w.text}</span><div class="weather-tip"><b>💡 Reisetipp</b><span>${esc(tip)}</span></div></div><div class="weather-icon">${w.icon}</div></article>`;
-    const labels=["Heute","Morgen","Übermorgen"];
-    forecast.innerHTML=(d.time||[]).slice(0,4).map((day,i)=>{const info=weatherInfo((d.weather_code||[])[i]);const label=labels[i]||new Intl.DateTimeFormat("de-AT",{weekday:"long"}).format(new Date(day+"T12:00:00"));return `<article class="forecast-day"><small>${esc(label)}</small><div class="forecast-icon">${info.icon}</div><strong>${Math.round((d.temperature_2m_max||[])[i]??0)}°</strong><span>${Math.round((d.temperature_2m_min||[])[i]??0)}° min</span><span>${Math.round((d.precipitation_probability_max||[])[i]??0)} % Regen</span><b>${info.text}</b></article>`}).join("");
-  }catch{current.innerHTML='<div class="empty-state">Wetterdaten sind derzeit nicht verfügbar.</div>';forecast.innerHTML=""}
-}
-
-
 function weatherTip({temperature=0,wind=0,precipitation=0,code=0}={}){
   if(precipitation>=50||code>=51&&code<=82)return "Regenjacke oder Schirm mitnehmen.";
   if(temperature<8)return "Warme Kleidung und eine wetterfeste Jacke empfohlen.";
