@@ -487,3 +487,136 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-r
   .timeline-marker .program-svg-icon{width:21px;height:21px}
   .timeline-row:hover .timeline-marker{transform:none}
 }
+
+
+/* =========================================================
+   Version 6.0 – ruhiger Premium-Look, Typografie & Mobile-Fix
+   ========================================================= */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-weight:400;
+  letter-spacing:-.006em;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Klarere, weniger schwere Typografie */
+.hero h1{
+  font-weight:790;
+  letter-spacing:-.058em;
+  line-height:.86;
+}
+.section-title h2,.hotel-copy h2,.group-card h2,.today-card h2,.admin-card h2{
+  font-weight:740;
+  letter-spacing:-.038em;
+  line-height:1.04;
+  text-wrap:balance;
+}
+.section-title p:not(.eyebrow),.hotel-copy p,.group-card p,.admin-card p{
+  font-size:clamp(16px,1.35vw,18px);
+  line-height:1.68;
+}
+.eyebrow{
+  font-size:11px;
+  font-weight:760;
+  letter-spacing:.17em;
+}
+nav a,.button,.day-tab,.program-pager-button{font-weight:680}
+
+/* Tagesprogramm: eleganter und ruhiger */
+.day-cover h3{
+  font-weight:760;
+  letter-spacing:-.042em;
+  line-height:.98;
+}
+.timeline-heading h4{
+  font-weight:720;
+  letter-spacing:-.035em;
+}
+.timeline-row h4{
+  font-weight:690;
+  letter-spacing:-.022em;
+  line-height:1.23;
+}
+.timeline-row p{line-height:1.62}
+.timeline-step,.status-dot,.badge{font-weight:680;letter-spacing:.01em}
+
+/* Icons: weg vom verspielten Duotone-Look, hin zu klaren Piktogrammen */
+.timeline-marker{
+  overflow:visible;
+  background:#fff;
+  border:1px solid #d6e2ee;
+  box-shadow:0 10px 24px rgba(7,29,73,.10);
+}
+.timeline-marker::before,.timeline-marker::after{display:none!important}
+.timeline-marker .program-svg-icon{
+  position:relative;
+  z-index:1;
+  color:#145fae;
+  stroke-width:1.7;
+  filter:none;
+}
+.timeline-row.confirmed .timeline-marker{
+  background:#f7fcfa;
+  border-color:#bee2d3;
+  box-shadow:0 10px 24px rgba(7,29,73,.09);
+}
+.timeline-row.pending .timeline-marker{
+  background:#fffaf1;
+  border-color:#ead3a3;
+  box-shadow:0 10px 24px rgba(7,29,73,.09);
+}
+.timeline-row:hover .timeline-marker{
+  transform:translateY(-2px);
+  box-shadow:0 15px 30px rgba(7,29,73,.13);
+}
+.day-icon{
+  background:rgba(8,27,62,.34);
+  border:1px solid rgba(255,255,255,.45);
+  box-shadow:0 14px 36px rgba(1,12,35,.24);
+}
+.day-icon .program-svg-icon{stroke-width:1.55;filter:none}
+
+/* Karten mit weniger optischem Gewicht */
+.timeline-content{
+  border-color:#dce6f0;
+  box-shadow:0 10px 28px rgba(7,29,73,.06);
+}
+.timeline-content::before{border-color:#dce6f0}
+.day-tabs{
+  box-shadow:0 13px 38px rgba(7,29,73,.085);
+}
+.day-tab.active{
+  box-shadow:0 10px 25px rgba(7,29,73,.22);
+}
+
+@media(max-width:700px){
+  .program-section{overflow-x:hidden}
+  .day-tabs{
+    width:100%;
+    max-width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+  .day-tab{scroll-snap-align:center}
+  .day-panels,.day-panel,.day-cover,.timeline,.timeline-row,.timeline-content{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+  }
+  .day-cover h3{
+    font-size:clamp(39px,11.8vw,50px);
+    letter-spacing:-.045em;
+  }
+  .section-title h2{
+    font-size:clamp(34px,9.6vw,42px);
+    letter-spacing:-.036em;
+  }
+  .timeline-heading h4{font-size:23px}
+  .timeline-row h4{font-size:18px}
+  .timeline-row:hover .timeline-marker{transform:none}
+}
