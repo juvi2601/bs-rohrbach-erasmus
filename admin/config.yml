@@ -496,43 +496,39 @@ collections:
   files:
   - name: places
     label: Karte & Orte
-    file: content/places.json
+    file: public/content/places.json
     format: json
     fields:
     - label: Orte
       name: places
       widget: list
-      summary: '{{fields.category}} – {{fields.title}}'
+      summary: '{{fields.order}} – {{fields.category}} – {{fields.title}}'
       fields:
-      - label: Name
-        name: title
-        widget: string
-      - label: Kategorie
-        name: category
-        widget: string
-      - label: Breitengrad
-        name: lat
-        widget: number
-        value_type: float
-      - label: Längengrad
-        name: lng
-        widget: number
-        value_type: float
-      - label: Adresse
-        name: address
-        widget: string
-      - label: Gehzeit/Hinweis
-        name: walk
-        widget: string
-      - label: Bild
-        name: image
-        widget: image
-      - label: Beschreibung
-        name: description
-        widget: text
-      - label: Google-Maps-Link
-        name: maps
-        widget: string
+      - {label: Name, name: title, widget: string}
+      - {label: Beschreibung, name: description, widget: text}
+      - {label: Bild, name: image, widget: image, required: false}
+      - {label: Breitengrad, name: lat, widget: number, value_type: float}
+      - {label: Längengrad, name: lng, widget: number, value_type: float}
+      - {label: Kategorie, name: category, widget: string}
+      - {label: Zoomstufe, name: zoom, widget: number, value_type: int, min: 3, max: 19, default: 17}
+      - {label: Reihenfolge, name: order, widget: number, value_type: int, default: 100}
+      - {label: Veröffentlichen, name: published, widget: boolean, default: true}
+      - {label: Adresse, name: address, widget: string, required: false}
+      - {label: Gehzeit/Hinweis, name: walk, widget: string, required: false}
+      - {label: Google-Maps-Link, name: maps, widget: string, required: false}
+      - {label: Street-View-Link, name: streetView, widget: string, required: false}
+      - {label: Markerfarbe, name: markerColor, widget: color, default: '#1557b0', allowInput: true}
+      - {label: Markersymbol, name: markerIcon, widget: string, default: '•', hint: 'Kurzes Symbol, Buchstabe oder Emoji'}
+    - label: Stationen der Gesamtreise
+      name: route
+      widget: list
+      summary: '{{fields.order}} – {{fields.title}}'
+      fields:
+      - {label: Name, name: title, widget: string}
+      - {label: Breitengrad, name: lat, widget: number, value_type: float}
+      - {label: Längengrad, name: lng, widget: number, value_type: float}
+      - {label: Reihenfolge, name: order, widget: number, value_type: int, default: 100}
+      - {label: Veröffentlichen, name: published, widget: boolean, default: true}
 - name: downloads
   label: Downloads
   files:

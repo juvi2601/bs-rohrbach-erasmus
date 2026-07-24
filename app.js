@@ -10,7 +10,7 @@ async function init(){
   ]);
   if(site.status==="fulfilled")applySite(site.value);
   if(program.status==="fulfilled"){programData=program.value;renderProgram(program.value.days||[]);renderToday(program.value.days||[])}
-  if(places.status==="fulfilled")renderMap(places.value.places||[]);
+  if(places.status==="fulfilled")renderMap(places.value);
   if(gallery.status==="fulfilled"){galleryData=gallery.value.photos||[];renderGallery(galleryData)}
   if(downloads.status==="fulfilled")renderDownloads(downloads.value.downloads||[]);
   if(faq.status==="fulfilled")renderFaq(faq.value.items||[]);
@@ -211,121 +211,72 @@ function activateDay(id,scroll=false){
 
 function renderToday(days){const site=window.__SITE||{};const t=site.today||{};const now=new Date(),start=new Date(site.departure||"2026-11-21T20:00:00+01:00"),end=new Date(site.returnDate||"2026-11-26T23:59:00+01:00");let pct=0,label="Vorfreude",day=null;if(now>=start&&now<=end){pct=Math.min(100,Math.max(0,(now-start)/(end-start)*100));label=`Tag ${Math.max(1,Math.ceil((now-start)/86400000))} von 5`;const ids=["sa","so","mo","di","mi","do"];day=days.find(d=>d.id===ids[Math.min(ids.length-1,Math.floor((now-start)/86400000))])}else if(now>end){pct=100;label=t.afterLabel||"Reise abgeschlossen"}qs("#progressBar").style.width=`${pct}%`;qs("#progressValue").textContent=`${Math.round(pct)} %`;qs("#progressLabel").textContent=label;if(day){qs("#todayTitle").textContent=day.title;qs("#todayText").textContent=day.subtitle;qs("#progressDate").textContent=`${day.short}, ${day.date}`;qs("#todaySchedule").innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");activateDay(day.id)}else if(now>end){qs("#todayTitle").textContent=t.afterTitle||"Schöne Erinnerungen an Brüssel";qs("#todayText").textContent=t.afterText||"Die Reise ist abgeschlossen. Die geschützte Galerie bleibt für die Reisegruppe erreichbar."}}
 
-function renderMap(places){
+function renderMap(mapData){
   const canvas=qs("#map"),list=qs("#placeList"),legend=qs("#mapLegend"),reset=qs("#mapReset");
-  if(!canvas||!list||!legend||!places.length){if(canvas)canvas.innerHTML='<div class="empty-state">Karte konnte nicht geladen werden.</div>';return}
+  const rawPlaces=Array.isArray(mapData)?mapData:(mapData?.places||[]);
+  const routeStops=Array.isArray(mapData?.route)?mapData.route:[];
+  if(!canvas||!list||!legend||!window.L){if(canvas)canvas.innerHTML='<div class="empty-state">Karte konnte nicht geladen werden.</div>';return}
 
-  const categories={
+  const defaults={
     "Hotel":{color:"#e63946",icon:"H"},"EU":{color:"#1557b0",icon:"EU"},
     "Sehenswürdigkeit":{color:"#7b2cbf",icon:"★"},"Metro":{color:"#f59e0b",icon:"M"},
     "Essen":{color:"#16a34a",icon:"✦"},"Notfall":{color:"#dc2626",icon:"!"},
     "Antwerpen":{color:"#0f766e",icon:"A"},"Waterloo":{color:"#64748b",icon:"W"}
   };
-  const styleFor=cat=>categories[cat]||{color:"#334155",icon:"•"};
-  const validPlaces=places.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)));
-  if(!validPlaces.length){canvas.innerHTML='<div class="empty-state">Für die Karte fehlen gültige Koordinaten.</div>';return}
+  const places=rawPlaces
+    .filter(p=>p&&p.published!==false&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)))
+    .sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999));
+  if(!places.length){canvas.innerHTML='<div class="empty-state">Für die Karte fehlen veröffentlichte Orte mit gültigen Koordinaten.</div>';return}
 
-  const categoryOrder=[...new Set(validPlaces.map(p=>p.category))];
+  const styleFor=p=>({color:p.markerColor||defaults[p.category]?.color||"#334155",icon:p.markerIcon||defaults[p.category]?.icon||"•"});
+  const markerIcon=p=>{const s=styleFor(p);return L.divIcon({className:"erasmus-marker-wrap",html:`<div class="erasmus-marker" style="--marker:${esc(s.color)}"><span>${esc(s.icon)}</span></div>`,iconSize:[44,50],iconAnchor:[22,48],popupAnchor:[0,-43]})};
+
+  canvas.innerHTML="";
+  const map=L.map(canvas,{zoomControl:true,scrollWheelZoom:false,zoomAnimation:true,fadeAnimation:true,markerZoomAnimation:true,preferCanvas:true});
+  L.tileLayer("https://tile.openstreetmap.de/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; OpenStreetMap-Mitwirkende'}).addTo(map);
+  map.zoomControl.setPosition("topright");
+  map.on("focus",()=>map.scrollWheelZoom.enable());
+  map.on("blur",()=>map.scrollWheelZoom.disable());
+
+  const layers=new Map();
+  const markerGroup=L.featureGroup().addTo(map);
+  const categoryOrder=[...new Set(places.map(p=>p.category||"Weitere Orte"))];
   legend.innerHTML=`<button class="map-filter active" data-category="Alle" type="button"><i style="--legend:#0a49a5"></i>Alle</button>`+
-    categoryOrder.map(cat=>{const c=styleFor(cat);return `<button class="map-filter" data-category="${esc(cat)}" type="button"><i style="--legend:${c.color}"></i>${esc(cat)}</button>`}).join("");
+    categoryOrder.map(cat=>{const p=places.find(x=>(x.category||"Weitere Orte")===cat),s=styleFor(p);return `<button class="map-filter" data-category="${esc(cat)}" type="button"><i style="--legend:${esc(s.color)}"></i>${esc(cat)}</button>`}).join("");
 
-  list.innerHTML=`<section class="map-detail" id="mapDetail" aria-live="polite"></section><div class="place-list-items" id="placeListItems"></div>`;
+  list.innerHTML='<section class="map-detail" id="mapDetail" aria-live="polite"></section><div class="place-list-items" id="placeListItems"></div>';
   const detail=qs("#mapDetail",list),items=qs("#placeListItems",list);
-  items.innerHTML=validPlaces.map((p,i)=>{const c=styleFor(p.category);return `<article class="place-card" data-place="${i}" data-category="${esc(p.category)}" tabindex="0" role="button" aria-label="${esc(p.title)} auf der Karte anzeigen"><img src="${esc(p.image)}" alt="${esc(p.title)}"><div class="place-card-copy"><span class="place-category" style="--category:${c.color}">${esc(p.category)}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
+  items.innerHTML=places.map((p,i)=>{const s=styleFor(p);return `<article class="place-card" data-place="${i}" data-category="${esc(p.category||"Weitere Orte")}" tabindex="0" role="button"><img src="${esc(p.image||'/images/hero.jpg')}" alt="${esc(p.title)}"><div class="place-card-copy"><span class="place-category" style="--category:${esc(s.color)}">${esc(p.category||"Weitere Orte")}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
 
-  const toolbar=legend.closest('.map-toolbar');
-  let viewSwitch=qs('.map-view-switch',toolbar);
-  if(!viewSwitch){
-    viewSwitch=document.createElement('div');viewSwitch.className='map-view-switch';
-    viewSwitch.innerHTML='<button class="active" data-view="city" type="button">Brüssel</button><button data-view="trip" type="button">Gesamtreise</button>';
-    reset?.replaceWith(viewSwitch);toolbar?.appendChild(viewSwitch);
+  const popupHtml=p=>{const maps=p.maps||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address||p.title)}`;return `<article class="leaflet-place-popup">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}">`:''}<div><small>${esc(p.category||'Ort')}</small><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:''}<div class="popup-actions"><a href="${esc(maps)}" target="_blank" rel="noopener">Google Maps ↗</a>${p.streetView?`<a href="${esc(p.streetView)}" target="_blank" rel="noopener">Street View ↗</a>`:''}</div></div></article>`};
+  places.forEach((p,i)=>{const marker=L.marker([Number(p.lat),Number(p.lng)],{icon:markerIcon(p),title:p.title,riseOnHover:true}).bindPopup(popupHtml(p),{maxWidth:340,minWidth:260});marker.addTo(markerGroup);marker.on("click",()=>setActive(i,{move:false}));layers.set(i,marker)});
+
+  let routeLayer=null,routeMarkers=[];
+  const validRoute=routeStops.filter(x=>x&&x.published!==false&&Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng))).sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999));
+  if(validRoute.length>1){
+    const coords=validRoute.map(x=>[Number(x.lat),Number(x.lng)]);
+    routeLayer=L.polyline(coords,{color:"#0a49a5",weight:5,opacity:.86,lineCap:"round",lineJoin:"round",dashArray:"1 0"}).addTo(map);
+    L.polyline(coords,{color:"#ffffff",weight:2,opacity:.75,dashArray:"3 10",interactive:false}).addTo(map);
+    routeMarkers=validRoute.map((stop,i)=>L.marker(coords[i],{icon:L.divIcon({className:"route-stop-wrap",html:`<div class="route-stop">${i+1}</div>`,iconSize:[28,28],iconAnchor:[14,14]})}).bindTooltip(stop.title||`Station ${i+1}`,{direction:"top",offset:[0,-12],className:"route-tooltip"}).addTo(map));
   }
 
-  let activeIndex=0;
-  let currentView='city';
-  let activeCategory='Alle';
-
-  const bboxAround=(lat,lng,spanLat=.045,spanLng=.075)=>[lng-spanLng,lat-spanLat,lng+spanLng,lat+spanLat];
-  const cityBounds=[4.27,50.79,4.48,50.93];
-  const tripBounds=()=>{
-    const lats=validPlaces.map(p=>Number(p.lat)),lngs=validPlaces.map(p=>Number(p.lng));
-    const padLat=Math.max(.16,(Math.max(...lats)-Math.min(...lats))*.16);
-    const padLng=Math.max(.20,(Math.max(...lngs)-Math.min(...lngs))*.16);
-    return [Math.min(...lngs)-padLng,Math.min(...lats)-padLat,Math.max(...lngs)+padLng,Math.max(...lats)+padLat];
-  };
-  const placeZoom=place=>{
-    const category=String(place?.category||'');
-    if(category==='Hotel'||category==='Sehenswürdigkeit'||category==='Essen')return 18;
-    if(category==='EU'||category==='Metro'||category==='Notfall')return 17;
-    if(category==='Antwerpen')return 16;
-    if(category==='Waterloo')return 15;
-    return 17;
-  };
-
-  const cityMapDocument=place=>{
-    const lat=Number(place.lat),lng=Number(place.lng),zoom=placeZoom(place);
-    const c=styleFor(place.category);
-    const title=String(place.title||'Ausgewählter Ort').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/</g,'&lt;');
-    return `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#city-map{height:100%;margin:0}body{font-family:Arial,sans-serif;background:#eaf1f8}.leaflet-container{background:#eaf1f8}.leaflet-control-zoom{border:0!important;box-shadow:0 8px 24px rgba(5,34,74,.18)!important}.leaflet-control-zoom a{border:0!important;color:#0a49a5!important;font-weight:800}.place-pin{display:grid;place-items:center;width:42px;height:42px;border-radius:50% 50% 50% 9px;transform:rotate(-45deg);background:${c.color};color:#fff;border:3px solid #fff;box-shadow:0 10px 24px rgba(5,34,74,.3);font-weight:900}.place-pin span{transform:rotate(45deg)}.place-label{background:#fff;border:0;border-radius:12px;box-shadow:0 8px 25px rgba(5,34,74,.18);color:#09204a;font-weight:700;padding:7px 10px}.place-label:before{display:none}</style></head><body><div id="city-map"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script><script>(function(){const map=L.map('city-map',{zoomControl:true,scrollWheelZoom:true,zoomAnimation:true,fadeAnimation:true});map.zoomControl.getContainer().querySelector('.leaflet-control-zoom-in').title='Vergrößern';map.zoomControl.getContainer().querySelector('.leaflet-control-zoom-out').title='Verkleinern';L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-Mitwirkende'}).addTo(map);const pos=[${lat},${lng}];const icon=L.divIcon({className:'',html:'<div class="place-pin"><span>${c.icon}</span></div>',iconSize:[42,42],iconAnchor:[21,42]});L.marker(pos,{icon}).addTo(map).bindTooltip('${title}',{permanent:true,direction:'top',className:'place-label',offset:[0,-40]});map.setView(pos,${zoom},{animate:true});setTimeout(()=>map.invalidateSize(),250)})();<\/script></body></html>`;
-  };
-
-  const tripMapDocument=hotel=>{
-    const origin={lat:48.5732,lng:13.9894,name:'BS Rohrbach'};
-    const destination={lat:Number(hotel.lat),lng:Number(hotel.lng),name:hotel.title||'ibis Brussels City Centre'};
-    const routeUrl=`https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
-    const html=`<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#trip-map{height:100%;margin:0}body{font-family:Arial,sans-serif;background:#eaf1f8}.leaflet-container{background:#eaf1f8}.route-pin{display:grid;place-items:center;width:38px;height:38px;border-radius:50% 50% 50% 8px;transform:rotate(-45deg);background:#0a49a5;color:#fff;border:3px solid #fff;box-shadow:0 8px 20px rgba(5,34,74,.28);font-weight:800}.route-pin span{transform:rotate(45deg)}.route-pin.hotel{background:#e63946}.route-label{background:#fff;border:0;border-radius:12px;box-shadow:0 8px 25px rgba(5,34,74,.18);color:#09204a;font-weight:700;padding:7px 10px}.route-label:before{display:none}.route-status{position:absolute;z-index:999;left:16px;bottom:16px;background:rgba(255,255,255,.95);border-radius:14px;padding:10px 14px;box-shadow:0 8px 24px rgba(5,34,74,.16);font-size:13px;color:#526580}.route-status b{display:block;color:#09204a;font-size:14px;margin-bottom:2px}</style></head><body><div id="trip-map"></div><div class="route-status"><b>Busreise nach Brüssel</b><span id="route-info">Route wird geladen …</span></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script><script>(function(){const map=L.map('trip-map',{zoomControl:true,scrollWheelZoom:true});L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-Mitwirkende'}).addTo(map);const a=[${origin.lat},${origin.lng}],b=[${destination.lat},${destination.lng}];const icon=(txt,cls='')=>L.divIcon({className:'',html:'<div class="route-pin '+cls+'"><span>'+txt+'</span></div>',iconSize:[38,38],iconAnchor:[19,38]});L.marker(a,{icon:icon('R')}).addTo(map).bindTooltip('${origin.name}',{permanent:true,direction:'right',className:'route-label',offset:[10,-18]});L.marker(b,{icon:icon('H','hotel')}).addTo(map).bindTooltip('${destination.name.replace(/'/g,"\'")}',{permanent:true,direction:'left',className:'route-label',offset:[-10,-18]});const bounds=L.latLngBounds([a,b]);map.fitBounds(bounds,{padding:[55,55]});fetch('${routeUrl}').then(r=>{if(!r.ok)throw new Error('route');return r.json()}).then(data=>{const route=data.routes&&data.routes[0];if(!route)throw new Error('route');const coords=route.geometry.coordinates.map(c=>[c[1],c[0]]);const line=L.polyline(coords,{color:'#0a49a5',weight:5,opacity:.9,lineCap:'round',lineJoin:'round'}).addTo(map);L.polyline(coords,{color:'#fff',weight:2,opacity:.65,dashArray:'3 10'}).addTo(map);map.fitBounds(line.getBounds(),{padding:[52,52]});const km=Math.round(route.distance/1000);const hours=Math.floor(route.duration/3600),mins=Math.round((route.duration%3600)/60);document.getElementById('route-info').textContent=km+' km · ca. '+hours+' Std. '+mins+' Min.'}).catch(()=>{L.polyline([a,b],{color:'#0a49a5',weight:5,opacity:.85,dashArray:'10 10'}).addTo(map);document.getElementById('route-info').textContent='Rohrbach → ibis Brussels City Centre'});setTimeout(()=>map.invalidateSize(),250)})();<\/script></body></html>`;
-    return html;
-  };
-
-  function renderMapFrame(index=activeIndex){
-    const p=validPlaces[index]||validPlaces[0];
-    if(currentView==='trip'){
-      const hotel=validPlaces.find(place=>place.category==='Hotel')||p;
-      const doc=tripMapDocument(hotel).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-      canvas.innerHTML=`<div class="travel-map-frame"><iframe title="Gesamtreise von Rohrbach nach Brüssel" srcdoc="${doc}" loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe><div class="travel-map-label"><span style="--pin:#0a49a5">🚌</span><div><small>Gesamtreise</small><strong>BS Rohrbach → ibis Brussels City Centre</strong></div></div></div>`;
-      return;
-    }
-    const doc=cityMapDocument(p).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    canvas.innerHTML=`<div class="travel-map-frame"><iframe title="Interaktive Karte – ${esc(p.title)}" srcdoc="${doc}" loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe><div class="travel-map-label"><span style="--pin:${styleFor(p.category).color}">${esc(styleFor(p.category).icon)}</span><div><small>Aktuell ausgewählt · Zoom ${placeZoom(p)}</small><strong>${esc(p.title)}</strong></div></div></div>`;
-  }
-
-  function renderDetail(index){
-    const p=validPlaces[index],c=styleFor(p.category);if(!p)return;
-    const route=p.maps||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address||p.title)}`;
-    detail.innerHTML=`<div class="map-detail-media"><img src="${esc(p.image)}" alt="${esc(p.title)}"><span class="map-detail-badge" style="--detail:${c.color}">${esc(p.category)}</span></div><div class="map-detail-copy"><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}<div class="map-detail-meta">${p.address?`<span><b>Adresse</b>${esc(p.address)}</span>`:""}${p.walk?`<span><b>Entfernung</b>${esc(p.walk)}</span>`:""}</div><a class="map-detail-route" href="${esc(route)}" target="_blank" rel="noopener">Navigation öffnen <span>↗</span></a></div>`;
-  }
-
-  function setActive(index,{refreshMap=true}={}){
-    activeIndex=index;
-    qsa('.place-card',items).forEach((card,i)=>card.classList.toggle('active',i===index));
-    renderDetail(index);
-    if(refreshMap&&currentView==='city')renderMapFrame(index);
-  }
-
-  qsa('.place-card',items).forEach(card=>{
-    const open=()=>setActive(Number(card.dataset.place));
-    card.addEventListener('click',open);
-    card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
-  });
-
-  function applyFilter(cat){
-    activeCategory=cat;
-    qsa('.map-filter',legend).forEach(b=>b.classList.toggle('active',b.dataset.category===cat));
-    qsa('.place-card',items).forEach(card=>card.hidden=!(cat==='Alle'||card.dataset.category===cat));
-    const first=validPlaces.findIndex(p=>cat==='Alle'||p.category===cat);
-    if(first>=0)setActive(first,{refreshMap:currentView==='city'});
-  }
+  let activeIndex=0,activeCategory="Alle",view="city";
+  function renderDetail(index){const p=places[index],s=styleFor(p);if(!p)return;const maps=p.maps||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address||p.title)}`;detail.innerHTML=`<div class="map-detail-media"><img src="${esc(p.image||'/images/hero.jpg')}" alt="${esc(p.title)}"><span class="map-detail-badge" style="--detail:${esc(s.color)}">${esc(p.category||'Ort')}</span></div><div class="map-detail-copy"><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:''}<div class="map-detail-meta">${p.address?`<span><b>Adresse</b>${esc(p.address)}</span>`:''}${p.walk?`<span><b>Entfernung</b>${esc(p.walk)}</span>`:''}</div><div class="map-detail-actions"><a class="map-detail-route" href="${esc(maps)}" target="_blank" rel="noopener">Google Maps <span>↗</span></a>${p.streetView?`<a class="map-detail-route secondary" href="${esc(p.streetView)}" target="_blank" rel="noopener">Street View <span>↗</span></a>`:''}</div></div>`}
+  function setActive(index,{move=true}={}){activeIndex=index;qsa('.place-card',items).forEach((c,i)=>c.classList.toggle('active',i===index));renderDetail(index);const p=places[index],marker=layers.get(index);if(move){view="city";updateSwitch();map.flyTo([Number(p.lat),Number(p.lng)],Number(p.zoom)||17,{duration:.85});setTimeout(()=>marker?.openPopup(),500)}}
+  qsa('.place-card',items).forEach(card=>{const open=()=>setActive(Number(card.dataset.place));card.addEventListener('click',open);card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});
+  function applyFilter(cat){activeCategory=cat;qsa('.map-filter',legend).forEach(b=>b.classList.toggle('active',b.dataset.category===cat));places.forEach((p,i)=>{const show=cat==='Alle'||(p.category||'Weitere Orte')===cat;const marker=layers.get(i);if(show&&!markerGroup.hasLayer(marker))markerGroup.addLayer(marker);if(!show&&markerGroup.hasLayer(marker))markerGroup.removeLayer(marker)});qsa('.place-card',items).forEach(c=>c.hidden=!(cat==='Alle'||c.dataset.category===cat));const first=places.findIndex(p=>cat==='Alle'||(p.category||'Weitere Orte')===cat);if(first>=0)setActive(first)}
   qsa('.map-filter',legend).forEach(btn=>btn.addEventListener('click',()=>applyFilter(btn.dataset.category)));
 
-  qsa('button',viewSwitch).forEach(btn=>btn.addEventListener('click',()=>{
-    currentView=btn.dataset.view;
-    qsa('button',viewSwitch).forEach(b=>b.classList.toggle('active',b===btn));
-    renderMapFrame(activeIndex);
-  }));
+  const toolbar=legend.closest('.map-toolbar');
+  const switcher=document.createElement('div');switcher.className='map-view-switch';switcher.innerHTML='<button class="active" data-view="city" type="button">Orte</button><button data-view="trip" type="button">Gesamtreise</button>';reset?.replaceWith(switcher);toolbar?.appendChild(switcher);
+  function updateSwitch(){qsa('button',switcher).forEach(b=>b.classList.toggle('active',b.dataset.view===view))}
+  qsa('button',switcher).forEach(btn=>btn.addEventListener('click',()=>{view=btn.dataset.view;updateSwitch();if(view==='trip'&&validRoute.length>1){map.fitBounds(L.latLngBounds(validRoute.map(x=>[Number(x.lat),Number(x.lng)])),{padding:[55,55],animate:true,duration:.8})}else{const p=places[activeIndex];map.flyTo([Number(p.lat),Number(p.lng)],Number(p.zoom)||17,{duration:.8})}}));
 
-  setActive(0,{refreshMap:false});
-  renderMapFrame(0);
+  setActive(0,{move:false});
+  if(validRoute.length>1)map.fitBounds(markerGroup.getBounds(),{padding:[45,45]});else map.setView([Number(places[0].lat),Number(places[0].lng)],Number(places[0].zoom)||17);
+  setTimeout(()=>map.invalidateSize(),200);
 }
+
 async function loadWeather(places=[]){
   const primary=places[0]||{name:"Brüssel",lat:50.8503,lon:4.3517};
   const current=qs("#weatherCurrent"),forecast=qs("#weatherForecast");
