@@ -302,9 +302,11 @@ function renderMap(places){
 
   showCity();
   selectPlace(0,false);
-  const refresh=()=>map.invalidateSize({pan:false});
-  setTimeout(refresh,80);setTimeout(refresh,350);setTimeout(refresh,900);
-  if('ResizeObserver' in window){const ro=new ResizeObserver(refresh);ro.observe(canvas)}
+  const refresh=()=>map.invalidateSize({pan:false,animate:false});
+  map.whenReady(()=>{requestAnimationFrame(()=>{refresh();showCity()})});
+  [80,250,600,1200].forEach(delay=>setTimeout(()=>{refresh();if(delay===600)showCity()},delay));
+  window.addEventListener("load",refresh,{once:true});
+  if('ResizeObserver' in window){let resizeTimer;const ro=new ResizeObserver(()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(refresh,60)});ro.observe(canvas)}
 }
 
 async function loadWeather(places=[]){

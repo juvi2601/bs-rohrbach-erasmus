@@ -881,7 +881,7 @@ nav a:hover::after{transform:scaleX(1)}
 .map-layout{display:grid;grid-template-columns:minmax(0,72fr) minmax(310px,28fr);gap:18px;align-items:stretch}
 .map-canvas{position:relative;width:100%;height:690px;min-width:0;border-radius:30px;overflow:hidden;background:#dfe9f3;box-shadow:0 22px 62px rgba(7,29,73,.13);isolation:isolate}
 .map-canvas.leaflet-container{width:100%!important;height:690px!important;display:block}
-.map-canvas .leaflet-map-pane,.map-canvas .leaflet-tile-pane,.map-canvas .leaflet-tile-container{width:100%;height:100%}
+
 .map-canvas .leaflet-control-zoom{border:0!important;margin:18px!important;box-shadow:0 10px 25px rgba(7,29,73,.16)!important}
 .map-canvas .leaflet-control-zoom a{width:38px;height:38px;line-height:38px;border:0!important;color:#0a49a5;font-weight:800}
 .map-canvas .leaflet-control-attribution{margin:0 10px 8px 0!important;padding:3px 7px!important;border-radius:8px;background:rgba(255,255,255,.82)!important;font-size:9px!important}
@@ -933,4 +933,91 @@ nav a:hover::after{transform:scaleX(1)}
   .map-layout{gap:14px}.map-canvas,.map-canvas.leaflet-container{height:470px!important;border-radius:22px}.place-sidebar{border-radius:22px}
   .map-detail{display:block}.map-detail-media{height:190px;min-height:0}.map-detail-copy{padding:18px}.map-detail-copy h3{font-size:23px}.map-detail-meta{grid-template-columns:1fr 1fr}.map-detail-meta span:only-child{grid-column:1/-1}
   .place-list-items{padding:10px}.place-card{flex-basis:min(82vw,290px)}
+}
+
+
+/* =========================================================
+   VERSION 8.1 — KARTE VOLLFLÄCHIG, OHNE INTERNE SCROLLLEISTE
+   ========================================================= */
+/* Leaflet-Kacheln dürfen nicht durch die globale Bildregel verkleinert werden. */
+.map-canvas.leaflet-container img,
+.map-canvas.leaflet-container .leaflet-tile{
+  max-width:none!important;
+  max-height:none!important;
+}
+.map-canvas .leaflet-map-pane,
+.map-canvas .leaflet-tile-pane,
+.map-canvas .leaflet-tile-container{
+  width:auto!important;
+  height:auto!important;
+}
+
+/* Die Karte ist das Hauptelement und nutzt die volle Breite. */
+.map-layout{
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:18px;
+}
+.map-canvas,
+.map-canvas.leaflet-container{
+  width:100%!important;
+  height:620px!important;
+  min-height:620px;
+}
+
+/* Orte unter der Karte statt in einer schmalen, scrollbareren Seitenleiste. */
+.place-sidebar{
+  width:100%;
+  height:auto!important;
+  overflow:visible!important;
+  border-radius:26px;
+}
+.place-list{
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+.map-detail{
+  display:grid;
+  grid-template-columns:minmax(280px,.42fr) minmax(0,.58fr);
+  align-items:stretch;
+  border-bottom:1px solid #dce6f0;
+}
+.map-detail-media{
+  height:100%;
+  min-height:280px;
+}
+.map-detail-copy{
+  padding:28px 30px;
+  align-self:center;
+}
+.map-detail-copy p{display:block!important;max-width:680px}
+.map-detail-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+.map-detail-meta span:only-child{grid-column:1/-1}
+
+.place-list-items{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  padding:14px;
+  overflow:visible!important;
+  max-height:none!important;
+  scrollbar-width:none;
+}
+.place-list-items::-webkit-scrollbar{display:none}
+.place-card{
+  min-width:0;
+  min-height:84px;
+}
+
+@media(max-width:1100px){
+  .map-canvas,.map-canvas.leaflet-container{height:570px!important;min-height:570px}
+  .place-list-items{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .map-canvas,.map-canvas.leaflet-container{height:470px!important;min-height:470px}
+  .map-detail{display:block}
+  .map-detail-media{height:210px;min-height:0}
+  .map-detail-copy{padding:20px}
+  .place-list-items{grid-template-columns:1fr;padding:10px}
+  .place-card{width:100%;min-height:82px}
 }
