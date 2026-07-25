@@ -82,6 +82,11 @@ collections:
         widget: boolean
         required: false
         default: false
+      - label: Als Hilfe-/Notfalllink kennzeichnen
+        name: emergency
+        widget: boolean
+        required: false
+        default: false
     - label: Schnellzugriffe
       name: quickLinks
       widget: list
@@ -533,6 +538,11 @@ collections:
       - label: Google-Maps-Link
         name: maps
         widget: string
+      - label: Bildnachweis
+        name: imageCredit
+        widget: string
+        required: false
+        hint: "z. B. Foto: © ÖV Brüssel / BMEIA"
 - name: downloads
   label: Downloads
   files:

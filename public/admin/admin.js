@@ -19,12 +19,16 @@ Promise.all([
   readJson('/content/program.json'),
   readJson('/content/gallery.json'),
   readJson('/content/downloads.json'),
+  readJson('/content/places.json'),
+  readJson('/content/faq.json'),
   readJson('/api/cms-status')
-]).then(([news, program, gallery, downloads, cms]) => {
+]).then(([news, program, gallery, downloads, places, faq, cms]) => {
   setCount('count-news', Array.isArray(news?.items) ? news.items.length : Array.isArray(news?.news) ? news.news.length : 0);
   setCount('count-program', Array.isArray(program?.days) ? program.days.length : Array.isArray(program?.program) ? program.program.length : 0);
   setCount('count-gallery', Array.isArray(gallery?.photos) ? gallery.photos.length : 0);
   setCount('count-downloads', Array.isArray(downloads?.downloads) ? downloads.downloads.length : 0);
+  setCount('count-places', Array.isArray(places?.places) ? places.places.length : 0);
+  setCount('count-faq', Array.isArray(faq?.items) ? faq.items.length : 0);
 
   const card = document.querySelector('.status-card');
   const title = card?.querySelector('strong');
