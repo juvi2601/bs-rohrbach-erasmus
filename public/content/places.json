@@ -106,9 +106,10 @@
       "lng": 4.3811,
       "address": "Avenue de Cortenbergh 4-10, 1040 Bruxelles",
       "walk": "Notfallkontakt / Metro",
-      "image": "/images/europaeischer-rat.jpg",
+      "image": "/images/oesterreichhaus-bruessel.jpg",
       "description": "Anlaufstelle für österreichische Staatsbürgerinnen und Staatsbürger in dringenden konsularischen Angelegenheiten.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Avenue+de+Cortenbergh+4-10+Brussels"
+      "maps": "https://www.google.com/maps/search/?api=1&query=Avenue+de+Cortenbergh+4-10+Brussels",
+      "imageCredit": "Foto: © ÖV Brüssel / BMEIA"
     }
   ]
 }

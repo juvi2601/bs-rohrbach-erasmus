@@ -1090,3 +1090,5 @@ nav a:hover::after{transform:scaleX(1)}
   .weather-card .weather-icon{font-size:50px}
   .forecast-day{min-height:248px;padding:18px 14px}
 }
+
+.map-image-credit{position:absolute;right:10px;bottom:10px;background:rgba(5,34,74,.78);color:#fff;padding:4px 7px;border-radius:7px;font-size:.68rem;line-height:1.2;backdrop-filter:blur(4px)}
