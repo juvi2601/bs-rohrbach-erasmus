@@ -1,12 +1,12 @@
 const qs=(s,c=document)=>c.querySelector(s), qsa=(s,c=document)=>[...c.querySelectorAll(s)];
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const fetchJson=async url=>{const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(url);return r.json()};
-let programData={days:[]}, galleryData=[], activeGallery=[];
+let programData={days:[]}, galleryData=[], activeGallery=[], legalData={};
 
 async function init(){
-  setupNav();setupReveal();setupPwa();setupLightbox();setupActiveNavigation();
-  const [site,program,places,gallery,downloads,faq,news]=await Promise.allSettled([
-    fetchJson("content/site.json"),fetchJson("content/program.json"),fetchJson("content/places.json"),fetchJson("content/gallery.json"),fetchJson("content/downloads.json"),fetchJson("content/faq.json"),fetchJson("content/news.json")
+  setupNav();setupReveal();setupPwa();setupLightbox();setupLegalModal();setupActiveNavigation();
+  const [site,program,places,gallery,downloads,faq,news,legal]=await Promise.allSettled([
+    fetchJson("content/site.json"),fetchJson("content/program.json"),fetchJson("content/places.json"),fetchJson("content/gallery.json"),fetchJson("content/downloads.json"),fetchJson("content/faq.json"),fetchJson("content/news.json"),fetchJson("content/legal.json")
   ]);
   if(site.status==="fulfilled")applySite(site.value);
   if(program.status==="fulfilled"){programData=program.value;renderProgram(program.value.days||[]);renderToday(program.value.days||[])}
@@ -15,6 +15,7 @@ async function init(){
   if(downloads.status==="fulfilled")renderDownloads(downloads.value.downloads||[]);
   if(faq.status==="fulfilled")renderFaq(faq.value.items||[]);
   renderNews(news.status==="fulfilled"?news.value.news||[]:[]);
+  if(legal.status==="fulfilled"){legalData=legal.value||{};renderLegalLinks(legalData.footerLinks||[])}
   loadWeather(site.status==="fulfilled"?(site.value.weatherLocations||[]):[]);
 }
 
@@ -379,6 +380,29 @@ function renderEmergency(items){const grid=qs("#emergencyGrid");if(!grid)return;
 
 function renderDownloads(items){const rows=items.filter(x=>x.published&&x.file);qs("#downloadsGrid").innerHTML=rows.length?rows.map(x=>`<article class="download-card"><div class="download-icon">${esc(x.icon||"📄")}</div><h3>${esc(x.title)}</h3><p>${esc(x.description)}</p><a class="button button-blue" href="${esc(x.file)}" target="_blank" rel="noopener">Öffnen</a></article>`).join(""):'<div class="empty-state">Derzeit sind noch keine öffentlichen Dokumente freigegeben.</div>'}
 function renderFaq(items){qs("#faqList").innerHTML=items.map((x,i)=>`<article class="faq-item"><button aria-expanded="false">${esc(x.question)}<span>＋</span></button><div class="faq-answer">${esc(x.answer)}</div></article>`).join("");qsa(".faq-item button").forEach(b=>b.addEventListener("click",()=>{const item=b.parentElement,open=item.classList.toggle("open");b.setAttribute("aria-expanded",String(open));qs("span",b).textContent=open?"−":"＋"}))}
+
+
+function renderLegalLinks(items){
+  const wrap=qs("#footerLegalLinks");if(!wrap)return;
+  wrap.innerHTML=items.map(x=>`<button type="button" data-legal="${esc(x.panel)}">${esc(x.label)}</button>`).join("");
+  qsa("[data-legal]",wrap).forEach(btn=>btn.addEventListener("click",()=>openLegal(btn.dataset.legal)));
+}
+function setupLegalModal(){
+  const modal=qs("#legalModal"),close=qs("#legalClose");if(!modal||!close)return;
+  close.addEventListener("click",closeLegal);
+  modal.addEventListener("click",e=>{if(e.target===modal)closeLegal()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.hidden)closeLegal()});
+}
+function openLegal(panel="impressum"){
+  const modal=qs("#legalModal"),data=legalData[panel];if(!modal||!data)return;
+  const links=legalData.footerLinks||[];
+  qs("#legalTabs").innerHTML=links.map(x=>`<button type="button" class="${x.panel===panel?'active':''}" data-legal-tab="${esc(x.panel)}">${esc(x.label)}</button>`).join("");
+  qsa("[data-legal-tab]",qs("#legalTabs")).forEach(btn=>btn.addEventListener("click",()=>openLegal(btn.dataset.legalTab)));
+  setText("legalEyebrow",data.eyebrow);setText("legalTitle",data.title);setText("legalIntro",data.intro);
+  qs("#legalContent").innerHTML=(data.blocks||[]).map(block=>`<section class="legal-block"><h3>${esc(block.heading)}</h3>${(block.paragraphs||[]).map(text=>`<p>${esc(text).replace(/\n/g,"<br>")}</p>`).join("")}${(block.links||[]).length?`<div class="legal-actions">${block.links.map(link=>`<a href="${esc(link.url)}" ${String(link.url).startsWith('http')?'target="_blank" rel="noopener"':''}>${esc(link.label)}</a>`).join("")}</div>`:""}</section>`).join("");
+  modal.hidden=false;document.body.classList.add("modal-open");qs("#legalClose").focus();
+}
+function closeLegal(){const modal=qs("#legalModal");if(!modal)return;modal.hidden=true;document.body.classList.remove("modal-open")}
 
 function bindNavLinks(){const nav=qs("#mainNav");qsa("a",nav).forEach(a=>a.addEventListener("click",()=>nav.classList.remove("open")))}
 function setupNav(){const toggle=qs("#navToggle"),nav=qs("#mainNav");toggle.addEventListener("click",()=>{const open=nav.classList.toggle("open");toggle.setAttribute("aria-expanded",String(open))});document.addEventListener("click",e=>{if(nav.classList.contains("open")&&!nav.contains(e.target)&&!toggle.contains(e.target)){nav.classList.remove("open");toggle.setAttribute("aria-expanded","false")}});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&nav.classList.contains("open")){nav.classList.remove("open");toggle.setAttribute("aria-expanded","false");toggle.focus()}});bindNavLinks();addEventListener("scroll",()=>qs("#siteHeader").classList.toggle("scrolled",scrollY>20),{passive:true})}

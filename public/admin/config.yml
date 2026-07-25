@@ -628,3 +628,84 @@ collections:
       - label: Antwort
         name: answer
         widget: text
+
+- name: legal
+  label: Rechtliches & Kontakt
+  files:
+  - name: legal
+    label: Impressum, Datenschutz, Kontakt & Bildnachweise
+    file: public/content/legal.json
+    format: json
+    fields:
+    - label: Links in der Fußzeile
+      name: footerLinks
+      widget: list
+      summary: '{{fields.label}}'
+      fields:
+      - label: Beschriftung
+        name: label
+        widget: string
+      - label: Technischer Bereich
+        name: panel
+        widget: select
+        options:
+        - label: Impressum
+          value: impressum
+        - label: Datenschutz
+          value: datenschutz
+        - label: Kontakt
+          value: kontakt
+        - label: Bildnachweise
+          value: bildnachweise
+    - label: Impressum
+      name: impressum
+      widget: object
+      fields: &legal_page_fields
+      - label: Kleine Überschrift
+        name: eyebrow
+        widget: string
+      - label: Titel
+        name: title
+        widget: string
+      - label: Einleitung
+        name: intro
+        widget: text
+      - label: Inhaltsblöcke
+        name: blocks
+        widget: list
+        summary: '{{fields.heading}}'
+        fields:
+        - label: Überschrift
+          name: heading
+          widget: string
+        - label: Absätze
+          name: paragraphs
+          widget: list
+          field:
+            label: Absatz
+            name: paragraph
+            widget: text
+        - label: Links
+          name: links
+          widget: list
+          required: false
+          fields:
+          - label: Beschriftung
+            name: label
+            widget: string
+          - label: URL, E-Mail oder Telefonlink
+            name: url
+            widget: string
+    - label: Datenschutz
+      name: datenschutz
+      widget: object
+      fields: *legal_page_fields
+    - label: Kontakt
+      name: kontakt
+      widget: object
+      fields: *legal_page_fields
+    - label: Bildnachweise
+      name: bildnachweise
+      widget: object
+      fields: *legal_page_fields
+

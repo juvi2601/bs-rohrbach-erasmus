@@ -1,0 +1,228 @@
+{
+  "footerLinks": [
+    {
+      "label": "Impressum",
+      "panel": "impressum"
+    },
+    {
+      "label": "Datenschutz",
+      "panel": "datenschutz"
+    },
+    {
+      "label": "Kontakt",
+      "panel": "kontakt"
+    },
+    {
+      "label": "Bildnachweise",
+      "panel": "bildnachweise"
+    }
+  ],
+  "impressum": {
+    "eyebrow": "Rechtliche Informationen",
+    "title": "Impressum",
+    "intro": "Angaben zur Betreiberin und zur inhaltlichen Verantwortung dieser Projektwebsite.",
+    "blocks": [
+      {
+        "heading": "Betreiberin der Website",
+        "paragraphs": [
+          "Berufsschule Rohrbach",
+          "Schulstraße 7\n4150 Rohrbach-Berg\nÖsterreich"
+        ],
+        "links": [
+          {
+            "label": "Telefon: +43 732 7720-37000",
+            "url": "tel:+43732772037000"
+          },
+          {
+            "label": "www.bs-rohrbach.ac.at",
+            "url": "https://www.bs-rohrbach.ac.at"
+          }
+        ]
+      },
+      {
+        "heading": "Verantwortlich für den Inhalt",
+        "paragraphs": [
+          "Jürgen Vierlinger\nBerufsschule Rohrbach\nProjektleitung Erasmus+ Brüsselreise 2026"
+        ],
+        "links": [
+          {
+            "label": "j.vierlinger@bs-rohrbach.ac.at",
+            "url": "mailto:j.vierlinger@bs-rohrbach.ac.at"
+          }
+        ]
+      },
+      {
+        "heading": "Zweck der Website",
+        "paragraphs": [
+          "Diese Website begleitet das Erasmus+-Projekt „Brüsselreise 2026“ der Berufsschule Rohrbach. Sie dient der Information der teilnehmenden Schülerinnen und Schüler sowie der Dokumentation der Reise."
+        ]
+      },
+      {
+        "heading": "Haftung für Inhalte und Links",
+        "paragraphs": [
+          "Die Inhalte dieser Website werden mit größtmöglicher Sorgfalt erstellt und regelmäßig aktualisiert. Eine Gewähr für Vollständigkeit, Richtigkeit und dauernde Verfügbarkeit kann dennoch nicht übernommen werden.",
+          "Diese Website enthält Links zu externen Angeboten. Für deren Inhalte und Datenschutzbestimmungen sind ausschließlich die jeweiligen Anbieter verantwortlich."
+        ]
+      },
+      {
+        "heading": "Urheberrecht",
+        "paragraphs": [
+          "Texte, Gestaltung und eigene Aufnahmen dieser Website dürfen ohne vorherige Zustimmung nicht außerhalb der gesetzlichen Schranken weiterverwendet werden. Rechte Dritter an Bildern, Kartenmaterial, Logos und sonstigen Inhalten bleiben unberührt und werden in den Bildnachweisen angeführt."
+        ]
+      }
+    ]
+  },
+  "datenschutz": {
+    "eyebrow": "Schutz personenbezogener Daten",
+    "title": "Datenschutzerklärung",
+    "intro": "Diese Hinweise erklären, welche technischen Daten beim Besuch der Website verarbeitet werden und welche externen Dienste eingebunden sind.",
+    "blocks": [
+      {
+        "heading": "Verantwortliche Stelle",
+        "paragraphs": [
+          "Berufsschule Rohrbach\nSchulstraße 7\n4150 Rohrbach-Berg\nÖsterreich",
+          "Ansprechperson für diese Website: Jürgen Vierlinger"
+        ],
+        "links": [
+          {
+            "label": "j.vierlinger@bs-rohrbach.ac.at",
+            "url": "mailto:j.vierlinger@bs-rohrbach.ac.at"
+          }
+        ]
+      },
+      {
+        "heading": "Bereitstellung und Hosting",
+        "paragraphs": [
+          "Die Website wird über Cloudflare Workers bereitgestellt. Beim Aufruf werden technisch erforderliche Verbindungsdaten verarbeitet, insbesondere IP-Adresse, Zeitpunkt, angeforderte Datei, Browser- und Geräteinformationen sowie gegebenenfalls Fehler- und Sicherheitsdaten. Diese Verarbeitung ist für die sichere und zuverlässige Auslieferung der Website erforderlich."
+        ]
+      },
+      {
+        "heading": "Keine Analyse- oder Werbe-Cookies",
+        "paragraphs": [
+          "Auf dieser Website sind keine Analyse-, Werbe- oder Social-Media-Trackingdienste eingebaut. Nach dem derzeitigen technischen Stand setzt die Website selbst keine nicht notwendigen Cookies. Der Browser kann technische Daten wie den PWA-Cache lokal speichern, damit Inhalte schneller oder zeitweise offline bereitgestellt werden können."
+        ]
+      },
+      {
+        "heading": "Externe Schriftarten und Programmbibliotheken",
+        "paragraphs": [
+          "Für die Darstellung können Schriftarten von Google Fonts sowie die Kartenbibliothek Leaflet über externe Server geladen werden. Dabei wird technisch bedingt die IP-Adresse des aufrufenden Geräts an die jeweiligen Anbieter übertragen. Die Einbindung dient einer einheitlichen Darstellung und der Kartenfunktion."
+        ]
+      },
+      {
+        "heading": "Interaktive Karte und Routenfunktion",
+        "paragraphs": [
+          "Kartenkacheln werden von Diensten aus dem OpenStreetMap-Umfeld geladen. Für die Darstellung einer Fahrtroute kann der öffentliche OSRM-Routendienst kontaktiert werden. Beim Laden der Karte oder Route erhalten die jeweiligen Anbieter technisch notwendige Verbindungsdaten, insbesondere die IP-Adresse. Die Karte wird erst sichtbar, wenn der Kartenbereich der Website geladen wird."
+        ]
+      },
+      {
+        "heading": "Wetterdaten",
+        "paragraphs": [
+          "Die Wetteranzeige ruft aktuelle Vorhersagedaten bei Open-Meteo ab. Dabei werden die Koordinaten des voreingestellten Reiseziels sowie technisch notwendige Verbindungsdaten übermittelt. Es werden keine Namen von Reiseteilnehmenden an den Wetterdienst übertragen."
+        ]
+      },
+      {
+        "heading": "Microsoft 365 und externe Links",
+        "paragraphs": [
+          "Der geschützte Reisegruppenbereich, Foto-Uploads und die interne Galerie werden über Microsoft 365, Microsoft Forms beziehungsweise SharePoint aufgerufen. Erst beim Anklicken dieser Links gelten die Datenschutz- und Anmeldebedingungen von Microsoft und der schulischen Microsoft-365-Umgebung.",
+          "Auch bei Links zu Google Maps, Schul- oder Informationsseiten werden Daten erst an den jeweiligen Anbieter übertragen, wenn der Link geöffnet wird."
+        ]
+      },
+      {
+        "heading": "Öffentliche Inhalte und Fotos",
+        "paragraphs": [
+          "Die öffentliche Website soll keine sensiblen Reisedaten oder personenbezogenen Schülerdaten enthalten. Allgemeine Reisemotive werden nur mit entsprechender Berechtigung veröffentlicht. Personenbezogene Reisebilder sind für den geschützten Bereich vorgesehen."
+        ]
+      },
+      {
+        "heading": "Ihre Rechte",
+        "paragraphs": [
+          "Soweit personenbezogene Daten verarbeitet werden, bestehen nach den gesetzlichen Voraussetzungen insbesondere Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Widerspruch. Beschwerden können an die Österreichische Datenschutzbehörde gerichtet werden."
+        ]
+      },
+      {
+        "heading": "Aktualisierung dieser Hinweise",
+        "paragraphs": [
+          "Diese Datenschutzerklärung wird angepasst, wenn sich Funktionen, externe Dienste oder rechtliche Anforderungen ändern. Stand: Juli 2026."
+        ]
+      }
+    ]
+  },
+  "kontakt": {
+    "eyebrow": "Fragen zur Reisewebsite",
+    "title": "Kontakt",
+    "intro": "Für Fragen zur Website oder zur Erasmus+ Brüsselreise 2026 erreichst du die Projektleitung direkt.",
+    "blocks": [
+      {
+        "heading": "Projektleitung",
+        "paragraphs": [
+          "Jürgen Vierlinger\nBerufsschule Rohrbach\nErasmus+ Brüsselreise 2026"
+        ],
+        "links": [
+          {
+            "label": "E-Mail schreiben",
+            "url": "mailto:j.vierlinger@bs-rohrbach.ac.at"
+          }
+        ]
+      },
+      {
+        "heading": "Berufsschule Rohrbach",
+        "paragraphs": [
+          "Schulstraße 7\n4150 Rohrbach-Berg\nÖsterreich"
+        ],
+        "links": [
+          {
+            "label": "Telefon: +43 732 7720-37000",
+            "url": "tel:+43732772037000"
+          },
+          {
+            "label": "Website der Schule",
+            "url": "https://www.bs-rohrbach.ac.at"
+          }
+        ]
+      }
+    ]
+  },
+  "bildnachweise": {
+    "eyebrow": "Quellen und Rechte",
+    "title": "Bild- und Quellenhinweise",
+    "intro": "Die Bild- und Kartennachweise werden laufend ergänzt, wenn neue Inhalte veröffentlicht werden.",
+    "blocks": [
+      {
+        "heading": "Eigene Inhalte",
+        "paragraphs": [
+          "Eigene Fotos, Texte und Grafiken: Berufsschule Rohrbach beziehungsweise die jeweils genannten Urheberinnen und Urheber."
+        ]
+      },
+      {
+        "heading": "Österreichhaus Brüssel",
+        "paragraphs": [
+          "Foto des Österreichhauses Brüssel: Österreichische Vertretung Brüssel / BMEIA, entsprechend dem beim Bild beziehungsweise Kartenort angegebenen Nachweis."
+        ]
+      },
+      {
+        "heading": "Karten und Geodaten",
+        "paragraphs": [
+          "Kartendaten: © OpenStreetMap-Mitwirkende. Je nach Verfügbarkeit werden Kartenkacheln von OpenStreetMap, OpenStreetMap Deutschland oder Humanitarian OpenStreetMap Team geladen. Routenberechnung: OSRM."
+        ]
+      },
+      {
+        "heading": "Weitere Reisefotos",
+        "paragraphs": [
+          "Bei Bildern aus Wikimedia Commons, Unsplash, offiziellen Einrichtungen oder anderen Quellen gelten die jeweils beim Bild angegebenen Urheber- und Lizenzhinweise. Ein fehlender oder unklarer Nachweis kann der Projektleitung gemeldet werden."
+        ]
+      },
+      {
+        "heading": "Technische Dienste",
+        "paragraphs": [
+          "Wetterdaten: Open-Meteo. Kartenbibliothek: Leaflet. Schriftart: Google Fonts (Inter)."
+        ],
+        "links": [
+          {
+            "label": "Hinweis an die Projektleitung senden",
+            "url": "mailto:j.vierlinger@bs-rohrbach.ac.at?subject=Bildnachweis%20Br%C3%BCsselreise%202026"
+          }
+        ]
+      }
+    ]
+  }
+}
