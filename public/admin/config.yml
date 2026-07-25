@@ -391,6 +391,14 @@ collections:
       - label: Untertitel
         name: subtitle
         widget: string
+      - label: Versionsanzeige
+        name: version
+        widget: string
+        required: false
+      - label: Letzte Aktualisierung
+        name: updated
+        widget: string
+        required: false
       - label: Nach-oben-Link
         name: topLink
         widget: string

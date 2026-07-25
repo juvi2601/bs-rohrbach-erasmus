@@ -40,7 +40,7 @@ function applySite(site){
   const g=site.studentArea||{};setText("groupIcon",g.icon);setText("groupEyebrow",g.eyebrow);setText("groupTitle",g.title);setText("groupIntro",g.text);setText("uploadButton",g.uploadButton);setText("galleryButton",g.galleryButton);setText("uploadNote",g.note);activateExternal("uploadButton",g.uploadUrl);activateExternal("galleryButton",g.galleryUrl);
   const e=site.emergency||{};setText("emergencyEyebrow",e.eyebrow);setText("emergencyTitle",e.title);setText("emergencyIntro",e.intro);renderEmergency(e.items||[]);
   const a=site.adminArea||{};setText("adminEyebrow",a.eyebrow);setText("adminTitle",a.title);setText("adminIntro",a.text);setText("adminButton",a.button);
-  const f=site.footer||{};setText("footerTitle",f.title);setText("footerSubtitle",f.subtitle);setText("footerTopLink",f.topLink);setText("footerPrivacy",f.privacy);
+  const f=site.footer||{};setText("footerTitle",f.title);setText("footerSubtitle",f.subtitle);setText("footerVersion",f.version);setText("footerUpdated",f.updated);setText("footerTopLink",f.topLink);setText("footerPrivacy",f.privacy);
   const target=new Date(site.departure||"2026-11-21T20:00:00+01:00").getTime();
   const tick=()=>{let d=target-Date.now(),el=qs("#countdown");if(!el)return;if(d<=0){el.innerHTML='<div><strong>🎉</strong><small>Es geht los!</small></div>';return}const vals=[];vals.push([Math.floor(d/86400000),"Tage"]);d%=86400000;vals.push([Math.floor(d/3600000),"Stunden"]);d%=3600000;vals.push([Math.floor(d/60000),"Minuten"]);d%=60000;vals.push([Math.floor(d/1000),"Sekunden"]);el.innerHTML=vals.map(v=>`<div><strong>${String(v[0]).padStart(2,"0")}</strong><small>${v[1]}</small></div>`).join("")};tick();setInterval(tick,1000);
 }
