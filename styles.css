@@ -1068,3 +1068,25 @@ nav a:hover::after{transform:scaleX(1)}
 .map-canvas>.leaflet-pane,.map-canvas>.leaflet-control-container{display:none!important}
 @media(max-width:1100px){.map-canvas,.map-canvas.leaflet-container{height:570px!important;min-height:570px!important}}
 @media(max-width:760px){.map-canvas,.map-canvas.leaflet-container{height:470px!important;min-height:470px!important;border-radius:22px!important}.travel-map-label{left:12px;bottom:12px;max-width:calc(100% - 24px);padding:10px 13px 10px 10px}.travel-map-label>span{width:38px;height:38px;flex-basis:38px;border-radius:12px}.travel-map-label strong{font-size:13px}}
+
+/* Version 9.0 – Wetter-Optimierung */
+.weather-now{padding:30px;min-height:292px}
+.weather-now>div:first-child{display:flex;flex-direction:column;min-width:0}
+.weather-now>div:first-child>small{margin-bottom:4px}
+.weather-now>div:first-child>strong{font-size:40px;line-height:1.1;margin:4px 0 6px}
+.weather-card .weather-icon{font-size:56px;line-height:1}
+.weather-tip{margin-top:18px;padding:15px 16px;border-radius:15px}
+.weather-tip b{font-size:14px;margin-bottom:5px}
+.weather-tip span{font-size:15px;line-height:1.5}
+.weather-forecast{align-items:stretch}
+.forecast-day{min-height:262px;display:flex;flex-direction:column;align-items:center}
+.forecast-day small{min-height:24px}
+.forecast-icon{height:58px;display:flex;align-items:center;justify-content:center;font-size:42px;margin:10px 0 8px}
+.forecast-day strong{line-height:1.15;margin-top:2px}
+.forecast-day b{margin-top:auto;padding-top:8px}
+@media(max-width:700px){
+  .weather-now{padding:24px;min-height:0}
+  .weather-now>div:first-child>strong{font-size:36px}
+  .weather-card .weather-icon{font-size:50px}
+  .forecast-day{min-height:248px;padding:18px 14px}
+}
