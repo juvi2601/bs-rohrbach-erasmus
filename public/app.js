@@ -4,7 +4,7 @@ const fetchJson=async url=>{const r=await fetch(url,{cache:"no-store"});if(!r.ok
 let programData={days:[]}, galleryData=[], activeGallery=[];
 
 async function init(){
-  setupNav();setupReveal();setupPwa();setupLightbox();
+  setupNav();setupReveal();setupPwa();setupLightbox();setupActiveNavigation();
   const [site,program,places,gallery,downloads,faq,news]=await Promise.allSettled([
     fetchJson("content/site.json"),fetchJson("content/program.json"),fetchJson("content/places.json"),fetchJson("content/gallery.json"),fetchJson("content/downloads.json"),fetchJson("content/faq.json"),fetchJson("content/news.json")
   ]);
@@ -190,7 +190,7 @@ function activateDay(id,scroll=false){
     b.setAttribute("aria-selected",String(on));
     if(on) activeTab=b;
   });
-  qsa(".day-panel").forEach(p=>p.classList.toggle("active",p.id===`day-${id}`));
+  qsa(".day-panel").forEach(p=>{const on=p.id===`day-${id}`;p.classList.toggle("active",on);if(on){p.classList.remove("panel-enter");requestAnimationFrame(()=>p.classList.add("panel-enter"))}});
 
   // Mobile: only the tab bar itself scrolls. scrollIntoView moved the whole
   // viewport horizontally on the final travel day and clipped the page.
@@ -231,7 +231,7 @@ function renderMap(places){
 
   list.innerHTML=`<section class="map-detail" id="mapDetail" aria-live="polite"></section><div class="place-list-items" id="placeListItems"></div>`;
   const detail=qs("#mapDetail",list),items=qs("#placeListItems",list);
-  items.innerHTML=validPlaces.map((p,i)=>{const c=styleFor(p.category);return `<article class="place-card" data-place="${i}" data-category="${esc(p.category)}" tabindex="0" role="button" aria-label="${esc(p.title)} auf der Karte anzeigen"><img src="${esc(p.image)}" alt="${esc(p.title)}"><div class="place-card-copy"><span class="place-category" style="--category:${c.color}">${esc(p.category)}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
+  items.innerHTML=validPlaces.map((p,i)=>{const c=styleFor(p.category);return `<article class="place-card" data-place="${i}" data-category="${esc(p.category)}" tabindex="0" role="button" aria-label="${esc(p.title)} auf der Karte anzeigen"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async"><div class="place-card-copy"><span class="place-category" style="--category:${c.color}">${esc(p.category)}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
 
   const toolbar=legend.closest('.map-toolbar');
   let viewSwitch=qs('.map-view-switch',toolbar);
@@ -283,17 +283,17 @@ function renderMap(places){
     if(currentView==='trip'){
       const hotel=validPlaces.find(place=>place.category==='Hotel')||p;
       const doc=tripMapDocument(hotel).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-      canvas.innerHTML=`<div class="travel-map-frame"><iframe title="Gesamtreise von Rohrbach nach Brüssel" srcdoc="${doc}" loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe><div class="travel-map-label"><span style="--pin:#0a49a5">🚌</span><div><small>Gesamtreise</small><strong>BS Rohrbach → ibis Brussels City Centre</strong></div></div></div>`;
+      canvas.innerHTML=`<div class="travel-map-frame is-loading"><span class="map-loader" aria-hidden="true"></span><iframe onload="this.parentElement.classList.remove('is-loading')" title="Gesamtreise von Rohrbach nach Brüssel" srcdoc="${doc}" loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe><div class="travel-map-label"><span style="--pin:#0a49a5">🚌</span><div><small>Gesamtreise</small><strong>BS Rohrbach → ibis Brussels City Centre</strong></div></div></div>`;
       return;
     }
     const doc=cityMapDocument(p).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    canvas.innerHTML=`<div class="travel-map-frame"><iframe title="Interaktive Karte – ${esc(p.title)}" srcdoc="${doc}" loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe><div class="travel-map-label"><span style="--pin:${styleFor(p.category).color}">${esc(styleFor(p.category).icon)}</span><div><small>Aktuell ausgewählt · Zoom ${placeZoom(p)}</small><strong>${esc(p.title)}</strong></div></div></div>`;
+    canvas.innerHTML=`<div class="travel-map-frame is-loading"><span class="map-loader" aria-hidden="true"></span><iframe onload="this.parentElement.classList.remove('is-loading')" title="Interaktive Karte – ${esc(p.title)}" srcdoc="${doc}" loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe><div class="travel-map-label"><span style="--pin:${styleFor(p.category).color}">${esc(styleFor(p.category).icon)}</span><div><small>Aktuell ausgewählt · Zoom ${placeZoom(p)}</small><strong>${esc(p.title)}</strong></div></div></div>`;
   }
 
   function renderDetail(index){
     const p=validPlaces[index],c=styleFor(p.category);if(!p)return;
     const route=p.maps||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address||p.title)}`;
-    detail.innerHTML=`<div class="map-detail-media"><img src="${esc(p.image)}" alt="${esc(p.title)}"><span class="map-detail-badge" style="--detail:${c.color}">${esc(p.category)}</span>${p.imageCredit?`<small class="map-image-credit">${esc(p.imageCredit)}</small>`:""}</div><div class="map-detail-copy"><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}<div class="map-detail-meta">${p.address?`<span><b>Adresse</b>${esc(p.address)}</span>`:""}${p.walk?`<span><b>Entfernung</b>${esc(p.walk)}</span>`:""}</div><a class="map-detail-route" href="${esc(route)}" target="_blank" rel="noopener">Navigation öffnen <span>↗</span></a></div>`;
+    detail.innerHTML=`<div class="map-detail-media"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async"><span class="map-detail-badge" style="--detail:${c.color}">${esc(p.category)}</span>${p.imageCredit?`<small class="map-image-credit">${esc(p.imageCredit)}</small>`:""}</div><div class="map-detail-copy"><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}<div class="map-detail-meta">${p.address?`<span><b>Adresse</b>${esc(p.address)}</span>`:""}${p.walk?`<span><b>Entfernung</b>${esc(p.walk)}</span>`:""}</div><a class="map-detail-route" href="${esc(route)}" target="_blank" rel="noopener">Navigation öffnen <span>↗</span></a></div>`;
   }
 
   function setActive(index,{refreshMap=true}={}){
@@ -357,7 +357,21 @@ function weatherTip({temperature=0,wind=0,precipitation=0,code=0}={}){
 
 function weatherInfo(code=0){if(code===0)return{icon:"☀️",text:"Klar"};if([1,2].includes(code))return{icon:"🌤️",text:"Leicht bewölkt"};if(code===3)return{icon:"☁️",text:"Bewölkt"};if([45,48].includes(code))return{icon:"🌫️",text:"Nebel"};if(code>=51&&code<=67)return{icon:"🌧️",text:"Regen"};if(code>=71&&code<=77)return{icon:"🌨️",text:"Schnee"};if(code>=80&&code<=82)return{icon:"🌦️",text:"Regenschauer"};if(code>=95)return{icon:"⛈️",text:"Gewitter"};return{icon:"🌥️",text:"Wechselhaft"}}
 
-function renderGallery(items){const cats=["Alle",...new Set(items.map(x=>x.day).filter(Boolean))];qs("#galleryFilters").innerHTML=cats.map((c,i)=>`<button class="filter-button ${i===0?'active':''}" data-filter="${esc(c)}">${esc(c)}</button>`).join("");const draw=filter=>{activeGallery=filter==="Alle"?items:items.filter(x=>x.day===filter);qs("#galleryGrid").innerHTML=activeGallery.map((p,i)=>`<figure class="gallery-item" data-index="${i}" tabindex="0"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy"><figcaption><b>${esc(p.title)}</b><span>${esc(p.day)}</span></figcaption></figure>`).join("");qsa(".gallery-item").forEach(el=>{const open=()=>openLightbox(Number(el.dataset.index));el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter")open()})})};draw("Alle");qsa(".filter-button").forEach(b=>b.addEventListener("click",()=>{qsa(".filter-button").forEach(x=>x.classList.remove("active"));b.classList.add("active");draw(b.dataset.filter)}))}
+function renderGallery(items){
+  const cats=["Alle",...new Set(items.map(x=>x.day).filter(Boolean))],grid=qs("#galleryGrid");
+  qs("#galleryFilters").innerHTML=cats.map((c,i)=>`<button class="filter-button ${i===0?'active':''}" data-filter="${esc(c)}" aria-pressed="${i===0}">${esc(c)}</button>`).join("");
+  const draw=filter=>{
+    grid.classList.add("is-updating");
+    activeGallery=filter==="Alle"?items:items.filter(x=>x.day===filter);
+    window.setTimeout(()=>{
+      grid.innerHTML=activeGallery.map((p,i)=>`<figure class="gallery-item" data-index="${i}" tabindex="0" style="--gallery-order:${i}"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async"><figcaption><b>${esc(p.title)}</b><span>${esc(p.day)}</span></figcaption></figure>`).join("");
+      qsa(".gallery-item",grid).forEach(el=>{const open=()=>openLightbox(Number(el.dataset.index));el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})});
+      requestAnimationFrame(()=>grid.classList.remove("is-updating"));
+    },120);
+  };
+  draw("Alle");
+  qsa(".filter-button").forEach(b=>b.addEventListener("click",()=>{qsa(".filter-button").forEach(x=>{x.classList.remove("active");x.setAttribute("aria-pressed","false")});b.classList.add("active");b.setAttribute("aria-pressed","true");draw(b.dataset.filter)}));
+}
 let lightboxIndex=0,touchStart=0;function setupLightbox(){qs("#lightboxClose").addEventListener("click",closeLightbox);qs("#lightboxPrev").addEventListener("click",()=>moveLightbox(-1));qs("#lightboxNext").addEventListener("click",()=>moveLightbox(1));qs("#lightbox").addEventListener("click",e=>{if(e.target.id==="lightbox")closeLightbox()});document.addEventListener("keydown",e=>{if(qs("#lightbox").hidden)return;if(e.key==="Escape")closeLightbox();if(e.key==="ArrowLeft")moveLightbox(-1);if(e.key==="ArrowRight")moveLightbox(1)});qs("#lightbox").addEventListener("touchstart",e=>touchStart=e.changedTouches[0].clientX,{passive:true});qs("#lightbox").addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-touchStart;if(Math.abs(dx)>60)moveLightbox(dx>0?-1:1)},{passive:true})}
 function openLightbox(i){lightboxIndex=i;updateLightbox();qs("#lightbox").hidden=false;document.body.style.overflow="hidden"}function closeLightbox(){qs("#lightbox").hidden=true;document.body.style.overflow=""}function moveLightbox(d){lightboxIndex=(lightboxIndex+d+activeGallery.length)%activeGallery.length;updateLightbox()}function updateLightbox(){const p=activeGallery[lightboxIndex];if(!p)return;qs("#lightboxImage").src=p.image;qs("#lightboxImage").alt=p.title;qs("#lightboxTitle").textContent=p.title;qs("#lightboxCaption").textContent=p.description||p.day||""}
 
@@ -367,7 +381,8 @@ function renderDownloads(items){const rows=items.filter(x=>x.published&&x.file);
 function renderFaq(items){qs("#faqList").innerHTML=items.map((x,i)=>`<article class="faq-item"><button aria-expanded="false">${esc(x.question)}<span>＋</span></button><div class="faq-answer">${esc(x.answer)}</div></article>`).join("");qsa(".faq-item button").forEach(b=>b.addEventListener("click",()=>{const item=b.parentElement,open=item.classList.toggle("open");b.setAttribute("aria-expanded",String(open));qs("span",b).textContent=open?"−":"＋"}))}
 
 function bindNavLinks(){const nav=qs("#mainNav");qsa("a",nav).forEach(a=>a.addEventListener("click",()=>nav.classList.remove("open")))}
-function setupNav(){const toggle=qs("#navToggle"),nav=qs("#mainNav");toggle.addEventListener("click",()=>{const open=nav.classList.toggle("open");toggle.setAttribute("aria-expanded",String(open))});bindNavLinks();addEventListener("scroll",()=>qs("#siteHeader").classList.toggle("scrolled",scrollY>20),{passive:true})}
+function setupNav(){const toggle=qs("#navToggle"),nav=qs("#mainNav");toggle.addEventListener("click",()=>{const open=nav.classList.toggle("open");toggle.setAttribute("aria-expanded",String(open))});document.addEventListener("click",e=>{if(nav.classList.contains("open")&&!nav.contains(e.target)&&!toggle.contains(e.target)){nav.classList.remove("open");toggle.setAttribute("aria-expanded","false")}});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&nav.classList.contains("open")){nav.classList.remove("open");toggle.setAttribute("aria-expanded","false");toggle.focus()}});bindNavLinks();addEventListener("scroll",()=>qs("#siteHeader").classList.toggle("scrolled",scrollY>20),{passive:true})}
+function setupActiveNavigation(){if(!("IntersectionObserver" in window))return;const links=qsa('#mainNav a[href^="#"]'),sections=links.map(a=>qs(a.getAttribute("href"))).filter(Boolean);const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;links.forEach(a=>{const active=a.getAttribute("href")==="#"+visible.target.id;a.classList.toggle("current",active);if(active)a.setAttribute("aria-current","location");else a.removeAttribute("aria-current")})},{rootMargin:"-28% 0px -58% 0px",threshold:[0,.2,.5]});sections.forEach(section=>observer.observe(section))}
 function setupReveal(){const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible")}),{threshold:.1});qsa(".reveal").forEach(x=>obs.observe(x))}
 function setupPwa(){let prompt;const btn=qs("#installButton");addEventListener("beforeinstallprompt",e=>{e.preventDefault();prompt=e;btn.hidden=false});btn.addEventListener("click",async()=>{if(!prompt)return;prompt.prompt();await prompt.userChoice;prompt=null;btn.hidden=true});if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
 init();

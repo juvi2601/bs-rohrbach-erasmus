@@ -1092,3 +1092,44 @@ nav a:hover::after{transform:scaleX(1)}
 }
 
 .map-image-credit{position:absolute;right:10px;bottom:10px;background:rgba(5,34,74,.78);color:#fff;padding:4px 7px;border-radius:7px;font-size:.68rem;line-height:1.2;backdrop-filter:blur(4px)}
+
+
+/* Version 9.2 – Feinschliff, mobile Bedienung und Performance */
+html{scroll-behavior:smooth;scroll-padding-top:92px}
+body{overflow-x:hidden}
+nav a.current::after,nav a[aria-current="location"]::after{transform:scaleX(1)}
+.day-panel.panel-enter{animation:panelEnter .38s cubic-bezier(.2,.75,.25,1) both}
+@keyframes panelEnter{from{opacity:.45;transform:translateY(10px)}to{opacity:1;transform:none}}
+.timeline-row{transition:transform .2s ease,opacity .2s ease}
+.timeline-row:hover{transform:translateY(-2px)}
+.timeline-card-head .status-dot{display:inline-flex;align-items:center;gap:5px}
+.status-dot.confirmed::before,.status-dot.pending::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px color-mix(in srgb,currentColor 13%,transparent)}
+.gallery-grid{transition:opacity .18s ease,transform .18s ease}
+.gallery-grid.is-updating{opacity:.18;transform:translateY(5px)}
+.gallery-item{animation:galleryIn .42s cubic-bezier(.2,.75,.25,1) both;animation-delay:min(calc(var(--gallery-order,0)*35ms),280ms);will-change:transform,opacity}
+@keyframes galleryIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.gallery-item img{backface-visibility:hidden}
+.travel-map-frame.is-loading::after{content:"Karte wird geladen …";position:absolute;inset:0;display:grid;place-items:center;padding-top:64px;background:linear-gradient(135deg,#eaf1f8,#dce8f3);color:#53647a;font-size:13px;font-weight:800;letter-spacing:.02em;z-index:1}
+.map-loader{position:absolute;z-index:3;left:50%;top:calc(50% - 22px);width:34px;height:34px;margin:-17px;border:3px solid rgba(10,73,165,.16);border-top-color:#0a49a5;border-radius:50%;animation:mapSpin .8s linear infinite}
+.travel-map-frame:not(.is-loading) .map-loader{display:none}
+.travel-map-frame iframe,.travel-map-label{transition:opacity .25s ease}
+.travel-map-frame.is-loading iframe,.travel-map-frame.is-loading .travel-map-label{opacity:0}
+@keyframes mapSpin{to{transform:rotate(360deg)}}
+.filter-button,.day-tab,.map-filter,.map-view-switch button,.program-pager-button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+img{content-visibility:auto}
+@media(max-width:760px){
+  html{scroll-padding-top:76px}
+  .section{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+  .day-tabs,.filter-row,.map-legend{overscroll-behavior-inline:contain;scroll-snap-type:x proximity}
+  .day-tab,.filter-button,.map-filter{scroll-snap-align:start}
+  .program-pager{gap:10px}.program-pager-button{min-width:0;padding:14px}.program-pager-button strong{font-size:12px}
+  .timeline-row:hover{transform:none}
+  .gallery-item{animation-delay:min(calc(var(--gallery-order,0)*22ms),160ms)}
+  .lightbox figure{max-height:calc(100dvh - 120px)}
+  .lightbox figure img{max-height:calc(100dvh - 190px)}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .gallery-item,.day-panel.panel-enter{animation:none!important}
+}
