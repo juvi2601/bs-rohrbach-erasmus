@@ -15,7 +15,7 @@
   </header>
   <main class="shell media-shell">
     <section class="welcome media-welcome">
-      <div><p class="eyebrow">Version 10.3</p><h1>Medienübersicht</h1><p>Hier siehst du, welche Bilder derzeit in den wichtigsten Bereichen der Website verwendet werden. Neue Bilder lädst du über die CMS-Mediathek hoch.</p></div>
+      <div><p class="eyebrow">Version 10.3.1</p><h1>Medienübersicht</h1><p>Hier siehst du, welche Bilder derzeit in den wichtigsten Bereichen der Website verwendet werden. Neue Bilder lädst du über die CMS-Mediathek hoch.</p></div>
       <div class="status-card ready"><span class="status-dot"></span><div><strong id="media-total">Bilder werden geladen</strong><small id="media-uploaded">Verwendung wird geprüft</small></div></div>
     </section>
 
@@ -38,6 +38,31 @@
 
     <section class="notice media-note"><span>💡</span><div><strong>Wichtig</strong><p>Ein Bild sollte erst gelöscht werden, wenn es in keinem Bereich mehr verwendet wird. Die Übersicht zeigt Verwendungen in Startseite, Programm, Galerie und Karte.</p></div></section>
   </main>
+
+  <dialog id="media-modal" class="media-modal" aria-labelledby="modal-title">
+    <div class="media-modal-panel">
+      <button id="modal-close" class="modal-close" type="button" aria-label="Dialog schließen">×</button>
+      <div class="modal-preview"><img id="modal-image" alt=""></div>
+      <div class="modal-content">
+        <p class="eyebrow">Bilddetails</p>
+        <h2 id="modal-title">Bild</h2>
+        <code id="modal-path"></code>
+        <div class="media-meta">
+          <div><span>Format</span><strong id="modal-type">–</strong></div>
+          <div><span>Abmessungen</span><strong id="modal-dimensions">–</strong></div>
+          <div><span>Dateigröße</span><strong id="modal-size">–</strong></div>
+        </div>
+        <div id="modal-warning" class="media-warning" hidden><strong>⚠ Mehrfach verwendet</strong><p id="modal-warning-text"></p></div>
+        <h3>Verwendet in</h3>
+        <ul id="modal-usages" class="usage-list"></ul>
+        <div class="modal-actions">
+          <button id="modal-copy" type="button" class="button ghost">Pfad kopieren</button>
+          <a class="button primary" href="/admin/cms.html#/media">In Mediathek öffnen</a>
+        </div>
+        <p class="modal-hint">Zum Ersetzen lädst du die neue Datei in der Mediathek hoch und wählst sie anschließend im jeweiligen Inhaltsbereich aus.</p>
+      </div>
+    </div>
+  </dialog>
   <script src="/admin/media.js"></script>
 </body>
 </html>
