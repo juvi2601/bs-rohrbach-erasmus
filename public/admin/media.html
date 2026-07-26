@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Medienübersicht – BS Rohrbach Erasmus+</title>
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/admin/" aria-label="Zum Admin-Dashboard"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Medienverwaltung</small></span></a>
+    <div class="top-actions"><a class="button ghost" href="/admin/">Dashboard</a><a class="button primary" href="/admin/cms.html#/media">Mediathek öffnen</a></div>
+  </header>
+  <main class="shell media-shell">
+    <section class="welcome media-welcome">
+      <div><p class="eyebrow">Version 10.3</p><h1>Medienübersicht</h1><p>Hier siehst du, welche Bilder derzeit in den wichtigsten Bereichen der Website verwendet werden. Neue Bilder lädst du über die CMS-Mediathek hoch.</p></div>
+      <div class="status-card ready"><span class="status-dot"></span><div><strong id="media-total">Bilder werden geladen</strong><small id="media-uploaded">Verwendung wird geprüft</small></div></div>
+    </section>
+
+    <section class="media-actions" aria-label="Medienaktionen">
+      <a class="media-action" href="/admin/cms.html#/media"><span>⬆️</span><strong>Bild hochladen</strong><small>Zentrale CMS-Mediathek öffnen</small></a>
+      <a class="media-action" href="/admin/cms.html#/collections/gallery"><span>📷</span><strong>Galerie bearbeiten</strong><small>Fotos, Texte und Nachweise pflegen</small></a>
+      <a class="media-action" href="/admin/cms.html#/collections/site"><span>🏠</span><strong>Startseitenbilder</strong><small>Titelbild, Hotel und weitere Bilder</small></a>
+      <a class="media-action" href="/admin/cms.html#/collections/places"><span>📍</span><strong>Kartenbilder</strong><small>Bilder und Quellen der Orte</small></a>
+    </section>
+
+    <section class="media-toolbar">
+      <label><span>Suche</span><input id="media-search" type="search" placeholder="Titel, Bereich oder Dateiname …"></label>
+      <label><span>Bereich</span><select id="media-filter"><option value="all">Alle Bereiche</option></select></label>
+    </section>
+
+    <section>
+      <div class="section-heading media-heading"><div><p class="eyebrow">Aktuelle Verwendung</p><h2>Bildbestand der Website</h2></div><p id="media-result-count" class="result-count"></p></div>
+      <div id="media-grid" class="media-grid" aria-live="polite"><div class="empty-state">Bilder werden geladen …</div></div>
+    </section>
+
+    <section class="notice media-note"><span>💡</span><div><strong>Wichtig</strong><p>Ein Bild sollte erst gelöscht werden, wenn es in keinem Bereich mehr verwendet wird. Die Übersicht zeigt Verwendungen in Startseite, Programm, Galerie und Karte.</p></div></section>
+  </main>
+  <script src="/admin/media.js"></script>
+</body>
+</html>

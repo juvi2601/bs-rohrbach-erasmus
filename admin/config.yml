@@ -509,10 +509,21 @@ collections:
       - label: Bild
         name: image
         widget: image
+        hint: Bild aus der Mediathek auswählen oder eine neue Datei hochladen. Empfohlen sind JPG oder WebP mit mindestens 1200 px Breite.
+      - label: Alternativtext
+        name: alt
+        widget: string
+        required: false
+        hint: Kurze sachliche Bildbeschreibung für Barrierefreiheit. Bleibt das Feld leer, wird der Titel verwendet.
       - label: Beschreibung
         name: description
         widget: text
         required: false
+      - label: Bildnachweis
+        name: imageCredit
+        widget: string
+        required: false
+        hint: "Bei eigenen Fotos z. B. Foto BS Rohrbach, bei fremden Bildern Quelle und Urheber angeben."
 - name: places
   label: Karte & Orte
   files:
