@@ -570,6 +570,11 @@ collections:
     - label: Orte
       name: places
       widget: list
+      label_singular: Ort
+      allow_add: true
+      collapsed: true
+      minimize_collapsed: true
+      hint: Neue Orte mit „Ort hinzufügen“ anlegen. Die Reihenfolge lässt sich per Ziehen ändern.
       summary: '{{fields.category}} – {{fields.title}}'
       fields:
       - label: Name
@@ -577,15 +582,24 @@ collections:
         widget: string
       - label: Kategorie
         name: category
-        widget: string
-      - label: Breitengrad
-        name: lat
-        widget: number
-        value_type: float
-      - label: Längengrad
-        name: lng
-        widget: number
-        value_type: float
+        widget: select
+        options:
+        - Hotel
+        - Sehenswürdigkeit
+        - EU
+        - Antwerpen
+        - Waterloo
+        - Metro
+        - Essen
+        - Treffpunkt
+        - Bahnhof
+        - Einkauf
+        - Notfall
+        hint: Die Kategorie bestimmt Farbe und Symbol des Markers auf der Website.
+      - label: Position auf der Karte
+        name: coordinates
+        widget: map-point
+        hint: Auf die Karte klicken oder den Marker verschieben. Die Koordinaten werden automatisch gespeichert.
       - label: Adresse
         name: address
         widget: string

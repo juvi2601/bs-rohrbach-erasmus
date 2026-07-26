@@ -214,6 +214,7 @@ function activateDay(id,scroll=false){
 function renderToday(days){const site=window.__SITE||{};const t=site.today||{};const now=new Date(),start=new Date(site.departure||"2026-11-21T20:00:00+01:00"),end=new Date(site.returnDate||"2026-11-26T23:59:00+01:00");let pct=0,label="Vorfreude",day=null;if(now>=start&&now<=end){pct=Math.min(100,Math.max(0,(now-start)/(end-start)*100));label=`Tag ${Math.max(1,Math.ceil((now-start)/86400000))} von 5`;const ids=["sa","so","mo","di","mi","do"];day=days.find(d=>d.id===ids[Math.min(ids.length-1,Math.floor((now-start)/86400000))])}else if(now>end){pct=100;label=t.afterLabel||"Reise abgeschlossen"}qs("#progressBar").style.width=`${pct}%`;qs("#progressValue").textContent=`${Math.round(pct)} %`;qs("#progressLabel").textContent=label;if(day){qs("#todayTitle").textContent=day.title;qs("#todayText").textContent=day.subtitle;qs("#progressDate").textContent=`${day.short}, ${day.date}`;qs("#todaySchedule").innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");activateDay(day.id)}else if(now>end){qs("#todayTitle").textContent=t.afterTitle||"Schöne Erinnerungen an Brüssel";qs("#todayText").textContent=t.afterText||"Die Reise ist abgeschlossen. Die geschützte Galerie bleibt für die Reisegruppe erreichbar."}}
 
 function renderMap(places){
+  places=(places||[]).map(place=>({ ...place, lat:place.coordinates?.lat??place.lat, lng:place.coordinates?.lng??place.lng }));
   const canvas=qs("#map"),list=qs("#placeList"),legend=qs("#mapLegend"),reset=qs("#mapReset");
   if(!canvas||!list||!legend||!places.length){if(canvas)canvas.innerHTML='<div class="empty-state">Karte konnte nicht geladen werden.</div>';return}
 
@@ -221,7 +222,9 @@ function renderMap(places){
     "Hotel":{color:"#e63946",icon:"H"},"EU":{color:"#1557b0",icon:"EU"},
     "Sehenswürdigkeit":{color:"#7b2cbf",icon:"★"},"Metro":{color:"#f59e0b",icon:"M"},
     "Essen":{color:"#16a34a",icon:"✦"},"Notfall":{color:"#dc2626",icon:"!"},
-    "Antwerpen":{color:"#0f766e",icon:"A"},"Waterloo":{color:"#64748b",icon:"W"}
+    "Antwerpen":{color:"#0f766e",icon:"A"},"Waterloo":{color:"#64748b",icon:"W"},
+    "Treffpunkt":{color:"#0284c7",icon:"T"},"Bahnhof":{color:"#475569",icon:"B"},
+    "Einkauf":{color:"#be185d",icon:"E"}
   };
   const styleFor=cat=>categories[cat]||{color:"#334155",icon:"•"};
   const validPlaces=places.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)));
