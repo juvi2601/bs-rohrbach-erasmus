@@ -1212,3 +1212,12 @@ footer{padding-top:40px;padding-bottom:40px;align-items:flex-start}
 .lightbox-close:focus-visible,.lightbox-nav:focus-visible{outline-color:#fff}
 img{content-visibility:auto}
 @media(max-width:700px){.lightbox{padding:18px 12px 86px}.lightbox-close{right:14px;top:14px}.lightbox figcaption{padding-inline:8px}}
+
+
+/* Version 10.7 – Live-Reisezentrale */
+.live-status-section{width:min(1180px,calc(100% - 36px));margin:26px auto 0}
+.live-status-card{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;padding:22px 26px;border:1px solid #b9d5e9;border-radius:20px;background:linear-gradient(135deg,#f5fbff,#eaf5fc);box-shadow:0 14px 34px rgba(18,58,99,.09)}
+.live-status-card.success{background:linear-gradient(135deg,#f4fcf8,#e6f7ee);border-color:#b8e1cc}.live-status-card.warning{background:linear-gradient(135deg,#fffaf0,#fff1c9);border-color:#ead28b}.live-status-card.important{background:linear-gradient(135deg,#fff5f5,#ffe2e2);border-color:#efbcbc}
+.live-status-icon{width:58px;height:58px;display:grid;place-items:center;border-radius:17px;background:#fff;font-size:30px;box-shadow:0 8px 22px rgba(18,58,99,.11)}
+.live-status-card .eyebrow{margin:0 0 4px}.live-status-card h2{margin:0;font-size:clamp(21px,3vw,28px);color:#123a63}.live-status-card p:not(.eyebrow){margin:7px 0 0;line-height:1.55}.live-status-card small{display:block;margin-top:7px;color:#607181}
+@media(max-width:620px){.live-status-section{width:min(100% - 24px,1180px)}.live-status-card{grid-template-columns:1fr;padding:20px}.live-status-icon{width:50px;height:50px}}

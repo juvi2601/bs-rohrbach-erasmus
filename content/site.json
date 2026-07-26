@@ -223,5 +223,13 @@
     "version": "Version 10.1.1",
     "updated": "Letzte Aktualisierung: 25.07.2026"
   },
-  "notice": "Noch nicht endgültig bestätigte Punkte sind entsprechend markiert."
+  "notice": "Noch nicht endgültig bestätigte Punkte sind entsprechend markiert.",
+  "liveStatus": {
+    "enabled": false,
+    "type": "info",
+    "emoji": "🚌",
+    "title": "Aktueller Reisestatus",
+    "text": "Hier kann während der Reise eine kurze aktuelle Information veröffentlicht werden.",
+    "updated": ""
+  }
 }

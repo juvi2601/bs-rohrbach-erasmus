@@ -1,4 +1,4 @@
-const CACHE="bsr-travel-v1062";
+const CACHE="bsr-travel-v106";
 const CORE=["/","/index.html","/styles.css","/app.js","/config.js","/manifest.webmanifest","/content/site.json","/content/news.json","/content/program.json","/content/places.json","/content/gallery.json","/content/downloads.json","/content/faq.json","/content/legal.json","/content/diary.json","/version.json"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

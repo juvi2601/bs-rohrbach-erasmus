@@ -88,6 +88,42 @@ collections:
         widget: boolean
         required: false
         default: false
+    - label: Live-Reisestatus
+      name: liveStatus
+      widget: object
+      hint: Kurze aktuelle Information für die Startseite. Der Bereich bleibt unsichtbar, solange „Anzeigen“ deaktiviert ist.
+      fields:
+      - label: Auf der Startseite anzeigen
+        name: enabled
+        widget: boolean
+        default: false
+      - label: Darstellung
+        name: type
+        widget: select
+        options:
+        - label: Information (Blau)
+          value: info
+        - label: Alles in Ordnung (Grün)
+          value: success
+        - label: Hinweis / Änderung (Gelb)
+          value: warning
+        - label: Wichtige Information (Rot)
+          value: important
+      - label: Emoji
+        name: emoji
+        widget: string
+        default: 📢
+      - label: Überschrift
+        name: title
+        widget: string
+      - label: Aktuelle Meldung
+        name: text
+        widget: text
+      - label: Aktualisiert am / um
+        name: updated
+        widget: string
+        required: false
+        hint: Zum Beispiel „24.11.2026, 14:30 Uhr“.
     - label: Schnellzugriffe
       name: quickLinks
       widget: list

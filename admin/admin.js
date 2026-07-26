@@ -34,22 +34,11 @@ const setText = (id, value) => {
 };
 
 const legalSectionExists = (legal, key, titleNeedle) => {
-  if (!legal || typeof legal !== 'object') return false;
-
-  const direct = legal[key];
+  const direct = legal?.[key];
   if (direct && typeof direct === 'object') {
-    const hasTitle = Boolean(normalizeText(direct.title));
-    const hasContent = Array.isArray(direct.blocks) && direct.blocks.length > 0;
-    if (hasTitle || hasContent) return true;
+    return Boolean(normalizeText(direct.title) || Array.isArray(direct.blocks));
   }
-
-  const footerMatch = Array.isArray(legal.footerLinks) && legal.footerLinks.some(entry => {
-    const haystack = `${normalizeText(entry?.panel)} ${normalizeText(entry?.label)}`.toLowerCase();
-    return haystack.includes(titleNeedle);
-  });
-  if (footerMatch) return true;
-
-  const collections = [legal.panels, legal.sections, legal.items].filter(Array.isArray);
+  const collections = [legal?.panels, legal?.sections, legal?.items].filter(Array.isArray);
   return collections.some(list => list.some(entry => {
     const haystack = `${normalizeText(entry?.id)} ${normalizeText(entry?.key)} ${normalizeText(entry?.panel)} ${normalizeText(entry?.title)} ${normalizeText(entry?.label)}`.toLowerCase();
     return haystack.includes(titleNeedle);
@@ -99,13 +88,27 @@ async function loadDashboard() {
   setCount('count-downloads', itemCount(downloads, 'downloads'));
   setCount('count-places', itemCount(places, 'places'));
   setCount('count-faq', itemCount(faq, 'items'));
-  setCount('count-diary', itemCount(diary, 'entries'));
+  const diaryRows = Array.isArray(diary?.entries) ? diary.entries : [];
+  const diaryPublished = diaryRows.filter(item => item.published === true);
+  const diaryDrafts = diaryRows.filter(item => item.published !== true);
+  setCount('count-diary-published', diaryPublished.length);
+  setCount('count-diary-drafts', diaryDrafts.length);
 
   if (version?.version) {
     const values = document.querySelectorAll('.system-strip strong');
     if (values[0]) values[0].textContent = version.version;
     if (values[1] && version.updated) values[1].textContent = version.updated;
   }
+
+  const departure = new Date(site?.departure || '2026-11-21T20:00:00+01:00');
+  const returnDate = new Date(site?.returnDate || '2026-11-26T23:59:00+01:00');
+  const now = new Date();
+  let phase = 'Vor der Reise', phaseDetail = `${Math.max(0, Math.ceil((departure-now)/86400000))} Tage bis zur Abfahrt`;
+  if (now >= departure && now <= returnDate) { const day = Math.max(1, Math.min(6, Math.floor((now-departure)/86400000)+1)); phase = `Tag ${day} von 6`; phaseDetail = 'Die Brüsselreise läuft.'; }
+  if (now > returnDate) { phase = 'Reise abgeschlossen'; phaseDetail = 'Das Reisetagebuch und die Galerie bleiben erreichbar.'; }
+  const phaseEl=document.getElementById('journey-phase'),phaseDetailEl=document.getElementById('journey-detail');if(phaseEl)phaseEl.textContent=phase;if(phaseDetailEl)phaseDetailEl.textContent=phaseDetail;
+  const live=site?.liveStatus||{};const liveTitle=document.getElementById('dashboard-live-title'),liveText=document.getElementById('dashboard-live-text');if(liveTitle)liveTitle.textContent=live.enabled?`${live.emoji||'📢'} ${live.title||'Aktueller Status'}`:'Nicht veröffentlicht';if(liveText)liveText.textContent=live.enabled?(live.text||'Keine Meldung eingetragen.'):'Der Status ist derzeit ausgeblendet.';
+  const latest=[...diaryPublished].sort((a,b)=>`${b.date||''} ${b.time||''}`.localeCompare(`${a.date||''} ${a.time||''}`))[0];const lastTitle=document.getElementById('last-diary-title'),lastDate=document.getElementById('last-diary-date');if(lastTitle)lastTitle.textContent=latest?.title||'Noch keiner';if(lastDate)lastDate.textContent=latest?.date?`Veröffentlicht am ${latest.date}`:'Kein veröffentlichter Eintrag';
 
   const card = document.querySelector('.status-card');
   const title = card?.querySelector('strong');
@@ -152,7 +155,7 @@ async function loadDashboard() {
     preflightResult('Galerie und Alternativtexte', galleryRows.length && missingAlt === 0 ? 'ok' : galleryRows.length ? 'warn' : 'fail', galleryRows.length ? (missingAlt ? `${galleryRows.length} Fotos geprüft; bei ${missingAlt} Foto${missingAlt === 1 ? '' : 's'} fehlt ein Alternativtext.` : `${galleryRows.length} Fotos geprüft; alle besitzen einen Alternativtext.`) : 'Die Galerie enthält noch keine Fotos.'),
     preflightResult('Öffentliche Downloads', publishedDownloads.length ? 'ok' : 'warn', publishedDownloads.length ? `${publishedDownloads.length} Dokument${publishedDownloads.length === 1 ? '' : 'e'} veröffentlicht.` : 'Derzeit ist kein Download veröffentlicht.'),
     preflightResult('Impressum und Datenschutz', hasImpressum && hasDatenschutz ? 'ok' : 'fail', hasImpressum && hasDatenschutz ? 'Impressum und Datenschutzerklärung wurden erkannt.' : `${hasImpressum ? '' : 'Impressum fehlt oder ist nicht lesbar. '}${hasDatenschutz ? '' : 'Datenschutz fehlt oder ist nicht lesbar.'}`.trim()),
-    preflightResult('Versionsstand', version?.version === '10.6.2' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
+    preflightResult('Versionsstand', version?.version === '10.6.1' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
   ]);
   if (refresh) refresh.disabled = false;
 }

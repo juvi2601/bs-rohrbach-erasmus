@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Admin-Dashboard – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=10.6.2">
+  <link rel="stylesheet" href="/admin/admin.css?v=10.7">
 </head>
 <body>
   <header class="topbar">
@@ -25,7 +25,7 @@
       <div>
         <p class="eyebrow">Brüssel 2026</p>
         <h1>Admin-Dashboard</h1>
-        <p>Version 10.6.2 stellt sicher, dass Dashboard und Prüfungen aus dem tatsächlich veröffentlichten Cloudflare-Verzeichnis geladen werden.</p>
+        <p>Version 10.6.1 erweitert den Pre-Flight-Check zu einem übersichtlichen System-Dashboard und erkennt die rechtlichen Bereiche zuverlässiger.</p>
       </div>
       <div class="status-card">
         <span class="status-dot"></span>
@@ -34,7 +34,7 @@
     </section>
 
     <section class="system-strip" aria-label="Systeminformationen">
-      <div><span>Version</span><strong>10.6.2</strong></div>
+      <div><span>Version</span><strong>10.7</strong></div>
       <div><span>Letzte Aktualisierung</span><strong>26.07.2026</strong></div>
       <div><span>Veröffentlichung</span><strong>GitHub → Cloudflare</strong></div>
     </section>
@@ -42,7 +42,7 @@
 
     <section class="preflight" aria-labelledby="preflight-title">
       <div class="section-heading">
-        <div><p class="eyebrow">Quality Update 10.6.2</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
+        <div><p class="eyebrow">Live-Reisezentrale 10.7.1</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
         <button class="button ghost preflight-refresh" id="preflightRefresh" type="button">Erneut prüfen</button>
       </div>
       <div class="preflight-summary" id="preflightSummary" aria-live="polite">
@@ -69,14 +69,30 @@
       </div>
     </section>
 
-    <section class="stats" aria-label="Inhaltsübersicht">
-      <article><span>News</span><strong id="count-news">–</strong><small>Beiträge</small></article>
-      <article><span>Programm</span><strong id="count-program">–</strong><small>Reisetage</small></article>
-      <article><span>Galerie</span><strong id="count-gallery">–</strong><small>Fotos</small></article>
-      <article><span>Downloads</span><strong id="count-downloads">–</strong><small>Dokumente</small></article>
-      <article><span>Karte</span><strong id="count-places">–</strong><small>Orte</small></article>
-      <article><span>FAQ</span><strong id="count-faq">–</strong><small>Fragen</small></article>
-      <article><span>Reisetagebuch</span><strong id="count-diary">–</strong><small>Einträge</small></article>
+    <section class="control-center" aria-labelledby="control-title">
+      <div class="section-heading"><div><p class="eyebrow">Live-Reisezentrale 10.7</p><h2 id="control-title">Website auf einen Blick</h2></div></div>
+      <div class="journey-overview">
+        <article class="journey-phase"><span>Reisephase</span><strong id="journey-phase">Wird berechnet …</strong><small id="journey-detail"></small></article>
+        <article class="current-live"><span>Aktueller Live-Status</span><strong id="dashboard-live-title">Nicht veröffentlicht</strong><small id="dashboard-live-text">Der Status ist derzeit ausgeblendet.</small></article>
+        <article><span>Letzter Beitrag</span><strong id="last-diary-title">Noch keiner</strong><small id="last-diary-date">Kein veröffentlichter Eintrag</small></article>
+      </div>
+      <div class="stats" aria-label="Inhaltsübersicht">
+        <article><span>Veröffentlichte Berichte</span><strong id="count-diary-published">–</strong><small>Reisetagebuch</small></article>
+        <article><span>Entwürfe</span><strong id="count-diary-drafts">–</strong><small>Reisetagebuch</small></article>
+        <article><span>Galerie</span><strong id="count-gallery">–</strong><small>Fotos</small></article>
+        <article><span>Downloads</span><strong id="count-downloads">–</strong><small>Dokumente</small></article>
+        <article><span>Karte</span><strong id="count-places">–</strong><small>Orte</small></article>
+        <article><span>FAQ</span><strong id="count-faq">–</strong><small>Fragen</small></article>
+        <article><span>Programm</span><strong id="count-program">–</strong><small>Reisetage</small></article>
+        <article><span>News</span><strong id="count-news">–</strong><small>Beiträge</small></article>
+      </div>
+      <div class="quick-actions" aria-label="Schnellaktionen">
+        <a href="/admin/cms.html#/collections/site/entries/site"><span>📢</span><strong>Live-Status ändern</strong><small>Aktuelle Meldung auf der Startseite</small></a>
+        <a href="/admin/cms.html#/collections/diary/new"><span>➕</span><strong>Neuer Tagebucheintrag</strong><small>Bericht als Entwurf anlegen</small></a>
+        <a href="/admin/cms.html#/collections/gallery"><span>📸</span><strong>Galerie bearbeiten</strong><small>Öffentliche Reisemotive pflegen</small></a>
+        <a href="/admin/cms.html#/collections/downloads"><span>📥</span><strong>Downloads bearbeiten</strong><small>Dokumente veröffentlichen</small></a>
+        <a href="/admin/cms.html#/collections/places"><span>📍</span><strong>Kartenorte bearbeiten</strong><small>Marker und Orte verwalten</small></a>
+      </div>
     </section>
 
     <section>
@@ -161,6 +177,6 @@
       <div><strong>Hinweis zum Speichern</strong><p>Nach dem Speichern legt das CMS die Änderung in GitHub ab. Cloudflare veröffentlicht den neuen Stand anschließend automatisch. Das kann kurz dauern.</p></div>
     </section>
 </main>
-  <script src="/admin/admin.js?v=10.6.2"></script>
+  <script src="/admin/admin.js?v=10.7"></script>
 </body>
 </html>

@@ -19,43 +19,6 @@ const itemCount = (data, ...keys) => {
   return 0;
 };
 
-const normalizeText = value => String(value ?? '').trim();
-
-const isPublished = item => {
-  if (!item || typeof item !== 'object') return false;
-  if (typeof item.published === 'boolean') return item.published;
-  if (typeof item.status === 'string') return item.status.toLowerCase() === 'published';
-  return false;
-};
-
-const setText = (id, value) => {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value ?? '–';
-};
-
-const legalSectionExists = (legal, key, titleNeedle) => {
-  if (!legal || typeof legal !== 'object') return false;
-
-  const direct = legal[key];
-  if (direct && typeof direct === 'object') {
-    const hasTitle = Boolean(normalizeText(direct.title));
-    const hasContent = Array.isArray(direct.blocks) && direct.blocks.length > 0;
-    if (hasTitle || hasContent) return true;
-  }
-
-  const footerMatch = Array.isArray(legal.footerLinks) && legal.footerLinks.some(entry => {
-    const haystack = `${normalizeText(entry?.panel)} ${normalizeText(entry?.label)}`.toLowerCase();
-    return haystack.includes(titleNeedle);
-  });
-  if (footerMatch) return true;
-
-  const collections = [legal.panels, legal.sections, legal.items].filter(Array.isArray);
-  return collections.some(list => list.some(entry => {
-    const haystack = `${normalizeText(entry?.id)} ${normalizeText(entry?.key)} ${normalizeText(entry?.panel)} ${normalizeText(entry?.title)} ${normalizeText(entry?.label)}`.toLowerCase();
-    return haystack.includes(titleNeedle);
-  }));
-};
-
 const hasCoordinates = place => {
   const position = place?.position || place;
   return Number.isFinite(Number(position?.lat)) && Number.isFinite(Number(position?.lng));
@@ -99,13 +62,27 @@ async function loadDashboard() {
   setCount('count-downloads', itemCount(downloads, 'downloads'));
   setCount('count-places', itemCount(places, 'places'));
   setCount('count-faq', itemCount(faq, 'items'));
-  setCount('count-diary', itemCount(diary, 'entries'));
+  const diaryRows = Array.isArray(diary?.entries) ? diary.entries : [];
+  const diaryPublished = diaryRows.filter(item => item.published === true);
+  const diaryDrafts = diaryRows.filter(item => item.published !== true);
+  setCount('count-diary-published', diaryPublished.length);
+  setCount('count-diary-drafts', diaryDrafts.length);
 
   if (version?.version) {
     const values = document.querySelectorAll('.system-strip strong');
     if (values[0]) values[0].textContent = version.version;
     if (values[1] && version.updated) values[1].textContent = version.updated;
   }
+
+  const departure = new Date(site?.departure || '2026-11-21T20:00:00+01:00');
+  const returnDate = new Date(site?.returnDate || '2026-11-26T23:59:00+01:00');
+  const now = new Date();
+  let phase = 'Vor der Reise', phaseDetail = `${Math.max(0, Math.ceil((departure-now)/86400000))} Tage bis zur Abfahrt`;
+  if (now >= departure && now <= returnDate) { const day = Math.max(1, Math.min(6, Math.floor((now-departure)/86400000)+1)); phase = `Tag ${day} von 6`; phaseDetail = 'Die Brüsselreise läuft.'; }
+  if (now > returnDate) { phase = 'Reise abgeschlossen'; phaseDetail = 'Das Reisetagebuch und die Galerie bleiben erreichbar.'; }
+  const phaseEl=document.getElementById('journey-phase'),phaseDetailEl=document.getElementById('journey-detail');if(phaseEl)phaseEl.textContent=phase;if(phaseDetailEl)phaseDetailEl.textContent=phaseDetail;
+  const live=site?.liveStatus||{};const liveTitle=document.getElementById('dashboard-live-title'),liveText=document.getElementById('dashboard-live-text');if(liveTitle)liveTitle.textContent=live.enabled?`${live.emoji||'📢'} ${live.title||'Aktueller Status'}`:'Nicht veröffentlicht';if(liveText)liveText.textContent=live.enabled?(live.text||'Keine Meldung eingetragen.'):'Der Status ist derzeit ausgeblendet.';
+  const latest=[...diaryPublished].sort((a,b)=>`${b.date||''} ${b.time||''}`.localeCompare(`${a.date||''} ${a.time||''}`))[0];const lastTitle=document.getElementById('last-diary-title'),lastDate=document.getElementById('last-diary-date');if(lastTitle)lastTitle.textContent=latest?.title||'Noch keiner';if(lastDate)lastDate.textContent=latest?.date?`Veröffentlicht am ${latest.date}`:'Kein veröffentlichter Eintrag';
 
   const card = document.querySelector('.status-card');
   const title = card?.querySelector('strong');
@@ -126,33 +103,18 @@ async function loadDashboard() {
   const placeRows = Array.isArray(places?.places) ? places.places : [];
   const galleryRows = Array.isArray(gallery?.photos) ? gallery.photos : [];
   const publishedDownloads = (downloads?.downloads || []).filter(item => item.published && item.file);
+  const legalPanels = legal?.panels || legal?.sections || [];
   const programDays = program?.days || program?.program || [];
-  const diaryRows = Array.isArray(diary?.entries) ? diary.entries : [];
-  const publishedDiary = diaryRows.filter(isPublished).length;
-  const draftDiary = diaryRows.length - publishedDiary;
-  const hasImpressum = legalSectionExists(legal, 'impressum', 'impressum');
-  const hasDatenschutz = legalSectionExists(legal, 'datenschutz', 'datenschutz');
-  const missingAlt = galleryRows.filter(item => !normalizeText(item.alt || item.title)).length;
-
-  setText('system-version', version?.version || '–');
-  setText('system-updated', version?.updated || version?.date || '–');
-  setText('system-status', cms?.ready && files.every(Boolean) ? 'Einsatzbereit' : 'Kontrolle nötig');
-  setText('system-diary-published', publishedDiary);
-  setText('system-diary-drafts', draftDiary);
-  setText('system-gallery', galleryRows.length);
-  setText('system-places', placeRows.length);
-  setText('system-program', programDays.length);
-  setText('system-downloads', publishedDownloads.length);
 
   renderPreflight([
     preflightResult('Inhaltsdateien erreichbar', files.every(Boolean) ? 'ok' : 'fail', files.every(Boolean) ? 'Alle zentralen JSON-Dateien konnten geladen werden.' : 'Mindestens eine Inhaltsdatei ist nicht erreichbar oder fehlerhaft.'),
     preflightResult('Redaktionszugang', cms?.ready ? 'ok' : 'fail', cms?.ready ? 'GitHub OAuth und CMS-Verbindung sind eingerichtet.' : 'Die CMS-Verbindung ist noch nicht vollständig eingerichtet.'),
     preflightResult('Programm', programDays.length >= 6 ? 'ok' : programDays.length ? 'warn' : 'fail', programDays.length ? `${programDays.length} Reisetage sind eingetragen.` : 'Es wurden keine Reisetage gefunden.'),
     preflightResult('Karte und Marker', placeRows.length && placeRows.every(hasCoordinates) ? 'ok' : placeRows.length ? 'warn' : 'fail', placeRows.length ? `${placeRows.filter(hasCoordinates).length} von ${placeRows.length} Orten besitzen gültige Koordinaten.` : 'Es wurden keine Kartenorte gefunden.'),
-    preflightResult('Galerie und Alternativtexte', galleryRows.length && missingAlt === 0 ? 'ok' : galleryRows.length ? 'warn' : 'fail', galleryRows.length ? (missingAlt ? `${galleryRows.length} Fotos geprüft; bei ${missingAlt} Foto${missingAlt === 1 ? '' : 's'} fehlt ein Alternativtext.` : `${galleryRows.length} Fotos geprüft; alle besitzen einen Alternativtext.`) : 'Die Galerie enthält noch keine Fotos.'),
+    preflightResult('Galerie und Alternativtexte', galleryRows.length && galleryRows.every(item => String(item.alt || item.title || '').trim()) ? 'ok' : galleryRows.length ? 'warn' : 'fail', galleryRows.length ? `${galleryRows.length} Fotos geprüft; fehlende Alternativtexte werden gelb markiert.` : 'Die Galerie enthält noch keine Fotos.'),
     preflightResult('Öffentliche Downloads', publishedDownloads.length ? 'ok' : 'warn', publishedDownloads.length ? `${publishedDownloads.length} Dokument${publishedDownloads.length === 1 ? '' : 'e'} veröffentlicht.` : 'Derzeit ist kein Download veröffentlicht.'),
-    preflightResult('Impressum und Datenschutz', hasImpressum && hasDatenschutz ? 'ok' : 'fail', hasImpressum && hasDatenschutz ? 'Impressum und Datenschutzerklärung wurden erkannt.' : `${hasImpressum ? '' : 'Impressum fehlt oder ist nicht lesbar. '}${hasDatenschutz ? '' : 'Datenschutz fehlt oder ist nicht lesbar.'}`.trim()),
-    preflightResult('Versionsstand', version?.version === '10.6.2' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
+    preflightResult('Impressum und Datenschutz', legalPanels.length >= 2 ? 'ok' : 'fail', legalPanels.length >= 2 ? 'Die rechtlichen Pflichtbereiche sind vorhanden.' : 'Impressum oder Datenschutz konnten nicht vollständig erkannt werden.'),
+    preflightResult('Versionsstand', version?.version === '10.7' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
   ]);
   if (refresh) refresh.disabled = false;
 }

@@ -37,3 +37,12 @@
 .system-dashboard-grid small{font-size:12px}
 @media(max-width:900px){.system-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.system-dashboard{padding:20px}.system-dashboard-grid{grid-template-columns:1fr}}
+
+
+/* Version 10.7 – Kontrollzentrum und Schnellaktionen */
+.control-center{margin:0 0 42px;padding:26px;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:var(--shadow)}
+.journey-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}
+.journey-overview article{padding:18px;border:1px solid var(--line);border-radius:15px;background:#f7fafc}.journey-overview span,.journey-overview strong,.journey-overview small{display:block}.journey-overview span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800}.journey-overview strong{margin-top:7px;color:var(--navy);font-size:18px}.journey-overview small{margin-top:5px;color:var(--muted);line-height:1.4}
+.control-center .stats{margin:16px 0 20px}
+.quick-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.quick-actions a{display:flex;flex-direction:column;padding:16px;border:1px solid #c9dbe8;border-radius:14px;background:linear-gradient(145deg,#fff,#f2f8fc);text-decoration:none;color:var(--ink);transition:.18s ease}.quick-actions a:hover,.quick-actions a:focus-visible{transform:translateY(-2px);border-color:#8bb9d8;box-shadow:var(--shadow);outline:none}.quick-actions span{font-size:25px}.quick-actions strong{margin-top:10px;color:var(--navy);line-height:1.25}.quick-actions small{margin-top:5px;color:var(--muted);line-height:1.4}
+@media(max-width:1050px){.quick-actions{grid-template-columns:repeat(2,1fr)}}@media(max-width:760px){.journey-overview,.quick-actions{grid-template-columns:1fr}.control-center{padding:20px}}
