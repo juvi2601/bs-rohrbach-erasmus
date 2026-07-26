@@ -21,15 +21,17 @@ Promise.all([
   readJson('/content/downloads.json'),
   readJson('/content/places.json'),
   readJson('/content/faq.json'),
+  readJson('/content/diary.json'),
   readJson('/api/cms-status'),
   readJson('/version.json')
-]).then(([news, program, gallery, downloads, places, faq, cms, version]) => {
+]).then(([news, program, gallery, downloads, places, faq, diary, cms, version]) => {
   setCount('count-news', Array.isArray(news?.items) ? news.items.length : Array.isArray(news?.news) ? news.news.length : 0);
   setCount('count-program', Array.isArray(program?.days) ? program.days.length : Array.isArray(program?.program) ? program.program.length : 0);
   setCount('count-gallery', Array.isArray(gallery?.photos) ? gallery.photos.length : 0);
   setCount('count-downloads', Array.isArray(downloads?.downloads) ? downloads.downloads.length : 0);
   setCount('count-places', Array.isArray(places?.places) ? places.places.length : 0);
   setCount('count-faq', Array.isArray(faq?.items) ? faq.items.length : 0);
+  setCount('count-diary', Array.isArray(diary?.entries) ? diary.entries.length : 0);
 
   if (version?.version) {
     const values = document.querySelectorAll('.system-strip strong');

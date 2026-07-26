@@ -25,7 +25,7 @@
       <div>
         <p class="eyebrow">Brüssel 2026</p>
         <h1>Admin-Dashboard</h1>
-        <p>Version 10.4.1 stabilisiert einen interaktiven Karteneditor: Orte anlegen, per Klick positionieren und ohne manuelles Eintippen von Koordinaten verwalten.</p>
+        <p>Version 10.5 ergänzt ein redaktionell geprüftes Reisetagebuch mit Entwürfen, Tagesberichten und mehreren Fotos.</p>
       </div>
       <div class="status-card">
         <span class="status-dot"></span>
@@ -34,7 +34,7 @@
     </section>
 
     <section class="system-strip" aria-label="Systeminformationen">
-      <div><span>Version</span><strong>10.4.1</strong></div>
+      <div><span>Version</span><strong>10.5</strong></div>
       <div><span>Letzte Aktualisierung</span><strong>26.07.2026</strong></div>
       <div><span>Veröffentlichung</span><strong>GitHub → Cloudflare</strong></div>
     </section>
@@ -46,6 +46,28 @@
       <article><span>Downloads</span><strong id="count-downloads">–</strong><small>Dokumente</small></article>
       <article><span>Karte</span><strong id="count-places">–</strong><small>Orte</small></article>
       <article><span>FAQ</span><strong id="count-faq">–</strong><small>Fragen</small></article>
+      <article><span>Reisetagebuch</span><strong id="count-diary">–</strong><small>Einträge</small></article>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <div><p class="eyebrow">Reisetagebuch 10.5</p><h2>Berichte und freigegebene Fotos veröffentlichen</h2></div>
+      </div>
+      <div class="grid featured-grid">
+        <a class="tile featured" href="/admin/cms.html#/collections/diary"><span class="icon">📖</span><div><h3>Tagebucheinträge verwalten</h3><p>Neue Berichte als Entwurf anlegen, Fotos auswählen und nach der Prüfung veröffentlichen.</p><span class="feature-note">Neu in 10.5</span></div><b>→</b></a>
+        <a class="tile featured" href="/admin/cms.html#/media"><span class="icon">📸</span><div><h3>Freigegebene Fotos auswählen</h3><p>Gesichtete Schülerfotos in der Mediathek bereitstellen und anschließend im Beitrag auswählen.</p><span class="feature-note">Redaktionell geprüft</span></div><b>→</b></a>
+        <a class="tile featured" href="/#reisetagebuch" target="_blank" rel="noopener"><span class="icon">👀</span><div><h3>Reisetagebuch kontrollieren</h3><p>Veröffentlichte Einträge direkt auf der Website ansehen.</p><span class="feature-note">Öffentliche Vorschau</span></div><b>→</b></a>
+      </div>
+    </section>
+
+    <section class="workflow">
+      <div><p class="eyebrow">Redaktionsablauf</p><h2>Vom Schülerfoto zum öffentlichen Beitrag</h2></div>
+      <ol>
+        <li><strong>Fotos sichten</strong><span>Nur geeignete und freigegebene Bilder auswählen.</span></li>
+        <li><strong>Entwurf erstellen</strong><span>Titel, Datum, Ort, Bericht und Fotos ergänzen.</span></li>
+        <li><strong>Inhalte prüfen</strong><span>Text, Bildauswahl und Datenschutz kontrollieren.</span></li>
+        <li><strong>Veröffentlichen</strong><span>Schalter aktivieren, speichern und die Website prüfen.</span></li>
+      </ol>
     </section>
 
     <section>
@@ -108,7 +130,7 @@
       <span>🔐</span>
       <div><strong>Hinweis zum Speichern</strong><p>Nach dem Speichern legt das CMS die Änderung in GitHub ab. Cloudflare veröffentlicht den neuen Stand anschließend automatisch. Das kann kurz dauern.</p></div>
     </section>
-  </main>
+</main>
   <script src="/admin/admin.js"></script>
 </body>
 </html>

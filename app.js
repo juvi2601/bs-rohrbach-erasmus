@@ -5,8 +5,8 @@ let programData={days:[]}, galleryData=[], activeGallery=[], legalData={};
 
 async function init(){
   setupNav();setupReveal();setupPwa();setupLightbox();setupLegalModal();setupActiveNavigation();
-  const [site,program,places,gallery,downloads,faq,news,legal]=await Promise.allSettled([
-    fetchJson("content/site.json"),fetchJson("content/program.json"),fetchJson("content/places.json"),fetchJson("content/gallery.json"),fetchJson("content/downloads.json"),fetchJson("content/faq.json"),fetchJson("content/news.json"),fetchJson("content/legal.json")
+  const [site,program,places,gallery,downloads,faq,news,legal,diary]=await Promise.allSettled([
+    fetchJson("content/site.json"),fetchJson("content/program.json"),fetchJson("content/places.json"),fetchJson("content/gallery.json"),fetchJson("content/downloads.json"),fetchJson("content/faq.json"),fetchJson("content/news.json"),fetchJson("content/legal.json"),fetchJson("content/diary.json")
   ]);
   if(site.status==="fulfilled")applySite(site.value);
   if(program.status==="fulfilled"){programData=program.value;renderProgram(program.value.days||[]);renderToday(program.value.days||[])}
@@ -16,6 +16,7 @@ async function init(){
   if(faq.status==="fulfilled")renderFaq(faq.value.items||[]);
   renderNews(news.status==="fulfilled"?news.value.news||[]:[]);
   if(legal.status==="fulfilled"){legalData=legal.value||{};renderLegalLinks(legalData.footerLinks||[])}
+  renderDiary(diary.status==="fulfilled"?diary.value.entries||[]:[]);
   loadWeather(site.status==="fulfilled"?(site.value.weatherLocations||[]):[]);
 }
 
@@ -46,6 +47,17 @@ function applySite(site){
   const tick=()=>{let d=target-Date.now(),el=qs("#countdown");if(!el)return;if(d<=0){el.innerHTML='<div><strong>🎉</strong><small>Es geht los!</small></div>';return}const vals=[];vals.push([Math.floor(d/86400000),"Tage"]);d%=86400000;vals.push([Math.floor(d/3600000),"Stunden"]);d%=3600000;vals.push([Math.floor(d/60000),"Minuten"]);d%=60000;vals.push([Math.floor(d/1000),"Sekunden"]);el.innerHTML=vals.map(v=>`<div><strong>${String(v[0]).padStart(2,"0")}</strong><small>${v[1]}</small></div>`).join("")};tick();setInterval(tick,1000);
 }
 function activateExternal(id,url){const a=qs("#"+id);if(a&&url){a.href=url;a.target="_blank";a.rel="noopener";a.classList.remove("disabled");a.removeAttribute("aria-disabled")}}
+
+function renderDiary(entries){
+  const timeline=qs("#diaryTimeline"),latest=qs("#diaryLatest");if(!timeline||!latest)return;
+  const rows=(entries||[]).filter(x=>x.published===true).sort((a,b)=>`${b.date||""} ${b.time||""}`.localeCompare(`${a.date||""} ${a.time||""}`));
+  if(!rows.length){timeline.innerHTML='<div class="empty-state">Noch keine Tagebucheinträge veröffentlicht.</div>';latest.hidden=true;return}
+  const card=(e,featured=false)=>{const images=(e.images||[]).map(x=>typeof x==='string'?{image:x}:x).filter(x=>x.image);const cover=e.cover||images[0]?.image||"";const tags=(e.tags||[]).map(t=>typeof t==='string'?t:t?.tag).filter(Boolean);return `<article class="diary-card ${featured?'featured':''}">${cover?`<button class="diary-cover" type="button" data-diary-image="${esc(cover)}" aria-label="${esc(e.title||'Foto')} vergrößern"><img src="${esc(cover)}" alt="${esc(e.alt||e.title||'Foto aus dem Reisetagebuch')}" loading="lazy"></button>`:''}<div class="diary-card-body"><div class="diary-meta"><span>${esc(e.emoji||'📖')}</span><time>${formatDate(e.date)}${e.time?' · '+esc(e.time):''}</time>${e.location?`<span>📍 ${esc(e.location)}</span>`:''}</div><h3>${esc(e.title||'Tagebucheintrag')}</h3><p class="diary-text">${esc(e.text||'').replace(/\n/g,'<br>')}</p>${tags.length?`<div class="diary-tags">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}${images.length?`<div class="diary-gallery">${images.map((im,i)=>`<button type="button" data-diary-image="${esc(im.image)}" aria-label="Weiteres Foto ${i+1} vergrößern"><img src="${esc(im.image)}" alt="${esc(im.alt||e.title||'Weiteres Reisefoto')}" loading="lazy"></button>`).join('')}</div>`:''}${e.author?`<small class="diary-author">Redaktion: ${esc(e.author)}</small>`:''}</div></article>`};
+  latest.hidden=false;latest.innerHTML=`<p class="diary-new-label">🆕 Neuester Eintrag</p>${card(rows[0],true)}<a class="button button-blue diary-jump" href="#diaryAll">Alle Einträge ansehen</a>`;
+  timeline.id='diaryAll';timeline.innerHTML=rows.map(e=>card(e,false)).join('');
+  qsa('[data-diary-image]').forEach(btn=>btn.addEventListener('click',()=>openDiaryImage(btn.dataset.diaryImage,btn.querySelector('img')?.alt||'')));
+}
+function openDiaryImage(src,alt){const box=qs('#lightbox'),img=qs('#lightboxImage'),title=qs('#lightboxTitle'),caption=qs('#lightboxCaption');if(!box||!img)return;img.src=src;img.alt=alt;title.textContent=alt;caption.textContent='Reisetagebuch';box.hidden=false;document.body.classList.add('modal-open')}
 
 function renderNews(items){const grid=qs("#newsGrid");const rows=items.filter(x=>x.published!==false).sort((a,b)=>(b.date||"").localeCompare(a.date||""));if(!rows.length){grid.innerHTML='<div class="empty-state">Noch keine Meldungen veröffentlicht.</div>';return}grid.innerHTML=rows.map(n=>`<article class="news-card ${n.important?'important':''}"><time>${formatDate(n.date)}</time><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p></article>`).join("")}
 function formatDate(v){if(!v)return"";return new Intl.DateTimeFormat("de-AT",{day:"2-digit",month:"long",year:"numeric"}).format(new Date(v+"T12:00:00"))}

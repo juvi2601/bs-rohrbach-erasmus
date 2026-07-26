@@ -44,6 +44,12 @@
   ],
   "quickLinks": [
     {
+      "icon": "📖",
+      "title": "Reisetagebuch",
+      "subtitle": "Berichte & Fotos",
+      "target": "#reisetagebuch"
+    },
+    {
       "icon": "📅",
       "title": "Programm",
       "subtitle": "Tag für Tag",
@@ -181,6 +187,10 @@
     {
       "label": "News",
       "target": "#news"
+    },
+    {
+      "label": "Reisetagebuch",
+      "target": "#reisetagebuch"
     },
     {
       "label": "Programm",

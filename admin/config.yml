@@ -660,6 +660,96 @@ collections:
         widget: text
         hint: Die Antwort darf ausführlicher sein und wird im aufgeklappten FAQ-Bereich angezeigt.
 
+
+- name: diary
+  label: Reisetagebuch
+  files:
+  - name: diary
+    label: Tagebucheinträge
+    file: public/content/diary.json
+    format: json
+    fields:
+    - label: Einträge
+      name: entries
+      widget: list
+      label_singular: Tagebucheintrag
+      allow_add: true
+      collapsed: true
+      minimize_collapsed: true
+      summary: '{{fields.emoji}} {{fields.date}} – {{fields.title}}'
+      hint: Schülerfotos zuerst sichten und nur freigegebene Bilder auswählen. Entwürfe bleiben auf der öffentlichen Website unsichtbar.
+      fields:
+      - label: Veröffentlichen
+        name: published
+        widget: boolean
+        default: false
+        hint: Erst aktivieren, wenn Text und Fotos vollständig geprüft sind.
+      - label: Datum
+        name: date
+        widget: datetime
+        date_format: DD.MM.YYYY
+        time_format: false
+        format: YYYY-MM-DD
+      - label: Uhrzeit
+        name: time
+        widget: string
+        required: false
+        hint: Optional, z. B. 19:30 Uhr
+      - label: Emoji
+        name: emoji
+        widget: string
+        default: 📖
+      - label: Titel
+        name: title
+        widget: string
+      - label: Ort
+        name: location
+        widget: string
+        required: false
+      - label: Tagesbericht
+        name: text
+        widget: text
+        hint: Kurzer redaktioneller Bericht; Zeilenumbrüche werden übernommen.
+      - label: Titelbild
+        name: cover
+        widget: image
+        required: false
+      - label: Alternativtext zum Titelbild
+        name: alt
+        widget: string
+        required: false
+      - label: Weitere Fotos
+        name: images
+        widget: list
+        required: false
+        label_singular: Foto
+        summary: '{{fields.alt}}'
+        fields:
+        - label: Foto
+          name: image
+          widget: image
+        - label: Alternativtext
+          name: alt
+          widget: string
+          required: false
+        - label: Bildnachweis
+          name: credit
+          widget: string
+          required: false
+      - label: Schlagwörter
+        name: tags
+        widget: list
+        required: false
+        field:
+          label: Schlagwort
+          name: tag
+          widget: string
+      - label: Redaktion/Autor
+        name: author
+        widget: string
+        required: false
+        default: BS Rohrbach
+
 - name: legal
   label: Rechtliches & Kontakt
   files:
