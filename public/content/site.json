@@ -68,10 +68,16 @@
       "target": "#wetter"
     },
     {
-      "icon": "🔒",
-      "title": "Reisegruppe",
-      "subtitle": "Fotos & Galerie",
+      "icon": "📷",
+      "title": "Galerie",
+      "subtitle": "Fotos & Upload",
       "target": "#reisegruppe"
+    },
+    {
+      "icon": "📥",
+      "title": "Downloads",
+      "subtitle": "Dokumente & Infos",
+      "target": "#downloads"
     }
   ],
   "heroSecondaryButton": "Reisegruppe öffnen",
