@@ -25,3 +25,15 @@
 @keyframes preflight-spin{to{transform:rotate(360deg)}}
 @media(max-width:700px){.preflight{padding:20px}.preflight .section-heading{align-items:flex-start;flex-direction:column}.preflight-grid{grid-template-columns:1fr}.preflight-refresh{width:100%;text-align:center}}
 @media(prefers-reduced-motion:reduce){.preflight-spinner{animation:none;border-top-color:#bfd0df}}
+
+/* Version 10.6.1 – System-Dashboard */
+.system-dashboard{margin:24px 0 34px;background:#fff;border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:var(--shadow)}
+.system-dashboard .section-heading{margin-bottom:18px}
+.system-dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.system-dashboard-grid article{min-width:0;background:#f8fbfd;border:1px solid var(--line);border-radius:16px;padding:18px}
+.system-dashboard-grid span,.system-dashboard-grid small{display:block;color:var(--muted)}
+.system-dashboard-grid span{font-size:13px;font-weight:700}
+.system-dashboard-grid strong{display:block;color:var(--navy);font-size:25px;line-height:1.15;margin:8px 0 4px;overflow-wrap:anywhere}
+.system-dashboard-grid small{font-size:12px}
+@media(max-width:900px){.system-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.system-dashboard{padding:20px}.system-dashboard-grid{grid-template-columns:1fr}}

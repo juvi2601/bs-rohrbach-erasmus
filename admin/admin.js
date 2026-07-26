@@ -34,11 +34,22 @@ const setText = (id, value) => {
 };
 
 const legalSectionExists = (legal, key, titleNeedle) => {
-  const direct = legal?.[key];
+  if (!legal || typeof legal !== 'object') return false;
+
+  const direct = legal[key];
   if (direct && typeof direct === 'object') {
-    return Boolean(normalizeText(direct.title) || Array.isArray(direct.blocks));
+    const hasTitle = Boolean(normalizeText(direct.title));
+    const hasContent = Array.isArray(direct.blocks) && direct.blocks.length > 0;
+    if (hasTitle || hasContent) return true;
   }
-  const collections = [legal?.panels, legal?.sections, legal?.items].filter(Array.isArray);
+
+  const footerMatch = Array.isArray(legal.footerLinks) && legal.footerLinks.some(entry => {
+    const haystack = `${normalizeText(entry?.panel)} ${normalizeText(entry?.label)}`.toLowerCase();
+    return haystack.includes(titleNeedle);
+  });
+  if (footerMatch) return true;
+
+  const collections = [legal.panels, legal.sections, legal.items].filter(Array.isArray);
   return collections.some(list => list.some(entry => {
     const haystack = `${normalizeText(entry?.id)} ${normalizeText(entry?.key)} ${normalizeText(entry?.panel)} ${normalizeText(entry?.title)} ${normalizeText(entry?.label)}`.toLowerCase();
     return haystack.includes(titleNeedle);
@@ -141,7 +152,7 @@ async function loadDashboard() {
     preflightResult('Galerie und Alternativtexte', galleryRows.length && missingAlt === 0 ? 'ok' : galleryRows.length ? 'warn' : 'fail', galleryRows.length ? (missingAlt ? `${galleryRows.length} Fotos geprüft; bei ${missingAlt} Foto${missingAlt === 1 ? '' : 's'} fehlt ein Alternativtext.` : `${galleryRows.length} Fotos geprüft; alle besitzen einen Alternativtext.`) : 'Die Galerie enthält noch keine Fotos.'),
     preflightResult('Öffentliche Downloads', publishedDownloads.length ? 'ok' : 'warn', publishedDownloads.length ? `${publishedDownloads.length} Dokument${publishedDownloads.length === 1 ? '' : 'e'} veröffentlicht.` : 'Derzeit ist kein Download veröffentlicht.'),
     preflightResult('Impressum und Datenschutz', hasImpressum && hasDatenschutz ? 'ok' : 'fail', hasImpressum && hasDatenschutz ? 'Impressum und Datenschutzerklärung wurden erkannt.' : `${hasImpressum ? '' : 'Impressum fehlt oder ist nicht lesbar. '}${hasDatenschutz ? '' : 'Datenschutz fehlt oder ist nicht lesbar.'}`.trim()),
-    preflightResult('Versionsstand', version?.version === '10.6.1' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
+    preflightResult('Versionsstand', version?.version === '10.6.2' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
   ]);
   if (refresh) refresh.disabled = false;
 }

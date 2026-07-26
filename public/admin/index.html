@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Admin-Dashboard – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css">
+  <link rel="stylesheet" href="/admin/admin.css?v=10.6.2">
 </head>
 <body>
   <header class="topbar">
@@ -25,7 +25,7 @@
       <div>
         <p class="eyebrow">Brüssel 2026</p>
         <h1>Admin-Dashboard</h1>
-        <p>Version 10.6 prüft den Reisebetrieb, verbessert Bedienung und Barrierefreiheit und zeigt den technischen Bereitschaftsstatus auf einen Blick.</p>
+        <p>Version 10.6.2 stellt sicher, dass Dashboard und Prüfungen aus dem tatsächlich veröffentlichten Cloudflare-Verzeichnis geladen werden.</p>
       </div>
       <div class="status-card">
         <span class="status-dot"></span>
@@ -34,7 +34,7 @@
     </section>
 
     <section class="system-strip" aria-label="Systeminformationen">
-      <div><span>Version</span><strong>10.6</strong></div>
+      <div><span>Version</span><strong>10.6.2</strong></div>
       <div><span>Letzte Aktualisierung</span><strong>26.07.2026</strong></div>
       <div><span>Veröffentlichung</span><strong>GitHub → Cloudflare</strong></div>
     </section>
@@ -42,7 +42,7 @@
 
     <section class="preflight" aria-labelledby="preflight-title">
       <div class="section-heading">
-        <div><p class="eyebrow">Quality Update 10.6</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
+        <div><p class="eyebrow">Quality Update 10.6.2</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
         <button class="button ghost preflight-refresh" id="preflightRefresh" type="button">Erneut prüfen</button>
       </div>
       <div class="preflight-summary" id="preflightSummary" aria-live="polite">
@@ -51,6 +51,22 @@
       </div>
       <div class="preflight-grid" id="preflightGrid" aria-label="Prüfergebnisse"></div>
       <p class="preflight-note">Der Check kontrolliert die technische Erreichbarkeit und wichtige Inhaltsfelder. Die inhaltliche Endkontrolle bleibt weiterhin Teil des redaktionellen Ablaufs.</p>
+    </section>
+
+    <section class="system-dashboard" aria-labelledby="system-dashboard-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">System-Dashboard</p><h2 id="system-dashboard-title">Website auf einen Blick</h2></div>
+      </div>
+      <div class="system-dashboard-grid">
+        <article><span>Website-Version</span><strong id="system-version">–</strong><small id="system-updated">–</small></article>
+        <article><span>Status</span><strong id="system-status">Wird geprüft</strong><small>Technik und Inhalte</small></article>
+        <article><span>Tagebuch veröffentlicht</span><strong id="system-diary-published">–</strong><small>öffentliche Einträge</small></article>
+        <article><span>Tagebuch-Entwürfe</span><strong id="system-diary-drafts">–</strong><small>noch nicht veröffentlicht</small></article>
+        <article><span>Galeriebilder</span><strong id="system-gallery">–</strong><small>Fotos</small></article>
+        <article><span>Kartenorte</span><strong id="system-places">–</strong><small>Marker</small></article>
+        <article><span>Programmtage</span><strong id="system-program">–</strong><small>Reisetage</small></article>
+        <article><span>Öffentliche Downloads</span><strong id="system-downloads">–</strong><small>Dokumente</small></article>
+      </div>
     </section>
 
     <section class="stats" aria-label="Inhaltsübersicht">
@@ -145,6 +161,6 @@
       <div><strong>Hinweis zum Speichern</strong><p>Nach dem Speichern legt das CMS die Änderung in GitHub ab. Cloudflare veröffentlicht den neuen Stand anschließend automatisch. Das kann kurz dauern.</p></div>
     </section>
 </main>
-  <script src="/admin/admin.js"></script>
+  <script src="/admin/admin.js?v=10.6.2"></script>
 </body>
 </html>
