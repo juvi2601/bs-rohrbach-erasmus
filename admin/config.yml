@@ -249,6 +249,7 @@ collections:
       - label: Text
         name: text
         widget: text
+        hint: Der vollständige Text, der auf der Website angezeigt wird.
     - label: Hotel
       name: hotel
       widget: object
@@ -381,14 +382,22 @@ collections:
     - label: Meldungen
       name: news
       widget: list
+      label_singular: Meldung
+      allow_add: true
+      add_to_top: true
+      collapsed: true
+      minimize_collapsed: true
+      hint: Mit „Meldung hinzufügen“ legst du einen neuen Beitrag an. Über den Griff links kannst du Beiträge verschieben; über das Papierkorb-Symbol löschst du sie.
       summary: '{{fields.date}} – {{fields.title}}'
       fields:
       - label: Überschrift
         name: title
         widget: string
+        hint: Kurze, eindeutige Überschrift für die Meldung.
       - label: Datum
         name: date
         widget: datetime
+        hint: Das Datum steuert die Anzeige und Sortierung der Meldung.
         format: YYYY-MM-DD
         date_format: DD.MM.YYYY
         time_format: false
@@ -562,6 +571,11 @@ collections:
     - label: Dokumente
       name: downloads
       widget: list
+      label_singular: Dokument
+      allow_add: true
+      collapsed: true
+      minimize_collapsed: true
+      hint: Neue Dokumente kannst du mit „Dokument hinzufügen“ anlegen. Die Reihenfolge lässt sich per Ziehen verändern. Ein Dokument erscheint erst, wenn „Öffentlich anzeigen“ aktiviert ist.
       summary: '{{fields.title}}'
       fields:
       - label: Titel
@@ -574,6 +588,7 @@ collections:
         name: file
         widget: file
         required: false
+        hint: Datei auswählen oder hochladen. Ohne Datei bleibt der Eintrag unsichtbar bzw. nicht anklickbar.
       - label: Icon
         name: icon
         widget: string
@@ -593,14 +608,21 @@ collections:
     - label: Fragen
       name: items
       widget: list
+      label_singular: Frage
+      allow_add: true
+      collapsed: true
+      minimize_collapsed: true
+      hint: Mit „Frage hinzufügen“ legst du einen neuen Eintrag an. Die Reihenfolge entspricht der Anzeige auf der Website und kann per Ziehen geändert werden.
       summary: '{{fields.question}}'
       fields:
       - label: Frage
         name: question
         widget: string
+        hint: Formuliere die Frage möglichst kurz und verständlich.
       - label: Antwort
         name: answer
         widget: text
+        hint: Die Antwort darf ausführlicher sein und wird im aufgeklappten FAQ-Bereich angezeigt.
 
 - name: legal
   label: Rechtliches & Kontakt
