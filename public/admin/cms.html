@@ -12,11 +12,11 @@
   <style>
     .cms-help{position:fixed;left:18px;bottom:18px;z-index:99999;max-width:min(620px,calc(100vw - 190px));background:#fff;color:#17212b;border:1px solid #c9dce9;padding:10px 14px;border-radius:12px;font:14px/1.4 system-ui;box-shadow:0 8px 24px #0002}.cms-help strong{color:#123a63}.admin-back{position:fixed;right:18px;bottom:18px;z-index:99999;background:#123a63;color:#fff;text-decoration:none;padding:10px 14px;border-radius:999px;font:600 14px system-ui;box-shadow:0 8px 24px #0003}
   
-    .map-point-widget{max-width:900px;border:1px solid #c9dce9;border-radius:14px;overflow:hidden;background:#fff}.map-point-search{display:flex;gap:8px;padding:12px;background:#f4f8fb;border-bottom:1px solid #dce5ec}.map-point-search input{min-width:0;flex:1;border:1px solid #b9cbd8;border-radius:8px;padding:10px 12px;font:inherit}.map-point-search button,.map-center-button{border:0;border-radius:8px;background:#123a63;color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}.map-point-canvas{height:390px;background:#e9f0f5}.map-point-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px}.map-point-values{display:flex;flex-wrap:wrap;gap:14px;color:#526273;font-size:13px}.map-point-values strong{color:#123a63}.map-center-button{background:#1f6fb2}.map-point-status{margin:0;padding:0 14px 13px;color:#526273;font-size:13px}.leaflet-container{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}@media(max-width:650px){.map-point-search,.map-point-footer{align-items:stretch;flex-direction:column}.map-point-canvas{height:330px}.cms-help{display:none}}
+    .map-point-widget{max-width:900px;border:1px solid #c9dce9;border-radius:14px;overflow:hidden;background:#fff}.map-point-search{display:flex;gap:8px;padding:12px;background:#f4f8fb;border-bottom:1px solid #dce5ec}.map-point-search input{min-width:0;flex:1;border:1px solid #b9cbd8;border-radius:8px;padding:10px 12px;font:inherit}.map-point-search button,.map-center-button{border:0;border-radius:8px;background:#123a63;color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}.map-point-canvas{height:390px;background:#e9f0f5}.map-point-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px}.map-point-values{display:flex;flex-wrap:wrap;gap:14px;color:#526273;font-size:13px}.map-point-values strong{color:#123a63}.map-center-button{background:#1f6fb2}.map-point-status{margin:0;padding:0 14px 13px;color:#526273;font-size:13px}.map-point-error{padding:16px;border:1px solid #e6b7b7;border-radius:10px;background:#fff3f3;color:#7b1d1d;font:600 14px/1.45 system-ui}.leaflet-container{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}@media(max-width:650px){.map-point-search,.map-point-footer{align-items:stretch;flex-direction:column}.map-point-canvas{height:330px}.cms-help{display:none}}
   </style>
 </head>
 <body>
-<div class="cms-help" role="note"><strong>Version 10.4:</strong> Unter „Karte &amp; Orte“ setzt du Positionen jetzt direkt per Klick auf die Karte oder über die Adresssuche. Koordinaten werden automatisch gespeichert.</div>
+<div class="cms-help" role="note"><strong>Version 10.4.1:</strong> Unter „Karte &amp; Orte“ setzt du Positionen jetzt direkt per Klick auf die Karte oder über die Adresssuche. Koordinaten werden automatisch gespeichert.</div>
 <a class="admin-back" href="/admin/">← Dashboard</a>
 <script>
   if ('serviceWorker' in navigator) {
@@ -26,6 +26,8 @@
   }
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
 <script src="/admin/map-widget.js"></script>
 </body>

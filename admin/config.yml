@@ -549,17 +549,28 @@ collections:
         name: category
         widget: select
         options:
-        - Hotel
-        - Sehenswürdigkeit
-        - EU
-        - Antwerpen
-        - Waterloo
-        - Metro
-        - Essen
-        - Treffpunkt
-        - Bahnhof
-        - Einkauf
-        - Notfall
+        - label: "🏨 Hotel"
+          value: Hotel
+        - label: "🏛️ Sehenswürdigkeit"
+          value: Sehenswürdigkeit
+        - label: "🇪🇺 EU-Institution"
+          value: EU
+        - label: "💎 Antwerpen"
+          value: Antwerpen
+        - label: "⚔️ Waterloo"
+          value: Waterloo
+        - label: "🚇 Metro"
+          value: Metro
+        - label: "🍽️ Essen"
+          value: Essen
+        - label: "📌 Treffpunkt"
+          value: Treffpunkt
+        - label: "🚉 Bahnhof"
+          value: Bahnhof
+        - label: "🛍️ Einkauf"
+          value: Einkauf
+        - label: "🆘 Notfall"
+          value: Notfall
         hint: Die Kategorie bestimmt Farbe und Symbol des Markers auf der Website.
       - label: Position auf der Karte
         name: coordinates

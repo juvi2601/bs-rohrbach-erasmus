@@ -1,8 +1,14 @@
 (function () {
   const CMS = window.CMS;
   const React = window.React;
-  if (!CMS || !React || !window.L) {
-    console.error('Karteneditor konnte nicht geladen werden.');
+  const L = window.L;
+
+  if (!CMS) {
+    console.error('Karteneditor: Decap CMS ist nicht verfügbar.');
+    return;
+  }
+  if (!React || !L) {
+    console.error('Karteneditor: React oder Leaflet konnte nicht geladen werden.');
     return;
   }
 
@@ -37,36 +43,61 @@
     }
 
     componentDidMount() {
-      const point = this.getPoint();
-      this.map = L.map(this.mapNode.current, { scrollWheelZoom: false }).setView([point.lat, point.lng], 14);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap-Mitwirkende'
-      }).addTo(this.map);
-      this.marker = L.marker([point.lat, point.lng], { draggable: true }).addTo(this.map);
-      this.map.on('click', event => this.setPoint(event.latlng.lat, event.latlng.lng));
-      this.marker.on('dragend', () => {
-        const p = this.marker.getLatLng();
-        this.setPoint(p.lat, p.lng, false);
-      });
-      setTimeout(() => this.map.invalidateSize(), 250);
+      try {
+        const point = this.getPoint();
+        this.map = L.map(this.mapNode.current, {
+          scrollWheelZoom: false,
+          zoomControl: true
+        }).setView([point.lat, point.lng], 14);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap-Mitwirkende'
+        }).addTo(this.map);
+
+        this.marker = L.marker([point.lat, point.lng], { draggable: true }).addTo(this.map);
+        this.map.on('click', event => this.setPoint(event.latlng.lat, event.latlng.lng));
+        this.marker.on('dragend', () => {
+          const p = this.marker.getLatLng();
+          this.setPoint(p.lat, p.lng, false);
+        });
+
+        const refresh = () => this.map && this.map.invalidateSize(false);
+        setTimeout(refresh, 100);
+        setTimeout(refresh, 450);
+        setTimeout(refresh, 1000);
+
+        if ('ResizeObserver' in window) {
+          this.resizeObserver = new ResizeObserver(refresh);
+          this.resizeObserver.observe(this.mapNode.current);
+        }
+      } catch (error) {
+        console.error('Karteneditor konnte nicht initialisiert werden.', error);
+        this.setState({ searchStatus: 'Die Karte konnte nicht geladen werden. Seite bitte neu laden.' });
+      }
     }
 
     componentDidUpdate(prevProps) {
-      if (!this.map || prevProps.value === this.props.value) return;
+      if (!this.map || !this.marker || prevProps.value === this.props.value) return;
       const point = this.getPoint();
       const markerPoint = this.marker.getLatLng();
       if (Math.abs(markerPoint.lat - point.lat) > 0.000001 || Math.abs(markerPoint.lng - point.lng) > 0.000001) {
         this.marker.setLatLng([point.lat, point.lng]);
       }
+      this.map.invalidateSize(false);
     }
 
     componentWillUnmount() {
+      if (this.resizeObserver) this.resizeObserver.disconnect();
       if (this.map) this.map.remove();
     }
 
     setPoint(lat, lng, moveMap = true) {
-      const point = { lat: Number(Number(lat).toFixed(6)), lng: Number(Number(lng).toFixed(6)) };
+      if (!this.map || !this.marker) return;
+      const point = {
+        lat: Number(Number(lat).toFixed(6)),
+        lng: Number(Number(lng).toFixed(6))
+      };
       this.marker.setLatLng([point.lat, point.lng]);
       if (moveMap) this.map.panTo([point.lat, point.lng]);
       this.props.onChange(point);
@@ -74,17 +105,19 @@
     }
 
     useMapCenter() {
+      if (!this.map) return;
       const p = this.map.getCenter();
       this.setPoint(p.lat, p.lng, false);
     }
 
     async searchAddress(event) {
       event.preventDefault();
-      const query = (this.searchInput.current && this.searchInput.current.value || '').trim();
+      const query = ((this.searchInput.current && this.searchInput.current.value) || '').trim();
       if (!query) {
         this.setState({ searchStatus: 'Bitte einen Ort oder eine Adresse eingeben.' });
         return;
       }
+
       this.setState({ searchStatus: 'Adresse wird gesucht …' });
       try {
         const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=de&q=' + encodeURIComponent(query);
@@ -95,10 +128,13 @@
           this.setState({ searchStatus: 'Kein passender Ort gefunden.' });
           return;
         }
-        this.map.setView([Number(rows[0].lat), Number(rows[0].lon)], 17);
-        this.setPoint(rows[0].lat, rows[0].lon, false);
+        const lat = Number(rows[0].lat);
+        const lng = Number(rows[0].lon);
+        this.map.setView([lat, lng], 17);
+        this.setPoint(lat, lng, false);
         this.setState({ searchStatus: 'Adresse gefunden und Position übernommen ✓' });
-      } catch {
+      } catch (error) {
+        console.error('Adresssuche fehlgeschlagen.', error);
         this.setState({ searchStatus: 'Suche derzeit nicht verfügbar. Bitte direkt auf die Karte klicken.' });
       }
     }
@@ -107,10 +143,20 @@
       const point = this.getPoint();
       return h('div', { className: 'map-point-widget' },
         h('form', { className: 'map-point-search', onSubmit: this.searchAddress },
-          h('input', { ref: this.searchInput, type: 'search', placeholder: 'Adresse oder Ort suchen, z. B. Atomium Brüssel' }),
+          h('input', {
+            ref: this.searchInput,
+            type: 'search',
+            placeholder: 'Adresse oder Ort suchen, z. B. Atomium Brüssel',
+            'aria-label': 'Adresse oder Ort suchen'
+          }),
           h('button', { type: 'submit' }, 'Suchen')
         ),
-        h('div', { ref: this.mapNode, className: 'map-point-canvas', role: 'application', 'aria-label': 'Karte zur Auswahl des Standortes' }),
+        h('div', {
+          ref: this.mapNode,
+          className: 'map-point-canvas',
+          role: 'application',
+          'aria-label': 'Karte zur Auswahl des Standortes'
+        }),
         h('div', { className: 'map-point-footer' },
           h('div', { className: 'map-point-values' },
             h('span', null, 'Breitengrad: ', h('strong', null, point.lat.toFixed(6))),
@@ -118,7 +164,9 @@
           ),
           h('button', { type: 'button', className: 'map-center-button', onClick: this.useMapCenter }, 'Kartenmitte übernehmen')
         ),
-        h('p', { className: 'map-point-status', 'aria-live': 'polite' }, this.state.searchStatus || 'Klicke auf die Karte oder verschiebe den Marker. Die Position wird automatisch gespeichert.')
+        h('p', { className: 'map-point-status', 'aria-live': 'polite' },
+          this.state.searchStatus || 'Klicke auf die Karte oder verschiebe den Marker. Die Position wird automatisch gespeichert.'
+        )
       );
     }
   }
@@ -130,4 +178,5 @@
   };
 
   CMS.registerWidget('map-point', MapPointControl, MapPointPreview);
+  console.info('Karteneditor 10.4.1 wurde geladen.');
 })();
