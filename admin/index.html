@@ -25,7 +25,7 @@
       <div>
         <p class="eyebrow">Brüssel 2026</p>
         <h1>Admin-Dashboard</h1>
-        <p>Version 10.5 ergänzt ein redaktionell geprüftes Reisetagebuch mit Entwürfen, Tagesberichten und mehreren Fotos.</p>
+        <p>Version 10.6 prüft den Reisebetrieb, verbessert Bedienung und Barrierefreiheit und zeigt den technischen Bereitschaftsstatus auf einen Blick.</p>
       </div>
       <div class="status-card">
         <span class="status-dot"></span>
@@ -34,9 +34,23 @@
     </section>
 
     <section class="system-strip" aria-label="Systeminformationen">
-      <div><span>Version</span><strong>10.5</strong></div>
+      <div><span>Version</span><strong>10.6</strong></div>
       <div><span>Letzte Aktualisierung</span><strong>26.07.2026</strong></div>
       <div><span>Veröffentlichung</span><strong>GitHub → Cloudflare</strong></div>
+    </section>
+
+
+    <section class="preflight" aria-labelledby="preflight-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">Quality Update 10.6</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
+        <button class="button ghost preflight-refresh" id="preflightRefresh" type="button">Erneut prüfen</button>
+      </div>
+      <div class="preflight-summary" id="preflightSummary" aria-live="polite">
+        <span class="preflight-spinner" aria-hidden="true"></span>
+        <div><strong>Website wird geprüft</strong><small>Inhalte, Redaktion und Pflichtbereiche werden kontrolliert.</small></div>
+      </div>
+      <div class="preflight-grid" id="preflightGrid" aria-label="Prüfergebnisse"></div>
+      <p class="preflight-note">Der Check kontrolliert die technische Erreichbarkeit und wichtige Inhaltsfelder. Die inhaltliche Endkontrolle bleibt weiterhin Teil des redaktionellen Ablaufs.</p>
     </section>
 
     <section class="stats" aria-label="Inhaltsübersicht">

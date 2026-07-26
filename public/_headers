@@ -11,4 +11,11 @@
   Cache-Control: no-cache
 
 /images/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+
+
+/*.html
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache

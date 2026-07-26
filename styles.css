@@ -1204,3 +1204,11 @@ footer{padding-top:40px;padding-bottom:40px;align-items:flex-start}
 /* Version 10.5.2 – mehr Abstand zwischen Schnellzugriff-Icon und Text */
 .quick-grid a{column-gap:20px}
 @media(max-width:700px){.quick-grid a{column-gap:14px}}
+
+
+/* Version 10.6 – Quality Update */
+:where(a,button,[tabindex]):focus-visible{outline:3px solid rgba(18,113,221,.34);outline-offset:3px}
+.gallery-item:focus-visible,.place-card:focus-visible,.diary-cover:focus-visible,.diary-gallery button:focus-visible{outline-color:#fff;box-shadow:0 0 0 5px rgba(18,113,221,.55)}
+.lightbox-close:focus-visible,.lightbox-nav:focus-visible{outline-color:#fff}
+img{content-visibility:auto}
+@media(max-width:700px){.lightbox{padding:18px 12px 86px}.lightbox-close{right:14px;top:14px}.lightbox figcaption{padding-inline:8px}}
