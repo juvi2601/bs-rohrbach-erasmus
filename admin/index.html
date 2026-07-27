@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Admin-Dashboard – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=11.0.0">
+  <link rel="stylesheet" href="/admin/admin.css?v=11.1.0">
 </head>
 <body>
   <header class="topbar">
@@ -25,7 +25,7 @@
       <div>
         <p class="eyebrow">Brüssel 2026</p>
         <h1>Admin-Dashboard</h1>
-        <p>Version 11.0 startet den neuen Foto-Workflow mit einem eigenen Fotoeingang für eingereichte Reisefotos.</p>
+        <p>Version 11.1 ergänzt den vorbereiteten Microsoft-365-Connector für Forms und SharePoint.</p>
       </div>
       <div class="status-card">
         <span class="status-dot"></span>
@@ -34,7 +34,7 @@
     </section>
 
     <section class="system-strip" aria-label="Systeminformationen">
-      <div><span>Version</span><strong>11.0.0</strong></div>
+      <div><span>Version</span><strong>11.1.0</strong></div>
       <div><span>Letzte Aktualisierung</span><strong>27.07.2026</strong></div>
       <div><span>Veröffentlichung</span><strong>GitHub → Cloudflare</strong></div>
     </section>
@@ -42,7 +42,7 @@
 
     <section class="preflight" aria-labelledby="preflight-title">
       <div class="section-heading">
-        <div><p class="eyebrow">Smart Journey 11.0</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
+        <div><p class="eyebrow">Smart Journey 11.1</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
         <button class="button ghost preflight-refresh" id="preflightRefresh" type="button">Erneut prüfen</button>
       </div>
       <div class="preflight-summary" id="preflightSummary" aria-live="polite">
@@ -87,7 +87,7 @@
         <article><span>News</span><strong id="count-news">–</strong><small>Beiträge</small></article>
       </div>
       <div class="quick-actions" aria-label="Schnellaktionen">
-        <a href="/admin/photo-inbox.html"><span>📷</span><strong>Fotoeingang öffnen</strong><small>Eingereichte Fotos prüfen und vorbereiten</small></a>
+        <a href="/admin/photo-inbox.html"><span>📷</span><strong>Fotoeingang öffnen</strong><small>Eingereichte Fotos prüfen und vorbereiten</small></a><a href="/admin/microsoft.html"><span>☁️</span><strong>Microsoft 365</strong><small>Connector-Status und Einrichtung prüfen</small></a>
         <a href="/admin/cms.html#/collections/site/entries/site"><span>📢</span><strong>Live-Status ändern</strong><small>Aktuelle Meldung auf der Startseite</small></a>
         <a href="/admin/cms.html#/collections/diary/new"><span>➕</span><strong>Neuer Tagebucheintrag</strong><small>Bericht als Entwurf anlegen</small></a>
         <a href="/admin/cms.html#/collections/gallery"><span>📸</span><strong>Galerie bearbeiten</strong><small>Öffentliche Reisemotive pflegen</small></a>
@@ -99,7 +99,7 @@
 
     <section class="journey-simulator" aria-labelledby="journey-simulator-title">
       <details id="journeySimulatorDetails">
-        <summary><span><small>Smart Journey 11.0</small><strong id="journey-simulator-title">🧭 Simulation</strong></span><b>Öffnen</b></summary>
+        <summary><span><small>Smart Journey 11.1</small><strong id="journey-simulator-title">🧭 Simulation</strong></span><b>Öffnen</b></summary>
         <p class="simulator-intro">Die Simulation gilt nur in diesem Browser. Andere Besucher sehen weiterhin das echte Datum.</p>
         <div class="simulator-panel">
         <label class="simulator-toggle"><input id="journeyPreviewEnabled" type="checkbox"><span><strong>Simulation aktivieren</strong><small>Die öffentliche Website simuliert das gewählte Datum nur auf diesem Gerät.</small></span></label>
@@ -119,10 +119,10 @@
 
     <section>
       <div class="section-heading">
-        <div><p class="eyebrow">Neu in Version 11.0</p><h2>Foto-Workflow für die Reise</h2></div>
+        <div><p class="eyebrow">Neu in Version 11.1</p><h2>Foto-Workflow für die Reise</h2></div>
       </div>
       <div class="grid featured-grid">
-        <a class="tile featured" href="/admin/photo-inbox.html"><span class="icon">📥</span><div><h3>Fotoeingang</h3><p>Eingereichte Reisefotos nach Status, Reisetag und Programmpunkt sichten.</p><span class="feature-note">Neu in 11.0</span></div><b>→</b></a>
+        <a class="tile featured" href="/admin/photo-inbox.html"><span class="icon">📥</span><div><h3>Fotoeingang</h3><p>Eingereichte Reisefotos nach Status, Reisetag und Programmpunkt sichten.</p><span class="feature-note">Neu in 11.1</span></div><b>→</b></a>
         <a class="tile featured" href="/admin/cms.html#/collections/diary"><span class="icon">📖</span><div><h3>Tagebucheinträge verwalten</h3><p>Neue Berichte als Entwurf anlegen, Fotos auswählen und nach der Prüfung veröffentlichen.</p><span class="feature-note">Neu in 10.5</span></div><b>→</b></a>
         <a class="tile featured" href="/admin/cms.html#/media"><span class="icon">📸</span><div><h3>Freigegebene Fotos auswählen</h3><p>Gesichtete Schülerfotos in der Mediathek bereitstellen und anschließend im Beitrag auswählen.</p><span class="feature-note">Redaktionell geprüft</span></div><b>→</b></a>
         <a class="tile featured" href="/#reisetagebuch" target="_blank" rel="noopener"><span class="icon">👀</span><div><h3>Reisetagebuch kontrollieren</h3><p>Veröffentlichte Einträge direkt auf der Website ansehen.</p><span class="feature-note">Öffentliche Vorschau</span></div><b>→</b></a>
@@ -200,6 +200,6 @@
       <div><strong>Hinweis zum Speichern</strong><p>Nach dem Speichern legt das CMS die Änderung in GitHub ab. Cloudflare veröffentlicht den neuen Stand anschließend automatisch. Das kann kurz dauern.</p></div>
     </section>
 </main>
-  <script src="/admin/admin.js?v=11.0.0"></script>
+  <script src="/admin/admin.js?v=11.1.0"></script>
 </body>
 </html>

@@ -1,0 +1,13 @@
+{
+  "enabled": false,
+  "provider": "microsoft-graph",
+  "tenantId": "",
+  "siteHostname": "",
+  "sitePath": "",
+  "driveId": "",
+  "responsesFile": "",
+  "uploadFolder": "",
+  "formName": "Fotos Brüsselreise 2026",
+  "lastSync": null,
+  "notes": "Keine geheimen Zugangsdaten in dieser Datei speichern. Client Secret ausschließlich als Cloudflare Secret hinterlegen."
+}

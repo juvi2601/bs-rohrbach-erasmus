@@ -162,6 +162,23 @@ export default {
     if (url.pathname === '/auth') return handleAuth(url, env);
     if (url.pathname === '/callback') return handleCallback(url, env);
 
+    if (url.pathname === '/api/microsoft-status') {
+      let config = {};
+      try {
+        const configResponse = await env.ASSETS.fetch(new Request(`${url.origin}/content/microsoft-connector.json`));
+        if (configResponse.ok) config = await configResponse.json();
+      } catch {}
+      const tenantIdConfigured = Boolean(String(env.MS_TENANT_ID || config.tenantId || '').trim());
+      const clientIdConfigured = Boolean(String(env.MS_CLIENT_ID || '').trim());
+      const clientSecretConfigured = Boolean(String(env.MS_CLIENT_SECRET || '').trim());
+      const sharePointConfigured = Boolean(String(config.siteHostname || '').trim() && String(config.sitePath || '').trim() && String(config.uploadFolder || '').trim());
+      return json({ready: tenantIdConfigured && clientIdConfigured && clientSecretConfigured && sharePointConfigured, tenantIdConfigured, clientIdConfigured, clientSecretConfigured, sharePointConfigured, lastSync: config.lastSync || null, version: '11.1.0'});
+    }
+
+    if (url.pathname === '/api/photo-inbox/sync' && request.method === 'POST') {
+      return json({ready:false,message:'Der Microsoft-Connector ist vorbereitet. Tenant, App-Berechtigungen und SharePoint-Ziel müssen noch gemeinsam eingerichtet werden.'},503);
+    }
+
     if (url.pathname === '/api/cms-status') {
       const { clientId, clientSecret } = getOAuthConfig(env);
       return json({
@@ -170,7 +187,7 @@ export default {
         clientSecretConfigured: Boolean(clientSecret),
         repo: REPO,
         branch: 'main',
-        version: '4.3.7'
+        version: '11.1.0'
       });
     }
 
