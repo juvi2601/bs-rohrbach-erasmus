@@ -92,7 +92,17 @@ collections:
       widget: object
       hint: Kurze aktuelle Information für die Startseite. Der Bereich bleibt unsichtbar, solange „Anzeigen“ deaktiviert ist.
       fields:
-      - label: Auf der Startseite anzeigen
+      - label: Steuerung
+        name: mode
+        widget: select
+        default: automatic
+        options:
+        - label: Automatisch aus Smart Journey
+          value: automatic
+        - label: Manuellen Status verwenden
+          value: manual
+        hint: Im Automatikmodus wird der Status aus Reisetag und Reiseplan erzeugt.
+      - label: Manuellen Status anzeigen
         name: enabled
         widget: boolean
         default: false
@@ -449,6 +459,56 @@ collections:
         name: published
         widget: boolean
         default: true
+  - name: journey
+    label: Smart Journey
+    file: content/journey.json
+    format: json
+    fields:
+    - label: Automatik aktiv
+      name: enabled
+      widget: boolean
+      default: true
+    - label: Automatischen Status erzeugen
+      name: automaticStatus
+      widget: boolean
+      default: true
+    - label: Zeitzone
+      name: timezone
+      widget: string
+      default: Europe/Vienna
+    - label: Reise
+      name: trip
+      widget: object
+      fields:
+      - {label: Name, name: name, widget: string}
+      - {label: Beginn, name: start, widget: datetime}
+      - {label: Ende, name: end, widget: datetime}
+    - label: Anzeige vor der Reise
+      name: before
+      widget: object
+      fields:
+      - {label: Emoji, name: emoji, widget: string}
+      - {label: Überschrift, name: title, widget: string}
+      - {label: Text, name: text, widget: text}
+    - label: Anzeige nach der Reise
+      name: after
+      widget: object
+      fields:
+      - {label: Emoji, name: emoji, widget: string}
+      - {label: Überschrift, name: title, widget: string}
+      - {label: Text, name: text, widget: text}
+    - label: Reisetage
+      name: days
+      widget: list
+      summary: '{{fields.date}} · {{fields.title}}'
+      fields:
+      - {label: Datum, name: date, widget: datetime, time_format: false}
+      - {label: Programm-ID, name: programId, widget: string, hint: sa, so, mo, di, mi oder do}
+      - {label: Emoji, name: emoji, widget: string}
+      - {label: Überschrift, name: title, widget: string}
+      - {label: Automatischer Status, name: status, widget: text}
+      - {label: Ort, name: place, widget: string, required: false}
+
 - name: program
   label: Tagesprogramm
   files:

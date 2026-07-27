@@ -75,11 +75,11 @@ const renderPreflight = results => {
 async function loadDashboard() {
   const refresh = document.getElementById('preflightRefresh');
   if (refresh) refresh.disabled = true;
-  const [news, program, gallery, downloads, places, faq, diary, legal, site, cms, version] = await Promise.all([
+  const [news, program, gallery, downloads, places, faq, diary, legal, site, cms, version, journey] = await Promise.all([
     readJson('/content/news.json'), readJson('/content/program.json'), readJson('/content/gallery.json'),
     readJson('/content/downloads.json'), readJson('/content/places.json'), readJson('/content/faq.json'),
     readJson('/content/diary.json'), readJson('/content/legal.json'), readJson('/content/site.json'),
-    readJson('/api/cms-status'), readJson('/version.json')
+    readJson('/api/cms-status'), readJson('/version.json'), readJson('/content/journey.json')
   ]);
 
   setCount('count-news', itemCount(news, 'items', 'news'));
@@ -107,7 +107,7 @@ async function loadDashboard() {
   if (now >= departure && now <= returnDate) { const day = Math.max(1, Math.min(6, Math.floor((now-departure)/86400000)+1)); phase = `Tag ${day} von 6`; phaseDetail = 'Die Brüsselreise läuft.'; }
   if (now > returnDate) { phase = 'Reise abgeschlossen'; phaseDetail = 'Das Reisetagebuch und die Galerie bleiben erreichbar.'; }
   const phaseEl=document.getElementById('journey-phase'),phaseDetailEl=document.getElementById('journey-detail');if(phaseEl)phaseEl.textContent=phase;if(phaseDetailEl)phaseDetailEl.textContent=phaseDetail;
-  const live=site?.liveStatus||{};const liveTitle=document.getElementById('dashboard-live-title'),liveText=document.getElementById('dashboard-live-text');if(liveTitle)liveTitle.textContent=live.enabled?`${live.emoji||'📢'} ${live.title||'Aktueller Status'}`:'Nicht veröffentlicht';if(liveText)liveText.textContent=live.enabled?(live.text||'Keine Meldung eingetragen.'):'Der Status ist derzeit ausgeblendet.';
+  const live=site?.liveStatus||{};const autoMode=live.mode!=="manual";const journeyDay=(journey?.days||[]).find(item=>item.date===new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Vienna',year:'numeric',month:'2-digit',day:'2-digit'}).format(now));const liveTitle=document.getElementById('dashboard-live-title'),liveText=document.getElementById('dashboard-live-text');if(liveTitle)liveTitle.textContent=autoMode?`🤖 Smart Journey: ${journeyDay?.title||phase}`:(live.enabled?`${live.emoji||'📢'} ${live.title||'Aktueller Status'}`:'Manueller Status aus');if(liveText)liveText.textContent=autoMode?(journeyDay?.status||'Der Status wird automatisch aus dem Reiseverlauf erzeugt.'):(live.enabled?(live.text||'Keine Meldung eingetragen.'):'Der manuelle Status ist derzeit ausgeblendet.');
   const latest=[...diaryPublished].sort((a,b)=>`${b.date||''} ${b.time||''}`.localeCompare(`${a.date||''} ${a.time||''}`))[0];const lastTitle=document.getElementById('last-diary-title'),lastDate=document.getElementById('last-diary-date');if(lastTitle)lastTitle.textContent=latest?.title||'Noch keiner';if(lastDate)lastDate.textContent=latest?.date?`Veröffentlicht am ${latest.date}`:'Kein veröffentlichter Eintrag';
 
   const card = document.querySelector('.status-card');
@@ -125,14 +125,14 @@ async function loadDashboard() {
     if (text) text.textContent = 'GitHub OAuth-Zugangsdaten fehlen';
   }
 
-  const files = [news, program, gallery, downloads, places, faq, diary, legal, site, version];
+  const files = [news, program, gallery, downloads, places, faq, diary, legal, site, version, journey];
   const placeRows = Array.isArray(places?.places) ? places.places : [];
   const galleryRows = Array.isArray(gallery?.photos) ? gallery.photos : [];
   const publishedDownloads = (downloads?.downloads || []).filter(item => item.published && item.file);
   const programDays = program?.days || program?.program || [];
-  const diaryRows = Array.isArray(diary?.entries) ? diary.entries : [];
-  const publishedDiary = diaryRows.filter(isPublished).length;
-  const draftDiary = diaryRows.length - publishedDiary;
+  const diaryRowsCheck = Array.isArray(diary?.entries) ? diary.entries : [];
+  const publishedDiary = diaryRowsCheck.filter(isPublished).length;
+  const draftDiary = diaryRowsCheck.length - publishedDiary;
   const hasImpressum = legalSectionExists(legal, 'impressum', 'impressum');
   const hasDatenschutz = legalSectionExists(legal, 'datenschutz', 'datenschutz');
   const missingAlt = galleryRows.filter(item => !normalizeText(item.alt || item.title)).length;
@@ -155,7 +155,8 @@ async function loadDashboard() {
     preflightResult('Galerie und Alternativtexte', galleryRows.length && missingAlt === 0 ? 'ok' : galleryRows.length ? 'warn' : 'fail', galleryRows.length ? (missingAlt ? `${galleryRows.length} Fotos geprüft; bei ${missingAlt} Foto${missingAlt === 1 ? '' : 's'} fehlt ein Alternativtext.` : `${galleryRows.length} Fotos geprüft; alle besitzen einen Alternativtext.`) : 'Die Galerie enthält noch keine Fotos.'),
     preflightResult('Öffentliche Downloads', publishedDownloads.length ? 'ok' : 'warn', publishedDownloads.length ? `${publishedDownloads.length} Dokument${publishedDownloads.length === 1 ? '' : 'e'} veröffentlicht.` : 'Derzeit ist kein Download veröffentlicht.'),
     preflightResult('Impressum und Datenschutz', hasImpressum && hasDatenschutz ? 'ok' : 'fail', hasImpressum && hasDatenschutz ? 'Impressum und Datenschutzerklärung wurden erkannt.' : `${hasImpressum ? '' : 'Impressum fehlt oder ist nicht lesbar. '}${hasDatenschutz ? '' : 'Datenschutz fehlt oder ist nicht lesbar.'}`.trim()),
-    preflightResult('Versionsstand', version?.version === '10.6.1' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
+    preflightResult('Smart Journey', journey?.enabled && Array.isArray(journey?.days) && journey.days.length >= 6 ? 'ok' : 'warn', journey?.enabled ? `${journey.days?.length||0} automatische Reisetage konfiguriert.` : 'Smart Journey ist deaktiviert.'),
+    preflightResult('Versionsstand', version?.version === '10.8.0' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
   ]);
   if (refresh) refresh.disabled = false;
 }

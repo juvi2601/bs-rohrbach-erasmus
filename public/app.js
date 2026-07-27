@@ -1,15 +1,16 @@
 const qs=(s,c=document)=>c.querySelector(s), qsa=(s,c=document)=>[...c.querySelectorAll(s)];
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const fetchJson=async url=>{const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(url);return r.json()};
-let programData={days:[]}, galleryData=[], activeGallery=[], legalData={};
+let programData={days:[]}, galleryData=[], activeGallery=[], legalData={}, journeyData=null;
 
 async function init(){
   setupNav();setupReveal();setupPwa();setupLightbox();setupLegalModal();setupActiveNavigation();
-  const [site,program,places,gallery,downloads,faq,news,legal,diary]=await Promise.allSettled([
-    fetchJson("content/site.json"),fetchJson("content/program.json"),fetchJson("content/places.json"),fetchJson("content/gallery.json"),fetchJson("content/downloads.json"),fetchJson("content/faq.json"),fetchJson("content/news.json"),fetchJson("content/legal.json"),fetchJson("content/diary.json")
+  const [site,program,places,gallery,downloads,faq,news,legal,diary,journey]=await Promise.allSettled([
+    fetchJson("content/site.json"),fetchJson("content/program.json"),fetchJson("content/places.json"),fetchJson("content/gallery.json"),fetchJson("content/downloads.json"),fetchJson("content/faq.json"),fetchJson("content/news.json"),fetchJson("content/legal.json"),fetchJson("content/diary.json"),fetchJson("content/journey.json")
   ]);
+  if(journey.status==="fulfilled")journeyData=journey.value;
   if(site.status==="fulfilled")applySite(site.value);
-  if(program.status==="fulfilled"){programData=program.value;renderProgram(program.value.days||[]);renderToday(program.value.days||[])}
+  if(program.status==="fulfilled"){programData=program.value;renderProgram(program.value.days||[]);renderToday(program.value.days||[]);applySmartJourney(site.status==="fulfilled"?site.value:{},program.value.days||[],journeyData)}
   if(places.status==="fulfilled")renderMap(places.value.places||[]);
   if(gallery.status==="fulfilled"){galleryData=gallery.value.photos||[];renderGallery(galleryData)}
   if(downloads.status==="fulfilled")renderDownloads(downloads.value.downloads||[]);
@@ -34,7 +35,7 @@ function applySite(site){
   if(Array.isArray(site.navigation)){qs("#mainNav").innerHTML=site.navigation.map(x=>`<a class="${x.highlight?'nav-upload':''} ${x.emergency?'nav-emergency':''}" href="${esc(x.target||'#')}">${esc(x.label)}</a>`).join("");bindNavLinks()}
   if(Array.isArray(site.quickLinks)){qs("#quickLinks").innerHTML=site.quickLinks.map(x=>`<a href="${esc(x.target||'#')}"><span>${esc(x.icon)}</span><b>${esc(x.title)}</b><small>${esc(x.subtitle)}</small></a>`).join("")}
   const live=site.liveStatus||{};const liveSection=qs("#liveStatusSection"),liveCard=qs("#liveStatusCard");
-  if(liveSection&&live.enabled===true&&String(live.text||"").trim()){liveSection.hidden=false;liveCard.className=`live-status-card reveal visible ${["success","warning","important"].includes(live.type)?live.type:"info"}`;setText("liveStatusIcon",live.emoji||"📢");setText("liveStatusTitle",live.title||"Aktueller Reisestatus");setText("liveStatusText",live.text);setText("liveStatusUpdated",live.updated?`Aktualisiert: ${live.updated}`:"")}else if(liveSection){liveSection.hidden=true}
+  if(liveSection&&live.mode!=="automatic"&&live.enabled===true&&String(live.text||"").trim()){liveSection.hidden=false;liveCard.className=`live-status-card reveal visible ${["success","warning","important"].includes(live.type)?live.type:"info"}`;setText("liveStatusIcon",live.emoji||"📢");setText("liveStatusTitle",live.title||"Aktueller Reisestatus");setText("liveStatusText",live.text);setText("liveStatusUpdated",live.updated?`Aktualisiert: ${live.updated}`:"")}else if(liveSection){liveSection.hidden=true}
   const t=site.today||{};setText("todayEyebrow",t.eyebrow);setText("todayTitle",t.beforeTitle);setText("todayText",t.beforeText);setText("progressLabel",t.beforeLabel);setText("progressDate",t.dateRange);
   const s=site.sections||{};renderSectionHead("news",s.news);renderSectionHead("program",s.program);renderSectionHead("map",s.map);renderSectionHead("weather",s.weather);renderSectionHead("gallery",s.gallery);renderSectionHead("culinary",s.culinary);renderSectionHead("downloads",s.downloads);renderSectionHead("faq",s.faq);
   setText("programNotice",site.notice||(s.program||{}).intro);
@@ -48,6 +49,26 @@ function applySite(site){
   const target=new Date(site.departure||"2026-11-21T20:00:00+01:00").getTime(),tripEnd=new Date(site.returnDate||"2026-11-26T23:59:00+01:00").getTime();
   const tick=()=>{let now=Date.now(),d=target-now,el=qs("#countdown");if(!el)return;if(now>tripEnd){setText("countdownLabel","✅ Brüsselreise abgeschlossen");setText("countdownDateText",site.today?.afterTitle||"Schöne Erinnerungen an Brüssel");el.innerHTML='<div><strong>🇧🇪</strong><small>Reise beendet</small></div>';return}if(d<=0){const day=Math.max(1,Math.min(6,Math.floor((now-target)/86400000)+1));setText("countdownLabel","📍 Wir sind unterwegs");setText("countdownDateText",`Tag ${day} unserer Brüsselreise`);el.innerHTML=`<div><strong>${day}</strong><small>Reisetag</small></div>`;return}const vals=[];vals.push([Math.floor(d/86400000),"Tage"]);d%=86400000;vals.push([Math.floor(d/3600000),"Stunden"]);d%=3600000;vals.push([Math.floor(d/60000),"Minuten"]);d%=60000;vals.push([Math.floor(d/1000),"Sekunden"]);el.innerHTML=vals.map(v=>`<div><strong>${String(v[0]).padStart(2,"0")}</strong><small>${v[1]}</small></div>`).join("")};tick();setInterval(tick,1000);
 }
+
+function localDateKey(date=new Date()){
+  return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Vienna",year:"numeric",month:"2-digit",day:"2-digit"}).format(date);
+}
+function minutesFromTime(value){
+  const match=String(value||"").match(/(\d{1,2}):(\d{2})/);return match?Number(match[1])*60+Number(match[2]):null;
+}
+function currentJourneyState(journey,days){
+  if(!journey?.enabled)return null;const now=new Date(),key=localDateKey(now),start=new Date(journey.trip?.start),end=new Date(journey.trip?.end);
+  if(now<start)return{phase:"before",data:journey.before||{},day:null};if(now>end)return{phase:"after",data:journey.after||{},day:null};
+  const day=(journey.days||[]).find(x=>x.date===key)||(journey.days||[]).find(x=>x.programId===(days||[]).find(d=>d.date===key.slice(8,10)+"."+key.slice(5,7)+".")?.id);
+  return{phase:"during",data:day||{},day};
+}
+function applySmartJourney(site,days,journey){
+  if(!journey?.enabled)return;const live=site.liveStatus||{},manual=live.mode==="manual"&&live.enabled===true&&String(live.text||"").trim();if(manual)return;
+  const state=currentJourneyState(journey,days);if(!state)return;const section=qs("#liveStatusSection"),card=qs("#liveStatusCard");if(!section||!card)return;
+  const data=state.data||{};section.hidden=false;card.className="live-status-card reveal visible info smart-journey-status";setText("liveStatusIcon",data.emoji||"🧭");setText("liveStatusTitle",data.title||"Smart Journey");setText("liveStatusText",data.status||data.text||"");setText("liveStatusUpdated",state.phase==="during"?(data.place?`Heute · ${data.place}`:"Automatisch aus dem Reiseplan"):"Automatisch gesteuert");
+  if(state.phase==="during"&&state.day){const programDay=(days||[]).find(d=>d.id===state.day.programId);if(programDay){setText("todayEyebrow","Smart Journey · Heute");setText("todayTitle",`${state.day.emoji||programDay.icon||"📍"} ${programDay.title}`);setText("todayText",state.day.status||programDay.subtitle||"");setText("progressLabel",`Tag ${Math.max(1,programDay.dayNumber||1)} der Reise`);setText("progressDate",state.day.date.split("-").reverse().join("."));}}
+}
+
 function activateExternal(id,url){const a=qs("#"+id);if(a&&url){a.href=url;a.target="_blank";a.rel="noopener";a.classList.remove("disabled");a.removeAttribute("aria-disabled")}}
 
 function renderDiary(entries){

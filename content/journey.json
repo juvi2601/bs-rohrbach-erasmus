@@ -1,0 +1,70 @@
+{
+  "enabled": true,
+  "automaticStatus": true,
+  "timezone": "Europe/Vienna",
+  "trip": {
+    "name": "Brüssel 2026",
+    "start": "2026-11-21T20:00:00+01:00",
+    "end": "2026-11-26T23:59:00+01:00"
+  },
+  "before": {
+    "emoji": "⏳",
+    "title": "Die Brüsselreise rückt näher",
+    "text": "Die Smart Journey aktiviert sich automatisch mit der Abfahrt am 21. November 2026."
+  },
+  "after": {
+    "emoji": "🎉",
+    "title": "Die Brüsselreise ist abgeschlossen",
+    "text": "Reisetagebuch, Galerie und Reiseinformationen bleiben weiterhin erreichbar."
+  },
+  "days": [
+    {
+      "date": "2026-11-21",
+      "programId": "sa",
+      "emoji": "🚌",
+      "title": "Heute geht es los!",
+      "status": "Abfahrt bei der Berufsschule Rohrbach um 20:00 Uhr.",
+      "place": "Rohrbach"
+    },
+    {
+      "date": "2026-11-22",
+      "programId": "so",
+      "emoji": "🇧🇪",
+      "title": "Ankommen in Brüssel",
+      "status": "Heute entdecken wir die Brüsseler Altstadt und beziehen unser Hotel.",
+      "place": "Brüssel"
+    },
+    {
+      "date": "2026-11-23",
+      "programId": "mo",
+      "emoji": "💎",
+      "title": "Heute entdecken wir Antwerpen",
+      "status": "Hafenrundfahrt, Hauptbahnhof und Diamantenviertel stehen auf dem Programm.",
+      "place": "Antwerpen"
+    },
+    {
+      "date": "2026-11-24",
+      "programId": "di",
+      "emoji": "🇪🇺",
+      "title": "Heute erleben wir die Europäische Union",
+      "status": "Parlamentarium, Europäisches Parlament und Europäischer Rat stehen im Mittelpunkt.",
+      "place": "Europaviertel Brüssel"
+    },
+    {
+      "date": "2026-11-25",
+      "programId": "mi",
+      "emoji": "🏛️",
+      "title": "Brüssel und Europa",
+      "status": "Heute verbinden wir politische Einblicke mit Stadtprogramm und Freizeit.",
+      "place": "Brüssel"
+    },
+    {
+      "date": "2026-11-26",
+      "programId": "do",
+      "emoji": "🧳",
+      "title": "Abschluss und Heimreise",
+      "status": "Nach dem letzten Programmpunkt treten wir die Heimreise an.",
+      "place": "Brüssel"
+    }
+  ]
+}
