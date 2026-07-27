@@ -156,10 +156,40 @@ async function loadDashboard() {
     preflightResult('Öffentliche Downloads', publishedDownloads.length ? 'ok' : 'warn', publishedDownloads.length ? `${publishedDownloads.length} Dokument${publishedDownloads.length === 1 ? '' : 'e'} veröffentlicht.` : 'Derzeit ist kein Download veröffentlicht.'),
     preflightResult('Impressum und Datenschutz', hasImpressum && hasDatenschutz ? 'ok' : 'fail', hasImpressum && hasDatenschutz ? 'Impressum und Datenschutzerklärung wurden erkannt.' : `${hasImpressum ? '' : 'Impressum fehlt oder ist nicht lesbar. '}${hasDatenschutz ? '' : 'Datenschutz fehlt oder ist nicht lesbar.'}`.trim()),
     preflightResult('Smart Journey', journey?.enabled && Array.isArray(journey?.days) && journey.days.length >= 6 ? 'ok' : 'warn', journey?.enabled ? `${journey.days?.length||0} automatische Reisetage konfiguriert.` : 'Smart Journey ist deaktiviert.'),
-    preflightResult('Versionsstand', version?.version === '10.8.0' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
+    preflightResult('Versionsstand', version?.version === '10.8.1' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
   ]);
   if (refresh) refresh.disabled = false;
 }
 
 document.getElementById('preflightRefresh')?.addEventListener('click', loadDashboard);
 loadDashboard();
+initJourneySimulator();
+
+
+const JOURNEY_PREVIEW_KEY = 'bsr-smart-journey-preview';
+const previewDateLabel = value => value ? value.split('-').reverse().join('.') : '–';
+function loadJourneyPreview(){
+  try{return JSON.parse(localStorage.getItem(JOURNEY_PREVIEW_KEY)||'null')}catch{return null}
+}
+function setJourneyPreviewStatus(preview){
+  const status=document.getElementById('journeyPreviewStatus');if(!status)return;
+  if(preview?.enabled&&preview.date){status.classList.add('active');status.textContent=`Testmodus aktiv: Die Website simuliert den ${previewDateLabel(preview.date)} – nur in diesem Browser.`}
+  else{status.classList.remove('active');status.textContent='Testmodus ist deaktiviert. Besucher sehen das echte Datum.'}
+}
+async function initJourneySimulator(){
+  const enabled=document.getElementById('journeyPreviewEnabled'),date=document.getElementById('journeyPreviewDate'),preset=document.getElementById('journeyPreviewPreset');
+  if(!enabled||!date||!preset)return;
+  const journey=await readJson('/content/journey.json');if(!journey)return;
+  const start=String(journey.trip?.start||'').slice(0,10),end=String(journey.trip?.end||'').slice(0,10);
+  const dayBefore=start?new Date(`${start}T12:00:00`):null;if(dayBefore)dayBefore.setDate(dayBefore.getDate()-1);
+  const dayAfter=end?new Date(`${end}T12:00:00`):null;if(dayAfter)dayAfter.setDate(dayAfter.getDate()+1);
+  const iso=d=>d&&!Number.isNaN(d.getTime())?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';
+  const options=[];if(dayBefore)options.push([iso(dayBefore),'⏳ Vor der Reise']);
+  (journey.days||[]).forEach(item=>options.push([String(item.date||'').slice(0,10),`${item.emoji||'📅'} ${item.title||item.date}`]));
+  if(dayAfter)options.push([iso(dayAfter),'🎉 Nach der Reise']);
+  preset.insertAdjacentHTML('beforeend',options.filter(x=>x[0]).map(([value,label])=>`<option value="${value}">${label} · ${previewDateLabel(value)}</option>`).join(''));
+  const current=loadJourneyPreview();enabled.checked=Boolean(current?.enabled);date.value=current?.date||start||'';preset.value=current?.date||'';setJourneyPreviewStatus(current);
+  preset.addEventListener('change',()=>{if(preset.value)date.value=preset.value});date.addEventListener('change',()=>{preset.value=[...preset.options].some(o=>o.value===date.value)?date.value:''});
+  document.getElementById('journeyPreviewApply')?.addEventListener('click',()=>{if(!date.value){setJourneyPreviewStatus(null);return}const value={enabled:enabled.checked,date:date.value};if(value.enabled)localStorage.setItem(JOURNEY_PREVIEW_KEY,JSON.stringify(value));else localStorage.removeItem(JOURNEY_PREVIEW_KEY);setJourneyPreviewStatus(value.enabled?value:null)});
+  document.getElementById('journeyPreviewClear')?.addEventListener('click',()=>{localStorage.removeItem(JOURNEY_PREVIEW_KEY);enabled.checked=false;setJourneyPreviewStatus(null)});
+}

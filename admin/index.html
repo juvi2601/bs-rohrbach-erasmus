@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Admin-Dashboard – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=10.7">
+  <link rel="stylesheet" href="/admin/admin.css?v=10.8.1">
 </head>
 <body>
   <header class="topbar">
@@ -25,7 +25,7 @@
       <div>
         <p class="eyebrow">Brüssel 2026</p>
         <h1>Admin-Dashboard</h1>
-        <p>Version 10.6.1 erweitert den Pre-Flight-Check zu einem übersichtlichen System-Dashboard und erkennt die rechtlichen Bereiche zuverlässiger.</p>
+        <p>Version 10.8.1 ergänzt einen sicheren lokalen Testmodus für alle Smart-Journey-Reisephasen.</p>
       </div>
       <div class="status-card">
         <span class="status-dot"></span>
@@ -34,7 +34,7 @@
     </section>
 
     <section class="system-strip" aria-label="Systeminformationen">
-      <div><span>Version</span><strong>10.7</strong></div>
+      <div><span>Version</span><strong>10.8.1</strong></div>
       <div><span>Letzte Aktualisierung</span><strong>26.07.2026</strong></div>
       <div><span>Veröffentlichung</span><strong>GitHub → Cloudflare</strong></div>
     </section>
@@ -42,7 +42,7 @@
 
     <section class="preflight" aria-labelledby="preflight-title">
       <div class="section-heading">
-        <div><p class="eyebrow">Live-Reisezentrale 10.7.1</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
+        <div><p class="eyebrow">Smart Journey 10.8.1</p><h2 id="preflight-title">Pre-Flight-Check</h2></div>
         <button class="button ghost preflight-refresh" id="preflightRefresh" type="button">Erneut prüfen</button>
       </div>
       <div class="preflight-summary" id="preflightSummary" aria-live="polite">
@@ -92,6 +92,27 @@
         <a href="/admin/cms.html#/collections/gallery"><span>📸</span><strong>Galerie bearbeiten</strong><small>Öffentliche Reisemotive pflegen</small></a>
         <a href="/admin/cms.html#/collections/downloads"><span>📥</span><strong>Downloads bearbeiten</strong><small>Dokumente veröffentlichen</small></a>
         <a href="/admin/cms.html#/collections/places"><span>📍</span><strong>Kartenorte bearbeiten</strong><small>Marker und Orte verwalten</small></a>
+      </div>
+    </section>
+
+
+    <section class="journey-simulator" aria-labelledby="journey-simulator-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">Smart Journey 10.8.1</p><h2 id="journey-simulator-title">Reisephasen testen</h2></div>
+      </div>
+      <p class="simulator-intro">Die Vorschau gilt nur in diesem Browser. Andere Besucher sehen weiterhin das echte Datum.</p>
+      <div class="simulator-panel">
+        <label class="simulator-toggle"><input id="journeyPreviewEnabled" type="checkbox"><span><strong>Testmodus aktivieren</strong><small>Die öffentliche Website simuliert das gewählte Datum nur auf diesem Gerät.</small></span></label>
+        <div class="simulator-fields">
+          <label><span>Testdatum</span><input id="journeyPreviewDate" type="date"></label>
+          <label><span>Schnellauswahl</span><select id="journeyPreviewPreset"><option value="">Datum auswählen …</option></select></label>
+        </div>
+        <div class="simulator-status" id="journeyPreviewStatus" aria-live="polite">Testmodus ist deaktiviert.</div>
+        <div class="simulator-actions">
+          <button class="button primary" id="journeyPreviewApply" type="button">Vorschau übernehmen</button>
+          <button class="button ghost" id="journeyPreviewClear" type="button">Testmodus beenden</button>
+          <a class="button ghost" id="journeyPreviewOpen" href="/" target="_blank" rel="noopener">Website in Vorschau öffnen</a>
+        </div>
       </div>
     </section>
 
@@ -177,6 +198,6 @@
       <div><strong>Hinweis zum Speichern</strong><p>Nach dem Speichern legt das CMS die Änderung in GitHub ab. Cloudflare veröffentlicht den neuen Stand anschließend automatisch. Das kann kurz dauern.</p></div>
     </section>
 </main>
-  <script src="/admin/admin.js?v=10.7"></script>
+  <script src="/admin/admin.js?v=10.8.1"></script>
 </body>
 </html>
