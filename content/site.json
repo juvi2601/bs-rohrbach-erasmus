@@ -13,7 +13,7 @@
   "heroEyebrow": "Berufsschule Rohrbach unterwegs",
   "heroTitle": "Brüssel 2026",
   "heroPrimaryButton": "Reiseprogramm",
-  "heroSecondaryButton": "Reisegruppe öffnen",
+  "heroSecondaryButton": "Internen Bereich öffnen",
   "countdownLabel": "🚌 Abfahrt in Rohrbach",
   "countdownDateText": "Samstag, 21. November · 20:00 Uhr",
   "navigation": [
@@ -46,7 +46,7 @@
       "target": "#downloads"
     },
     {
-      "label": "Reisegruppe 🔒",
+      "label": "Interner Bereich 🔒",
       "target": "#reisegruppe",
       "highlight": true
     }
@@ -77,9 +77,9 @@
       "target": "#wetter"
     },
     {
-      "icon": "📷",
-      "title": "Galerie",
-      "subtitle": "Fotos & Upload",
+      "icon": "🔒",
+      "title": "Interner Bereich",
+      "subtitle": "Geschützte Inhalte",
       "target": "#reisegruppe"
     },
     {
@@ -90,7 +90,7 @@
     }
   ],
   "today": {
-    "eyebrow": "Digitaler Reisebegleiter",
+    "eyebrow": "Heute auf unserer Reise",
     "beforeTitle": "Die Reise beginnt bald",
     "beforeText": "Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.",
     "beforeLabel": "Vorfreude",
@@ -201,8 +201,8 @@
   "studentArea": {
     "icon": "🔒",
     "eyebrow": "Nur mit Schulkonto",
-    "title": "Bereich für die Reisegruppe",
-    "text": "Fotoupload und Schülergalerie liegen geschützt in Microsoft 365. Auf der öffentlichen Website werden keine Schülerfotos gespeichert.",
+    "title": "Interner Bereich",
+    "text": "Fotoupload, Schülergalerie und geschützte Informationen liegen in Microsoft 365. Auf der öffentlichen Website werden keine Schülerfotos gespeichert.",
     "uploadButton": "📤 Fotos hochladen",
     "galleryButton": "📸 Schülergalerie öffnen",
     "note": "Anmeldung mit dem schulischen Microsoft-365-Konto erforderlich. Hochgeladene Fotos werden vor der Veröffentlichung geprüft.",

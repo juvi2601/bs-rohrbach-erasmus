@@ -1,6 +1,6 @@
 {
   "today": {
-    "eyebrow": "Digitaler Reisebegleiter",
+    "eyebrow": "Heute auf unserer Reise",
     "beforeTitle": "Die Reise beginnt bald",
     "beforeText": "Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.",
     "beforeLabel": "Vorfreude",
@@ -17,11 +17,11 @@
   "studentArea": {
     "galleryButton": "📸 Schülergalerie öffnen",
     "eyebrow": "Nur mit Schulkonto",
-    "text": "Fotoupload und Schülergalerie liegen geschützt in Microsoft 365. Auf der öffentlichen Website werden keine Schülerfotos gespeichert.",
+    "text": "Fotoupload, Schülergalerie und geschützte Informationen liegen in Microsoft 365. Auf der öffentlichen Website werden keine Schülerfotos gespeichert.",
     "uploadUrl": "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=Z9b4aaCZ2k6zc0ILJIznMvKDmvvfCnpDoqGfIp0BMCJUQ1RXMjdKWEJVTTBMQ005WVRWSUw5NllNSS4u",
     "note": "Anmeldung mit dem schulischen Microsoft-365-Konto erforderlich. Hochgeladene Fotos werden vor der Veröffentlichung geprüft.",
     "uploadButton": "📤 Fotos hochladen",
-    "title": "Bereich für die Reisegruppe",
+    "title": "Interner Bereich",
     "icon": "🔒",
     "galleryUrl": "https://bsrohrbach.sharepoint.com/sites/BSRohrbachBrsselreise2026?market=de-DE"
   },
@@ -68,9 +68,9 @@
       "target": "#wetter"
     },
     {
-      "icon": "📷",
-      "title": "Galerie",
-      "subtitle": "Fotos & Upload",
+      "icon": "🔒",
+      "title": "Interner Bereich",
+      "subtitle": "Geschützte Inhalte",
       "target": "#reisegruppe"
     },
     {
@@ -80,7 +80,7 @@
       "target": "#downloads"
     }
   ],
-  "heroSecondaryButton": "Reisegruppe öffnen",
+  "heroSecondaryButton": "Internen Bereich öffnen",
   "countdownDateText": "Samstag, 21. November · 20:00 Uhr",
   "sections": {
     "news": {
@@ -220,7 +220,7 @@
       "emergency": true
     },
     {
-      "label": "Reisegruppe 🔒",
+      "label": "Interner Bereich 🔒",
       "target": "#reisegruppe",
       "highlight": true
     }

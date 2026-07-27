@@ -35,12 +35,12 @@ function applySite(site){
   setText("countdownLabel",site.countdownLabel);setText("countdownDateText",site.countdownDateText);
   if(Array.isArray(site.navigation)){qs("#mainNav").innerHTML=site.navigation.map(x=>`<a class="${x.highlight?'nav-upload':''} ${x.emergency?'nav-emergency':''}" href="${esc(x.target||'#')}">${esc(x.label)}</a>`).join("");bindNavLinks()}
   if(Array.isArray(site.quickLinks)){qs("#quickLinks").innerHTML=site.quickLinks.map(x=>`<a href="${esc(x.target||'#')}"><span>${esc(x.icon)}</span><b>${esc(x.title)}</b><small>${esc(x.subtitle)}</small></a>`).join("")}
-  const live=site.liveStatus||{};const liveSection=qs("#liveStatusSection"),liveCard=qs("#liveStatusCard");
-  if(liveSection&&live.mode!=="automatic"&&live.enabled===true&&String(live.text||"").trim()){liveSection.hidden=false;liveCard.className=`live-status-card reveal visible ${["success","warning","important"].includes(live.type)?live.type:"info"}`;setText("liveStatusIcon",live.emoji||"📢");setText("liveStatusTitle",live.title||"Aktueller Reisestatus");setText("liveStatusText",live.text);setText("liveStatusUpdated",live.updated?`Aktualisiert: ${live.updated}`:"")}else if(liveSection){liveSection.hidden=true}
+  const live=site.liveStatus||{};const todayAlert=qs("#todayAlert");
+  const manualLive=live.mode!=="automatic"&&live.enabled===true&&String(live.text||"").trim();
+  if(todayAlert&&manualLive){todayAlert.hidden=false;todayAlert.className=`today-alert ${["success","warning","important"].includes(live.type)?live.type:"info"}`;setText("todayAlertIcon",live.emoji||"📢");setText("todayAlertTitle",live.title||"Aktueller Reisestatus");setText("todayAlertText",live.text);setText("todayAlertUpdated",live.updated?`Aktualisiert: ${live.updated}`:"")}else if(todayAlert){todayAlert.hidden=true}
   const t=site.today||{};setText("todayEyebrow",t.eyebrow);setText("todayTitle",t.beforeTitle);setText("todayText",t.beforeText);setText("progressLabel",t.beforeLabel);setText("progressDate",t.dateRange);
-  const s=site.sections||{};renderSectionHead("news",s.news);renderSectionHead("program",s.program);renderSectionHead("map",s.map);renderSectionHead("weather",s.weather);renderSectionHead("gallery",s.gallery);renderSectionHead("culinary",s.culinary);renderSectionHead("downloads",s.downloads);renderSectionHead("faq",s.faq);
+  const s=site.sections||{};renderSectionHead("news",s.news);renderSectionHead("program",s.program);renderSectionHead("map",s.map);renderSectionHead("weather",s.weather);renderSectionHead("gallery",s.gallery);renderSectionHead("downloads",s.downloads);renderSectionHead("faq",s.faq);
   setText("programNotice",site.notice||(s.program||{}).intro);
-  const culinary=site.culinaryItems||[];qs("#culinaryGrid").innerHTML=culinary.map(x=>`<article class="reveal visible"><img src="${esc(x.image)}" alt="${esc(x.title)}"><div><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></div></article>`).join("");
   const h=site.hotel||{};setText("hotelEyebrow",h.eyebrow);setText("hotelTitle",h.title);setText("hotelAddress",h.address);if(h.image){const im=qs("#hotelImage");im.src=h.image;im.alt=h.title||"Hotel"}setLink("hotelMapsButton",h.mapsButton,h.mapsUrl);qs("#hotelDetails").innerHTML=(h.details||[]).map(x=>`<div><span>${esc(x.icon)}</span><b>${esc(x.title)}</b><small>${esc(x.text)}</small></div>`).join("");
   const g=site.studentArea||{};setText("groupIcon",g.icon);setText("groupEyebrow",g.eyebrow);setText("groupTitle",g.title);setText("groupIntro",g.text);setText("uploadButton",g.uploadButton);setText("galleryButton",g.galleryButton);setText("uploadNote",g.note);activateExternal("uploadButton",g.uploadUrl);activateExternal("galleryButton",g.galleryUrl);
   const e=site.emergency||{};setText("emergencyEyebrow",e.eyebrow);setText("emergencyTitle",e.title);setText("emergencyIntro",e.intro);renderEmergency(e.items||[]);
@@ -100,10 +100,11 @@ function currentJourneyState(journey,days){
   return{phase:"during",data:day||{},day};
 }
 function applySmartJourney(site,days,journey){
-  if(!journey?.enabled)return;const live=site.liveStatus||{},manual=live.mode==="manual"&&live.enabled===true&&String(live.text||"").trim();if(manual)return;
-  const state=currentJourneyState(journey,days);if(!state)return;const section=qs("#liveStatusSection"),card=qs("#liveStatusCard");if(!section||!card)return;
-  const data=state.data||{};section.hidden=false;card.className="live-status-card reveal visible info smart-journey-status";setText("liveStatusIcon",data.emoji||"🧭");setText("liveStatusTitle",data.title||"Smart Journey");setText("liveStatusText",data.status||data.text||"");setText("liveStatusUpdated",state.phase==="during"?(data.place?`Heute · ${data.place}`:"Automatisch aus dem Reiseplan"):"Automatisch gesteuert");
-
+  // Der automatische Status wird bereits im gemeinsamen Bereich „Heute auf unserer Reise“ dargestellt.
+  // Nur ein manueller Hinweis erscheint dort zusätzlich als hervorgehobene Meldung.
+  const live=site.liveStatus||{},manual=live.mode==="manual"&&live.enabled===true&&String(live.text||"").trim();
+  const alert=qs("#todayAlert");
+  if(alert&&!manual)alert.hidden=true;
 }
 
 function activateExternal(id,url){const a=qs("#"+id);if(a&&url){a.href=url;a.target="_blank";a.rel="noopener";a.classList.remove("disabled");a.removeAttribute("aria-disabled")}}
@@ -119,7 +120,7 @@ function renderDiary(entries){
 }
 function openDiaryImage(src,alt){const box=qs('#lightbox'),img=qs('#lightboxImage'),title=qs('#lightboxTitle'),caption=qs('#lightboxCaption');if(!box||!img)return;img.src=src;img.alt=alt;title.textContent=alt;caption.textContent='Reisetagebuch';box.hidden=false;document.body.classList.add('modal-open')}
 
-function renderNews(items){const grid=qs("#newsGrid");const rows=items.filter(x=>x.published!==false).sort((a,b)=>(b.date||"").localeCompare(a.date||""));if(!rows.length){grid.innerHTML='<div class="empty-state">Noch keine Meldungen veröffentlicht.</div>';return}grid.innerHTML=rows.map(n=>`<article class="news-card ${n.important?'important':''}"><time>${formatDate(n.date)}</time><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p></article>`).join("")}
+function renderNews(items){const section=qs("#news"),grid=qs("#newsGrid"),links=qsa('a[href="#news"]');const rows=items.filter(x=>x.published!==false).sort((a,b)=>(b.date||"").localeCompare(a.date||""));if(!rows.length){if(section)section.hidden=true;if(grid)grid.innerHTML="";links.forEach(link=>link.hidden=true);return}if(section)section.hidden=false;links.forEach(link=>link.hidden=false);grid.innerHTML=rows.map(n=>`<article class="news-card ${n.important?'important':''}"><time>${formatDate(n.date)}</time><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p></article>`).join("")}
 function formatDate(v){if(!v)return"";return new Intl.DateTimeFormat("de-AT",{day:"2-digit",month:"long",year:"numeric"}).format(new Date(v+"T12:00:00"))}
 
 
@@ -290,16 +291,16 @@ function renderToday(days,journey=journeyData){
   if(state?.phase==="during"&&state.day){
     const day=days.find(d=>d.id===state.day.programId)||days[0],index=Math.max(0,days.findIndex(d=>d.id===day.id));
     pct=Math.round(((index+1)/total)*100);label=`Tag ${index+1} von ${total}`;dateText=`${day.short}, ${day.date}2026`;
-    setText("todayEyebrow","Digitaler Reisebegleiter · Heute");setText("todayTitle",`${state.day.emoji||day.icon||"📍"} ${state.day.title||day.title}`);setText("todayText",state.day.status||day.subtitle||"");
+    setText("todayEyebrow","Heute auf unserer Reise");setText("todayTitle",`${state.day.emoji||day.icon||"📍"} ${state.day.title||day.title}`);setText("todayText",state.day.status||day.subtitle||"");
     if(schedule)schedule.innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");
     activateDay(day.id);
   }else if(state?.phase==="after"){
     pct=100;label=t.afterLabel||"Reise abgeschlossen";dateText=journey?.trip?.name||"Brüssel 2026";
-    setText("todayEyebrow","Digitaler Reisebegleiter · Rückblick");setText("todayTitle",journey?.after?.title||t.afterTitle||"Unsere Brüsselreise ist abgeschlossen");setText("todayText",journey?.after?.text||t.afterText||"Entdecke unsere Berichte und Erinnerungen im Reisetagebuch und in der Galerie.");
+    setText("todayEyebrow","Unsere Reise · Rückblick");setText("todayTitle",journey?.after?.title||t.afterTitle||"Unsere Brüsselreise ist abgeschlossen");setText("todayText",journey?.after?.text||t.afterText||"Entdecke unsere Berichte und Erinnerungen im Reisetagebuch und in der Galerie.");
     if(schedule)schedule.innerHTML='<a class="button button-blue" href="#reisetagebuch">Zum Reisetagebuch</a><a class="button button-light" href="#galerie">Zur Galerie</a>';
     if(days.length)activateDay(days[days.length-1].id);
   }else{
-    setText("todayEyebrow",t.eyebrow||"Digitaler Reisebegleiter");setText("todayTitle",t.beforeTitle||"Die Reise beginnt bald");setText("todayText",t.beforeText||"Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.");
+    setText("todayEyebrow",t.eyebrow||"Heute auf unserer Reise");setText("todayTitle",t.beforeTitle||"Die Reise beginnt bald");setText("todayText",t.beforeText||"Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.");
     if(schedule)schedule.innerHTML="";
     if(days.length)activateDay(days[0].id);
   }
