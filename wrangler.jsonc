@@ -3,6 +3,7 @@
   "name": "bs-rohrbach-erasmus",
   "main": "src/index.js",
   "compatibility_date": "2026-07-20",
+  "keep_vars": true,
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
