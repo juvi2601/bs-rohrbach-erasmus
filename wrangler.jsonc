@@ -1,11 +1,8 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "bs-rohrbach-erasmus-v2",
+  "name": "bs-rohrbach-erasmus",
   "main": "src/index.js",
   "compatibility_date": "2026-07-20",
-  "vars": {
-    "GITHUB_CLIENT_ID": "Ov23liCC5SOhcSdn0yBs"
-  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
