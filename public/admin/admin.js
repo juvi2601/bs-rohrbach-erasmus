@@ -156,7 +156,7 @@ async function loadDashboard() {
     preflightResult('Öffentliche Downloads', publishedDownloads.length ? 'ok' : 'warn', publishedDownloads.length ? `${publishedDownloads.length} Dokument${publishedDownloads.length === 1 ? '' : 'e'} veröffentlicht.` : 'Derzeit ist kein Download veröffentlicht.'),
     preflightResult('Impressum und Datenschutz', hasImpressum && hasDatenschutz ? 'ok' : 'fail', hasImpressum && hasDatenschutz ? 'Impressum und Datenschutzerklärung wurden erkannt.' : `${hasImpressum ? '' : 'Impressum fehlt oder ist nicht lesbar. '}${hasDatenschutz ? '' : 'Datenschutz fehlt oder ist nicht lesbar.'}`.trim()),
     preflightResult('Smart Journey', journey?.enabled && Array.isArray(journey?.days) && journey.days.length >= 6 ? 'ok' : 'warn', journey?.enabled ? `${journey.days?.length||0} automatische Reisetage konfiguriert.` : 'Smart Journey ist deaktiviert.'),
-    preflightResult('Versionsstand', version?.version === '10.8.1' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
+    preflightResult('Versionsstand', version?.version === '10.8.2' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
   ]);
   if (refresh) refresh.disabled = false;
 }
@@ -173,8 +173,8 @@ function loadJourneyPreview(){
 }
 function setJourneyPreviewStatus(preview){
   const status=document.getElementById('journeyPreviewStatus');if(!status)return;
-  if(preview?.enabled&&preview.date){status.classList.add('active');status.textContent=`Testmodus aktiv: Die Website simuliert den ${previewDateLabel(preview.date)} – nur in diesem Browser.`}
-  else{status.classList.remove('active');status.textContent='Testmodus ist deaktiviert. Besucher sehen das echte Datum.'}
+  if(preview?.enabled&&preview.date){status.classList.add('active');status.textContent=`Simulation aktiv: Die Website simuliert den ${previewDateLabel(preview.date)} – nur in diesem Browser.`}
+  else{status.classList.remove('active');status.textContent='Simulation ist deaktiviert. Besucher sehen das echte Datum.'}
 }
 async function initJourneySimulator(){
   const enabled=document.getElementById('journeyPreviewEnabled'),date=document.getElementById('journeyPreviewDate'),preset=document.getElementById('journeyPreviewPreset');
@@ -188,7 +188,7 @@ async function initJourneySimulator(){
   (journey.days||[]).forEach(item=>options.push([String(item.date||'').slice(0,10),`${item.emoji||'📅'} ${item.title||item.date}`]));
   if(dayAfter)options.push([iso(dayAfter),'🎉 Nach der Reise']);
   preset.insertAdjacentHTML('beforeend',options.filter(x=>x[0]).map(([value,label])=>`<option value="${value}">${label} · ${previewDateLabel(value)}</option>`).join(''));
-  const current=loadJourneyPreview();enabled.checked=Boolean(current?.enabled);date.value=current?.date||start||'';preset.value=current?.date||'';setJourneyPreviewStatus(current);
+  const current=loadJourneyPreview();const details=document.getElementById("journeySimulatorDetails");if(current?.enabled&&details)details.open=true;enabled.checked=Boolean(current?.enabled);date.value=current?.date||start||'';preset.value=current?.date||'';setJourneyPreviewStatus(current);
   preset.addEventListener('change',()=>{if(preset.value)date.value=preset.value});date.addEventListener('change',()=>{preset.value=[...preset.options].some(o=>o.value===date.value)?date.value:''});
   document.getElementById('journeyPreviewApply')?.addEventListener('click',()=>{if(!date.value){setJourneyPreviewStatus(null);return}const value={enabled:enabled.checked,date:date.value};if(value.enabled)localStorage.setItem(JOURNEY_PREVIEW_KEY,JSON.stringify(value));else localStorage.removeItem(JOURNEY_PREVIEW_KEY);setJourneyPreviewStatus(value.enabled?value:null)});
   document.getElementById('journeyPreviewClear')?.addEventListener('click',()=>{localStorage.removeItem(JOURNEY_PREVIEW_KEY);enabled.checked=false;setJourneyPreviewStatus(null)});
