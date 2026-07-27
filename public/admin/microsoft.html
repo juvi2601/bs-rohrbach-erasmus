@@ -1,1 +1,76 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Microsoft 365 – BS Rohrbach Erasmus+</title><link rel="stylesheet" href="/admin/admin.css?v=11.1.0"><link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.0"></head><body><header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Microsoft 365 Connector</small></span></a><div class="top-actions"><a class="button ghost" href="/admin/photo-inbox.html">Fotoeingang</a><a class="button primary" href="/admin/">Dashboard</a></div></header><main class="shell"><section class="welcome"><div><p class="eyebrow">Version 11.1</p><h1>☁️ Microsoft 365</h1><p>Verbindung zwischen Microsoft Forms, SharePoint und dem Fotoeingang.</p></div><div class="status-card" id="ms-status"><span class="status-dot"></span><div><strong id="ms-title">Status wird geprüft</strong><small id="ms-text">Cloudflare-Konfiguration wird geladen</small></div></div></section><section class="inbox-panel"><div class="section-heading"><div><p class="eyebrow">Connector</p><h2>Konfigurationsstatus</h2></div><button class="button ghost" id="refresh" type="button">Erneut prüfen</button></div><div class="inbox-stats"><article><span>Tenant-ID</span><strong id="tenant">–</strong></article><article><span>Client-ID</span><strong id="client">–</strong></article><article><span>Client Secret</span><strong id="secret">–</strong></article><article><span>SharePoint</span><strong id="sharepoint">–</strong></article></div></section><section class="inbox-panel" style="margin-top:1rem"><p class="eyebrow">Nächster Einrichtungsschritt</p><h2>Was noch einzutragen ist</h2><ol><li>Microsoft-Entra-App registrieren und Tenant-ID sowie Client-ID erfassen.</li><li>Client Secret ausschließlich als Cloudflare Secret <code>MS_CLIENT_SECRET</code> speichern.</li><li>In <code>content/microsoft-connector.json</code> SharePoint-Site, Uploadordner und Antwortdatei eintragen.</li><li>Erforderliche Graph-Berechtigungen durch die zuständige Microsoft-365-Administration genehmigen lassen.</li></ol><p><strong>Wichtig:</strong> Keine Passwörter oder Secrets in GitHub speichern.</p></section></main><script>async function load(){try{const r=await fetch('/api/microsoft-status',{cache:'no-store'}),d=await r.json();document.getElementById('ms-title').textContent=d.ready?'Microsoft 365 verbunden':'Einrichtung noch nicht vollständig';document.getElementById('ms-text').textContent=d.ready?'Foto-Synchronisierung ist bereit':'Fehlende Angaben werden unten angezeigt';document.getElementById('ms-status').classList.toggle('ready',!!d.ready);document.getElementById('tenant').textContent=d.tenantIdConfigured?'✓':'Fehlt';document.getElementById('client').textContent=d.clientIdConfigured?'✓':'Fehlt';document.getElementById('secret').textContent=d.clientSecretConfigured?'✓':'Fehlt';document.getElementById('sharepoint').textContent=d.sharePointConfigured?'✓':'Fehlt'}catch(e){document.getElementById('ms-title').textContent='Status nicht erreichbar'}}document.getElementById('refresh').onclick=load;load()</script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Microsoft 365 – BS Rohrbach Erasmus+</title>
+  <link rel="stylesheet" href="/admin/admin.css?v=11.1.1">
+  <link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.1">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Microsoft Forms Connector</small></span></a>
+  <div class="top-actions"><a class="button ghost" href="/admin/photo-inbox.html">Fotoeingang</a><a class="button primary" href="/admin/">Dashboard</a></div>
+</header>
+<main class="shell">
+  <section class="welcome">
+    <div><p class="eyebrow">Version 11.1.1</p><h1>☁️ Microsoft Forms</h1><p>Verbindung zwischen Microsoft Forms, OneDrive und dem Fotoeingang.</p></div>
+    <div class="status-card" id="ms-status"><span class="status-dot"></span><div><strong id="ms-title">Status wird geprüft</strong><small id="ms-text">Cloudflare-Konfiguration wird geladen</small></div></div>
+  </section>
+
+  <section class="inbox-panel">
+    <div class="section-heading"><div><p class="eyebrow">Connector</p><h2>Konfigurationsstatus</h2></div><button class="button ghost" id="refresh" type="button">Erneut prüfen</button></div>
+    <div class="inbox-stats">
+      <article><span>Tenant-ID</span><strong id="tenant">–</strong></article>
+      <article><span>Client-ID</span><strong id="client">–</strong></article>
+      <article><span>Client Secret</span><strong id="secret">–</strong></article>
+      <article><span>Fotoeingang-PIN</span><strong id="pin">–</strong></article>
+      <article><span>Forms-Quelle</span><strong id="source">–</strong></article>
+      <article><span>Graph-Verbindung</span><strong id="graph">–</strong></article>
+    </div>
+  </section>
+
+  <section class="inbox-panel" style="margin-top:1rem">
+    <p class="eyebrow">Cloudflare-Einrichtung</p>
+    <h2>Vier geschützte Werte eintragen</h2>
+    <p>Unter <strong>Cloudflare → Workers &amp; Pages → bs-rohrbach-erasmus-v2 → Settings → Variables and Secrets</strong> werden folgende Namen benötigt:</p>
+    <div class="setup-code">
+      <code>MS_TENANT_ID</code>
+      <code>MS_CLIENT_ID</code>
+      <code>MS_CLIENT_SECRET</code>
+      <code>PHOTO_INBOX_PIN</code>
+    </div>
+    <p><strong>Wichtig:</strong> <code>MS_CLIENT_SECRET</code> und <code>PHOTO_INBOX_PIN</code> als verschlüsselte Secrets speichern. Keine dieser Angaben in GitHub eintragen.</p>
+  </section>
+
+  <section class="inbox-panel" style="margin-top:1rem">
+    <p class="eyebrow">Bereits vorbereitet</p>
+    <h2>Microsoft-Forms-Quelle</h2>
+    <ul>
+      <li>Besitzer: <code>j.vierlinger@bs-rohrbach.ac.at</code></li>
+      <li>Antwortdatei: <code>Fotos Brüsselreise 2026.xlsx</code></li>
+      <li>Uploadordner: <code>Apps/Microsoft Forms/Fotos Brüsselreise 2026/Frage</code></li>
+    </ul>
+    <p>Nach dem Eintragen der vier Cloudflare-Werte kann der Fotoeingang mit echten Forms-Daten synchronisiert werden.</p>
+  </section>
+</main>
+<script>
+async function load(){
+  try{
+    const r=await fetch('/api/microsoft-status',{cache:'no-store'}),d=await r.json();
+    document.getElementById('ms-title').textContent=d.ready&&d.connectionTest?'Microsoft Forms verbunden':'Einrichtung noch nicht vollständig';
+    document.getElementById('ms-text').textContent=d.ready&&d.connectionTest?'Graph-Anmeldung erfolgreich – Synchronisierung ist bereit':(d.connectionError||'Fehlende Angaben werden unten angezeigt');
+    document.getElementById('ms-status').classList.toggle('ready',!!(d.ready&&d.connectionTest));
+    document.getElementById('tenant').textContent=d.tenantIdConfigured?'✓':'Fehlt';
+    document.getElementById('client').textContent=d.clientIdConfigured?'✓':'Fehlt';
+    document.getElementById('secret').textContent=d.clientSecretConfigured?'✓':'Fehlt';
+    document.getElementById('pin').textContent=d.inboxPinConfigured?'✓':'Fehlt';
+    document.getElementById('source').textContent=d.sourceConfigured?'✓':'Fehlt';
+    document.getElementById('graph').textContent=d.connectionTest?'✓':(d.ready?'Fehler':'Noch nicht getestet');
+  }catch(e){document.getElementById('ms-title').textContent='Status nicht erreichbar';document.getElementById('ms-text').textContent=String(e)}
+}
+document.getElementById('refresh').onclick=load;load();
+</script>
+</body>
+</html>

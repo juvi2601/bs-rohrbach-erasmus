@@ -1,13 +1,10 @@
 {
-  "enabled": false,
+  "enabled": true,
   "provider": "microsoft-graph",
-  "tenantId": "",
-  "siteHostname": "",
-  "sitePath": "",
-  "driveId": "",
-  "responsesFile": "",
-  "uploadFolder": "",
+  "ownerUserPrincipalName": "j.vierlinger@bs-rohrbach.ac.at",
+  "responsesFileName": "Fotos Brüsselreise 2026.xlsx",
+  "uploadFolder": "Apps/Microsoft Forms/Fotos Brüsselreise 2026/Frage",
   "formName": "Fotos Brüsselreise 2026",
   "lastSync": null,
-  "notes": "Keine geheimen Zugangsdaten in dieser Datei speichern. Client Secret ausschließlich als Cloudflare Secret hinterlegen."
+  "notes": "Keine geheimen Zugangsdaten in dieser Datei speichern. Tenant-ID, Client-ID, Client Secret und Fotoeingang-PIN ausschließlich als Cloudflare-Variablen bzw. Secrets hinterlegen."
 }
