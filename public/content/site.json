@@ -163,7 +163,7 @@
   "hotel": {
     "eyebrow": "Unser Zuhause in Brüssel",
     "title": "ibis Brussels City Centre",
-    "image": "/images/hotel-ibis.jpg",
+    "image": "/images/uploads/hotel-ibis.jpg",
     "address": "Rue Joseph Plateau 2\n1000 Bruxelles, Belgien",
     "mapsUrl": "https://www.google.com/maps/search/?api=1&query=ibis+Brussels+City+Centre",
     "mapsButton": "In Google Maps öffnen",
@@ -263,7 +263,6 @@
   },
   "returnDate": "2026-11-26T23:59:00+01:00",
   "heroTitle": "Brüssel 2026",
-  "brandSubtitle": "Brüssel · 21.–26. November 2026",
   "liveStatus": {
     "enabled": false,
     "type": "info",
@@ -272,5 +271,6 @@
     "text": "Hier kann während der Reise eine kurze aktuelle Information veröffentlicht werden.",
     "updated": "",
     "mode": "automatic"
-  }
+  },
+  "brandSubtitle": "Brüssel · 21.–26. November 2026"
 }
