@@ -81,6 +81,31 @@ async function graphToken(env){
   const data=await r.json();if(!r.ok||!data.access_token)throw new Error(data.error_description||'Microsoft-Anmeldung ist fehlgeschlagen.');return data.access_token;
 }
 
+
+function decodeJwtPayload(token=''){
+  try{
+    const part=String(token).split('.')[1]||'';
+    const normalized=part.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(part.length/4)*4,'=');
+    return JSON.parse(atob(normalized));
+  }catch{return {}}
+}
+
+function graphTokenInfo(token=''){
+  const claims=decodeJwtPayload(token);
+  return {
+    audience:claims.aud||null,
+    applicationId:claims.appid||claims.azp||null,
+    tenantId:claims.tid||null,
+    roles:Array.isArray(claims.roles)?claims.roles:[],
+    expiresAt:claims.exp?new Date(claims.exp*1000).toISOString():null
+  };
+}
+
+async function resolveUserDrive(token,upn){
+  const r=await graphFetch(`/users/${encodeURIComponent(upn)}/drive?$select=id,driveType,webUrl,owner`,token);
+  return r.json();
+}
+
 async function graphFetch(path,token,options={}){
   const url=`https://graph.microsoft.com/v1.0${path}`;
   const r=await fetch(url,{...options,headers:{authorization:`Bearer ${token}`,...(options.headers||{})}});
@@ -261,11 +286,25 @@ export default {async fetch(request,env){
       if(!state.ready)return json({ok:false,message:'Microsoft-Connector ist noch nicht vollständig eingerichtet.',state},503);
       stage='graph-token';
       const token=await graphToken(env);
+      const tokenInfo=graphTokenInfo(token);
+      const requiredRoles=['Files.Read.All'];
+      const missingRoles=requiredRoles.filter(role=>!tokenInfo.roles.includes(role));
+      if(tokenInfo.audience!=='https://graph.microsoft.com'){
+        const e=new Error(`Das Access-Token ist nicht für Microsoft Graph bestimmt (aud: ${tokenInfo.audience||'fehlt'}).`);
+        e.tokenInfo=tokenInfo;throw e;
+      }
+      if(missingRoles.length){
+        const e=new Error(`Im tatsächlich verwendeten Access-Token fehlt: ${missingRoles.join(', ')}. Prüfe, ob MS_CLIENT_ID wirklich zu jener Entra-App gehört, bei der die Application-Berechtigungen erteilt wurden.`);
+        e.tokenInfo=tokenInfo;throw e;
+      }
+      stage='user-drive';
+      const drive=await resolveUserDrive(token,config.ownerUserPrincipalName);
       stage='forms-source';
       const source=await inspectFormsSource(token,config,{includeWorkbookRows:true});
-      return json({ok:true,message:'Forms-Antwortdatei und Uploadordner wurden gefunden.',source,testedAt:new Date().toISOString()});
+      return json({ok:true,message:'Forms-Antwortdatei und Uploadordner wurden gefunden.',source,drive:{id:drive.id,driveType:drive.driveType,webUrl:drive.webUrl||null},tokenInfo,testedAt:new Date().toISOString()});
     }catch(error){
       const payload=errorPayload(error,stage);
+      if(error?.tokenInfo)payload.tokenInfo=error.tokenInfo;
       console.error('Microsoft Forms source test failed',JSON.stringify(payload));
       return json(payload,500);
     }
