@@ -1,13 +1,70 @@
-{"photos":[
-{"title":"Grand Place","day":"Brüssel","image":"/images/grand-place.webp","description":"Das historische Herz der Stadt."},
-{"title":"Atomium","day":"Brüssel","image":"/images/atomium.jpg","description":"Brüssels bekanntestes Wahrzeichen."},
-{"title":"Europäisches Parlament","day":"EU-Viertel","image":"/images/europaeisches-parlament.webp","description":"Demokratie in Europa erleben."},
-{"title":"Europäischer Rat","day":"EU-Viertel","image":"/images/europaeischer-rat.jpg","description":"Europäische Politik aus nächster Nähe."},
-{"title":"Hafen Antwerpen","day":"Antwerpen","image":"/images/antwerpen-hafen.jpg","description":"Logistik im Großformat."},
-{"title":"Antwerpen-Centraal","day":"Antwerpen","image":"/images/antwerpen-centraal.jpg","description":"Beeindruckende Bahnhofsarchitektur."},
-{"title":"Diamantenviertel","day":"Antwerpen","image":"/images/diamantenviertel.jpg","description":"Weltzentrum des Diamantenhandels."},
-{"title":"Waterloo","day":"Waterloo","image":"/images/waterloo.jpg","description":"Geschichte zum Abschluss."},
-{"title":"Belgische Pommes","day":"Kulinarik","image":"/images/pommes.jpg","description":"Ein Klassiker aus Belgien."},
-{"title":"Belgische Waffeln","day":"Kulinarik","image":"/images/waffeln.jpg","description":"Süße Spezialität aus Brüssel."},
-{"title":"Belgische Schokolade","day":"Kulinarik","image":"/images/schokolade.jpg","description":"Berühmter Genuss aus Belgien."}
-]}
+{
+  "photos": [
+    {
+      "title": "Grand Place",
+      "day": "Brüssel",
+      "image": "/images/grand-place.webp",
+      "description": "Der prachtvolle Hauptplatz bildet mit seinen historischen Fassaden das eindrucksvolle Herz von Brüssel."
+    },
+    {
+      "title": "Atomium",
+      "day": "Brüssel",
+      "image": "/images/atomium.jpg",
+      "description": "Das außergewöhnliche Wahrzeichen erinnert an ein stark vergrößertes Eisenkristall und prägt die Skyline Brüssels."
+    },
+    {
+      "title": "Europäisches Parlament",
+      "day": "EU-Viertel",
+      "image": "/images/europaeisches-parlament.webp",
+      "description": "Hier erleben wir europäische Demokratie und politische Entscheidungsprozesse aus nächster Nähe."
+    },
+    {
+      "title": "Europäischer Rat",
+      "day": "EU-Viertel",
+      "image": "/images/europaeischer-rat.jpg",
+      "description": "Im Europa-Gebäude beraten die Staats- und Regierungschefs über zentrale Fragen der Europäischen Union."
+    },
+    {
+      "title": "Hafen Antwerpen",
+      "day": "Antwerpen",
+      "image": "/images/antwerpen-hafen.jpg",
+      "description": "Einer der größten Häfen Europas zeigt internationale Logistik, Handel und Wirtschaft im beeindruckenden Maßstab."
+    },
+    {
+      "title": "Antwerpen-Centraal",
+      "day": "Antwerpen",
+      "image": "/images/antwerpen-centraal.jpg",
+      "description": "Der monumentale Hauptbahnhof zählt zu den schönsten Bahnhöfen Europas und verbindet Geschichte mit moderner Architektur."
+    },
+    {
+      "title": "Diamantenviertel",
+      "day": "Antwerpen",
+      "image": "/images/diamantenviertel.jpg",
+      "description": "Antwerpen gilt seit Jahrhunderten als internationales Zentrum des Diamantenhandels und der Schmuckindustrie."
+    },
+    {
+      "title": "Waterloo",
+      "day": "Waterloo",
+      "image": "/images/waterloo.jpg",
+      "description": "Am historischen Schauplatz der Schlacht von 1815 wird europäische Geschichte besonders anschaulich."
+    },
+    {
+      "title": "Belgische Pommes",
+      "day": "Kulinarik",
+      "image": "/images/pommes.jpg",
+      "description": "Knusprig, goldgelb und typisch belgisch – ein Klassiker, den man auf der Reise unbedingt probieren muss."
+    },
+    {
+      "title": "Belgische Waffeln",
+      "day": "Kulinarik",
+      "image": "/images/waffeln.jpg",
+      "description": "Außen knusprig, innen weich und mit Zucker, Schokolade oder Früchten verfeinert – einfach zum Genießen."
+    },
+    {
+      "title": "Belgische Schokolade",
+      "day": "Kulinarik",
+      "image": "/images/schokolade.jpg",
+      "description": "Feinste Pralinen und Schokolade stehen in Belgien für große Handwerkskunst und unvergleichlichen Geschmack."
+    }
+  ]
+}

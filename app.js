@@ -460,7 +460,7 @@ function renderGallery(items){
     grid.classList.add("is-updating");
     activeGallery=filter==="Alle"?items:items.filter(x=>x.day===filter);
     window.setTimeout(()=>{
-      grid.innerHTML=activeGallery.map((p,i)=>`<figure class="gallery-item" data-index="${i}" tabindex="0" style="--gallery-order:${i}"><img src="${esc(p.image)}" alt="${esc(p.alt||p.title)}" loading="lazy" decoding="async"><figcaption><b>${esc(p.title)}</b><span>${esc(p.day)}</span>${p.imageCredit?`<small>${esc(p.imageCredit)}</small>`:""}</figcaption></figure>`).join("");
+      grid.innerHTML=activeGallery.map((p,i)=>`<figure class="gallery-item" data-index="${i}" tabindex="0" style="--gallery-order:${i}"><div class="gallery-image-wrap"><img src="${esc(p.image)}" alt="${esc(p.alt||p.title)}" loading="lazy" decoding="async"></div><figcaption><b>${esc(p.title)}</b><span class="gallery-category">${esc(p.day)}</span>${p.description?`<p>${esc(p.description)}</p>`:""}${p.imageCredit?`<small>${esc(p.imageCredit)}</small>`:""}</figcaption></figure>`).join("");
       qsa(".gallery-item",grid).forEach(el=>{const open=()=>openLightbox(Number(el.dataset.index));el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})});
       requestAnimationFrame(()=>grid.classList.remove("is-updating"));
     },120);
