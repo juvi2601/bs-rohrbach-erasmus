@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Microsoft 365 – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=11.1.1">
-  <link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.1">
+  <link rel="stylesheet" href="/admin/admin.css?v=11.1.2">
+  <link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.2">
 </head>
 <body>
 <header class="topbar">
@@ -15,12 +15,12 @@
 </header>
 <main class="shell">
   <section class="welcome">
-    <div><p class="eyebrow">Version 11.1.1</p><h1>☁️ Microsoft Forms</h1><p>Verbindung zwischen Microsoft Forms, OneDrive und dem Fotoeingang.</p></div>
+    <div><p class="eyebrow">Microsoft 365</p><h1>☁️ Microsoft Graph</h1><p>Verbindung zwischen Cloudflare, Microsoft Graph, Forms und OneDrive prüfen.</p></div>
     <div class="status-card" id="ms-status"><span class="status-dot"></span><div><strong id="ms-title">Status wird geprüft</strong><small id="ms-text">Cloudflare-Konfiguration wird geladen</small></div></div>
   </section>
 
   <section class="inbox-panel">
-    <div class="section-heading"><div><p class="eyebrow">Connector</p><h2>Konfigurationsstatus</h2></div><button class="button ghost" id="refresh" type="button">Erneut prüfen</button></div>
+    <div class="section-heading"><div><p class="eyebrow">Version 11.1.2</p><h2>Microsoft-Graph-Verbindungstest</h2></div><button class="button primary" id="refresh" type="button">Verbindung testen</button></div>
     <div class="inbox-stats">
       <article><span>Tenant-ID</span><strong id="tenant">–</strong></article>
       <article><span>Client-ID</span><strong id="client">–</strong></article>
@@ -29,48 +29,48 @@
       <article><span>Forms-Quelle</span><strong id="source">–</strong></article>
       <article><span>Graph-Verbindung</span><strong id="graph">–</strong></article>
     </div>
+    <p id="test-meta" style="margin-top:1rem">Noch kein Verbindungstest durchgeführt.</p>
   </section>
 
   <section class="inbox-panel" style="margin-top:1rem">
-    <p class="eyebrow">Cloudflare-Einrichtung</p>
-    <h2>Vier geschützte Werte eintragen</h2>
-    <p>Unter <strong>Cloudflare → Workers &amp; Pages → bs-rohrbach-erasmus-v2 → Settings → Variables and Secrets</strong> werden folgende Namen benötigt:</p>
-    <div class="setup-code">
-      <code>MS_TENANT_ID</code>
-      <code>MS_CLIENT_ID</code>
-      <code>MS_CLIENT_SECRET</code>
-      <code>PHOTO_INBOX_PIN</code>
+    <p class="eyebrow">Systemdiagnose</p><h2>Integrationsfortschritt</h2>
+    <div class="inbox-stats">
+      <article><span>Microsoft Graph</span><strong id="diag-graph">⏳</strong></article>
+      <article><span>OneDrive erreichbar</span><strong>Vorbereitet</strong></article>
+      <article><span>Excel gefunden</span><strong>Vorbereitet</strong></article>
+      <article><span>Uploadordner gefunden</span><strong>Vorbereitet</strong></article>
+      <article><span>Synchronisierung</span><strong>Vorbereitet</strong></article>
     </div>
-    <p><strong>Wichtig:</strong> <code>MS_CLIENT_SECRET</code> und <code>PHOTO_INBOX_PIN</code> als verschlüsselte Secrets speichern. Keine dieser Angaben in GitHub eintragen.</p>
   </section>
 
   <section class="inbox-panel" style="margin-top:1rem">
-    <p class="eyebrow">Bereits vorbereitet</p>
-    <h2>Microsoft-Forms-Quelle</h2>
-    <ul>
-      <li>Besitzer: <code>j.vierlinger@bs-rohrbach.ac.at</code></li>
-      <li>Antwortdatei: <code>Fotos Brüsselreise 2026.xlsx</code></li>
-      <li>Uploadordner: <code>Apps/Microsoft Forms/Fotos Brüsselreise 2026/Frage</code></li>
-    </ul>
-    <p>Nach dem Eintragen der vier Cloudflare-Werte kann der Fotoeingang mit echten Forms-Daten synchronisiert werden.</p>
+    <p class="eyebrow">Cloudflare-Einrichtung</p><h2>Vier geschützte Werte</h2>
+    <p>Unter <strong>Cloudflare → Workers &amp; Pages → bs-rohrbach-erasmus-v2 → Settings → Variables and Secrets</strong> werden folgende Namen benötigt:</p>
+    <div class="setup-code"><code>MS_TENANT_ID</code><code>MS_CLIENT_ID</code><code>MS_CLIENT_SECRET</code><code>PHOTO_INBOX_PIN</code></div>
+    <p><strong>Wichtig:</strong> <code>MS_CLIENT_SECRET</code> und <code>PHOTO_INBOX_PIN</code> als verschlüsselte Secrets speichern. Keine dieser Angaben in GitHub eintragen.</p>
   </section>
 </main>
 <script>
-async function load(){
+const text=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+const mark=(id,ok,missing='Fehlt')=>text(id,ok?'✓':missing);
+async function load(runExplicitTest=false){
+  const button=document.getElementById('refresh');button.disabled=true;button.textContent='Wird geprüft …';
   try{
-    const r=await fetch('/api/microsoft-status',{cache:'no-store'}),d=await r.json();
-    document.getElementById('ms-title').textContent=d.ready&&d.connectionTest?'Microsoft Forms verbunden':'Einrichtung noch nicht vollständig';
-    document.getElementById('ms-text').textContent=d.ready&&d.connectionTest?'Graph-Anmeldung erfolgreich – Synchronisierung ist bereit':(d.connectionError||'Fehlende Angaben werden unten angezeigt');
-    document.getElementById('ms-status').classList.toggle('ready',!!(d.ready&&d.connectionTest));
-    document.getElementById('tenant').textContent=d.tenantIdConfigured?'✓':'Fehlt';
-    document.getElementById('client').textContent=d.clientIdConfigured?'✓':'Fehlt';
-    document.getElementById('secret').textContent=d.clientSecretConfigured?'✓':'Fehlt';
-    document.getElementById('pin').textContent=d.inboxPinConfigured?'✓':'Fehlt';
-    document.getElementById('source').textContent=d.sourceConfigured?'✓':'Fehlt';
-    document.getElementById('graph').textContent=d.connectionTest?'✓':(d.ready?'Fehler':'Noch nicht getestet');
-  }catch(e){document.getElementById('ms-title').textContent='Status nicht erreichbar';document.getElementById('ms-text').textContent=String(e)}
+    const endpoint=runExplicitTest?'/api/microsoft/test':'/api/microsoft-status';
+    const r=await fetch(endpoint,{method:runExplicitTest?'POST':'GET',cache:'no-store'}),d=await r.json();
+    const state=d.state||d;
+    const connected=runExplicitTest?!!d.ok:!!d.connectionTest;
+    text('ms-title',connected?'Microsoft Graph verbunden':'Einrichtung noch nicht vollständig');
+    text('ms-text',connected?'Anmeldung über Client Credentials erfolgreich':(d.message||state.connectionError||'Fehlende Angaben werden unten angezeigt'));
+    document.getElementById('ms-status').classList.toggle('ready',connected);
+    mark('tenant',state.tenantIdConfigured);mark('client',state.clientIdConfigured);mark('secret',state.clientSecretConfigured);mark('pin',state.inboxPinConfigured);mark('source',state.sourceConfigured);
+    text('graph',connected?'✓':'Nicht verbunden');text('diag-graph',connected?'✅':'⚠️');
+    const testedAt=d.testedAt||state.testedAt;
+    text('test-meta',testedAt?`Letzter Test: ${new Date(testedAt).toLocaleString('de-AT')} · Dauer: ${d.durationMs??state.connectionDurationMs??'–'} ms`:'Noch kein vollständiger Verbindungstest möglich.');
+  }catch(e){text('ms-title','Status nicht erreichbar');text('ms-text',String(e));text('graph','Fehler');text('diag-graph','❌')}
+  finally{button.disabled=false;button.textContent='Verbindung testen'}
 }
-document.getElementById('refresh').onclick=load;load();
+document.getElementById('refresh').onclick=()=>load(true);load(false);
 </script>
 </body>
 </html>

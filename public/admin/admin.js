@@ -156,7 +156,7 @@ async function loadDashboard() {
     preflightResult('Öffentliche Downloads', publishedDownloads.length ? 'ok' : 'warn', publishedDownloads.length ? `${publishedDownloads.length} Dokument${publishedDownloads.length === 1 ? '' : 'e'} veröffentlicht.` : 'Derzeit ist kein Download veröffentlicht.'),
     preflightResult('Impressum und Datenschutz', hasImpressum && hasDatenschutz ? 'ok' : 'fail', hasImpressum && hasDatenschutz ? 'Impressum und Datenschutzerklärung wurden erkannt.' : `${hasImpressum ? '' : 'Impressum fehlt oder ist nicht lesbar. '}${hasDatenschutz ? '' : 'Datenschutz fehlt oder ist nicht lesbar.'}`.trim()),
     preflightResult('Smart Journey', journey?.enabled && Array.isArray(journey?.days) && journey.days.length >= 6 ? 'ok' : 'warn', journey?.enabled ? `${journey.days?.length||0} automatische Reisetage konfiguriert.` : 'Smart Journey ist deaktiviert.'),
-    preflightResult('Versionsstand', version?.version === '10.8.2' ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
+    preflightResult('Versionsstand', version?.version ? 'ok' : 'warn', version?.version ? `Aktuell veröffentlichte Version: ${version.version}.` : 'Versionsinformation konnte nicht geladen werden.')
   ]);
   if (refresh) refresh.disabled = false;
 }

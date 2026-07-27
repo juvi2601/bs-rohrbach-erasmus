@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '11.1.1';
+const VERSION = '11.1.2';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -158,8 +158,25 @@ export default {async fetch(request,env){
   if(url.pathname==='/api/microsoft-status'){
     let config={};try{config=await loadConnectorConfig(url,env)}catch{}
     const state=microsoftState(env,config);
-    if(state.ready){try{await graphToken(env);state.connectionTest=true}catch(error){state.connectionTest=false;state.connectionError=error.message}}
+    if(state.ready){
+      const started=Date.now();
+      try{await graphToken(env);state.connectionTest=true;state.connectionDurationMs=Date.now()-started;state.testedAt=new Date().toISOString()}
+      catch(error){state.connectionTest=false;state.connectionError=error.message;state.connectionDurationMs=Date.now()-started;state.testedAt=new Date().toISOString()}
+    }
     return json(state);
+  }
+  if(url.pathname==='/api/microsoft/test'&&(request.method==='GET'||request.method==='POST')){
+    let config={};try{config=await loadConnectorConfig(url,env)}catch{}
+    const state=microsoftState(env,config),started=Date.now();
+    if(!state.tenantIdConfigured||!state.clientIdConfigured||!state.clientSecretConfigured){
+      return json({ok:false,message:'Microsoft-Zugangsdaten sind in Cloudflare noch nicht vollständig hinterlegt.',state,testedAt:new Date().toISOString()},503);
+    }
+    try{
+      await graphToken(env);
+      return json({ok:true,message:'Microsoft Graph-Anmeldung erfolgreich.',durationMs:Date.now()-started,testedAt:new Date().toISOString(),state});
+    }catch(error){
+      return json({ok:false,message:error.message||String(error),durationMs:Date.now()-started,testedAt:new Date().toISOString(),state},502);
+    }
   }
   if(url.pathname==='/api/photo-inbox/sync'&&request.method==='POST'){
     const denied=requireInboxPin(request,env);if(denied)return denied;
