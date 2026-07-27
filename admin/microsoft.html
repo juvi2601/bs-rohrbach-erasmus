@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Microsoft 365 – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=11.1.3">
-  <link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.3">
+  <link rel="stylesheet" href="/admin/admin.css?v=11.1.4">
+  <link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.4">
 </head>
 <body>
 <header class="topbar">
@@ -36,11 +36,13 @@
     <p class="eyebrow">Systemdiagnose</p><h2>Integrationsfortschritt</h2>
     <div class="inbox-stats">
       <article><span>Microsoft Graph</span><strong id="diag-graph">⏳</strong></article>
-      <article><span>OneDrive erreichbar</span><strong>Vorbereitet</strong></article>
-      <article><span>Excel gefunden</span><strong>Vorbereitet</strong></article>
-      <article><span>Uploadordner gefunden</span><strong>Vorbereitet</strong></article>
-      <article><span>Synchronisierung</span><strong>Vorbereitet</strong></article>
+      <article><span>OneDrive erreichbar</span><strong id="diag-drive">Noch offen</strong></article>
+      <article><span>Excel gefunden</span><strong id="diag-excel">Noch offen</strong></article>
+      <article><span>Uploadordner gefunden</span><strong id="diag-folder">Noch offen</strong></article>
+      <article><span>Forms-Antworten</span><strong id="diag-rows">Noch offen</strong></article>
     </div>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem"><button class="button primary" id="source-test" type="button">Forms-Quelle testen</button><a class="button ghost" href="/admin/photo-inbox.html">Fotoeingang öffnen</a></div>
+    <div id="source-result" class="notice" style="margin-top:1rem" hidden><span>📄</span><div><strong id="source-result-title">Forms-Quelle</strong><p id="source-result-text"></p></div></div>
   </section>
 
   <section class="inbox-panel" style="margin-top:1rem">
@@ -70,6 +72,24 @@ async function load(runExplicitTest=false){
   }catch(e){text('ms-title','Status nicht erreichbar');text('ms-text',String(e));text('graph','Fehler');text('diag-graph','❌')}
   finally{button.disabled=false;button.textContent='Verbindung testen'}
 }
+
+async function testSource(){
+  let inboxPin=sessionStorage.getItem('photoInboxPin')||'';
+  if(!inboxPin){inboxPin=window.prompt('Fotoeingang-PIN eingeben:')||'';if(!inboxPin)return;sessionStorage.setItem('photoInboxPin',inboxPin)}
+  const button=document.getElementById('source-test');button.disabled=true;button.textContent='Quelle wird geprüft …';
+  try{
+    const r=await fetch('/api/microsoft/source-test',{method:'POST',headers:{'x-photo-inbox-pin':inboxPin},cache:'no-store'}),d=await r.json();
+    if(r.status===401){sessionStorage.removeItem('photoInboxPin');throw new Error('PIN ist falsch. Bitte erneut testen.')}
+    if(!r.ok)throw new Error(d.message||'Forms-Quelle konnte nicht geprüft werden.');
+    const src=d.source||{};text('diag-drive','Erreichbar');text('diag-excel','Gefunden');text('diag-folder','Gefunden');text('diag-rows',`${src.rowCount??0} Antworten`);
+    ['diag-drive','diag-excel','diag-folder','diag-rows'].forEach(id=>document.getElementById(id)?.classList.add('status-ok'));
+    const result=document.getElementById('source-result');result.hidden=false;result.classList.add('ready');
+    text('source-result-title','Forms-Quelle erfolgreich geprüft');
+    text('source-result-text',`Excel: ${src.workbook?.name||'–'} · Uploadordner: ${src.uploadFolder?.name||'–'} · Antworten: ${src.rowCount??0} · Dateiuploads: ${src.uploadEntries??0}`);
+  }catch(e){const result=document.getElementById('source-result');result.hidden=false;result.classList.remove('ready');text('source-result-title','Forms-Quelle konnte nicht geprüft werden');text('source-result-text',e.message||String(e))}
+  finally{button.disabled=false;button.textContent='Forms-Quelle testen'}
+}
+document.getElementById('source-test').onclick=testSource;
 document.getElementById('refresh').onclick=()=>load(true);load(false);
 </script>
 </body>

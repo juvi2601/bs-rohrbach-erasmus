@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '11.1.2';
+const VERSION = '11.1.4';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -129,26 +129,53 @@ async function findResponseWorkbook(token,upn,fileName){
 async function getDriveItemByPath(token,upn,path){
   const r=await graphFetch(`/users/${encodeURIComponent(upn)}/drive/root:/${pathEncode(path)}?$select=id,name,parentReference,file,lastModifiedDateTime`,token);return r.json();
 }
+
+async function inspectFormsSource(token,config,{includeWorkbookRows=true}={}){
+  const upn=String(config.ownerUserPrincipalName||'').trim();
+  if(!upn)throw new Error('In der Connector-Konfiguration fehlt ownerUserPrincipalName.');
+  const workbook=await findResponseWorkbook(token,upn,config.responsesFileName);
+  const uploadFolder=await getDriveItemByPath(token,upn,config.uploadFolder);
+  let rowCount=null,uploadColumn=null,uploadEntries=null,headers=[];
+  if(includeWorkbookRows){
+    const content=await graphFetch(`/users/${encodeURIComponent(upn)}/drive/items/${encodeURIComponent(workbook.id)}/content`,token);
+    const rows=parseXlsx(await content.arrayBuffer());
+    headers=(rows[0]||[]).map(String);
+    let upload=headerIndex(headers,['foto','bild','datei','upload','frage']);
+    if(upload<0)upload=headers.findIndex((_,i)=>rows.slice(1).some(r=>parseUploads(r[i]).length));
+    rowCount=Math.max(0,rows.length-1);
+    uploadColumn=upload>=0?(headers[upload]||`Spalte ${upload+1}`):null;
+    uploadEntries=upload>=0?rows.slice(1).reduce((sum,row)=>sum+parseUploads(row[upload]).length,0):0;
+  }
+  return {
+    ownerUserPrincipalName:upn,
+    workbook:{id:workbook.id,name:workbook.name,lastModifiedDateTime:workbook.lastModifiedDateTime||null},
+    uploadFolder:{id:uploadFolder.id,name:uploadFolder.name,driveId:uploadFolder.parentReference?.driveId||null,lastModifiedDateTime:uploadFolder.lastModifiedDateTime||null},
+    rowCount,uploadColumn,uploadEntries,headers
+  };
+}
 async function buildPhotoRows(url,env,config){
-  const token=await graphToken(env),upn=config.ownerUserPrincipalName,file=await findResponseWorkbook(token,upn,config.responsesFileName);
-  const content=await graphFetch(`/users/${encodeURIComponent(upn)}/drive/items/${encodeURIComponent(file.id)}/content`,token);
-  const rows=parseXlsx(await content.arrayBuffer());if(rows.length<2)return {photos:[],workbook:file,syncedAt:new Date().toISOString()};
+  const token=await graphToken(env),upn=config.ownerUserPrincipalName;
+  const source=await inspectFormsSource(token,config,{includeWorkbookRows:false});
+  const content=await graphFetch(`/users/${encodeURIComponent(upn)}/drive/items/${encodeURIComponent(source.workbook.id)}/content`,token);
+  const rows=parseXlsx(await content.arrayBuffer());
+  if(rows.length<2)return {photos:[],source:{...source,rowCount:0,uploadEntries:0},diagnostics:{rows:0,uploadEntries:0,photosFound:0,skipped:0},syncedAt:new Date().toISOString()};
   const headers=rows[0].map(String),idx={start:headerIndex(headers,['startzeit','start time']),name:headerIndex(headers,['name']),email:headerIndex(headers,['e-mail','email']),day:headerIndex(headers,['reisetag']),place:headerIndex(headers,['ort oder programmpunkt','programmpunkt']),description:headerIndex(headers,['kurze bildbeschreibung','bildbeschreibung'])};
   let upload=headerIndex(headers,['foto','bild','datei','upload','frage']);
   if(upload<0)upload=headers.findIndex((_,i)=>rows.slice(1).some(r=>parseUploads(r[i]).length));
-  const photos=[];
+  if(upload<0)throw new Error('In der Forms-Antwortdatei wurde keine Spalte mit hochgeladenen Dateien gefunden.');
+  const photos=[];let uploadEntries=0,skipped=0;
   for(let r=1;r<rows.length;r++){
-    const row=rows[r],uploads=parseUploads(row[upload]);
+    const row=rows[r],uploads=parseUploads(row[upload]);uploadEntries+=uploads.length;
     for(let u=0;u<uploads.length;u++){
       const entry=uploads[u];let item=null;
       if(entry.id&&entry.driveId)item={id:entry.id,parentReference:{driveId:entry.driveId},name:entry.name};
       if(!item&&entry.name){try{item=await getDriveItemByPath(token,upn,`${config.uploadFolder}/${entry.name}`)}catch{}}
-      if(!item)continue;
-      const driveId=item.parentReference?.driveId||entry.driveId;if(!driveId)continue;
-      photos.push({id:`${driveId}:${item.id}`,status:'new',day:row[idx.day]||'',place:row[idx.place]||'',program:row[idx.place]||'',description:row[idx.description]||'',name:row[idx.name]||row[idx.email]||'Unbekannt',email:row[idx.email]||'',submittedAt:excelSerialToText(row[idx.start]),fileName:item.name||entry.name||'',image:`${url.origin}/api/photo-inbox/image?driveId=${encodeURIComponent(driveId)}&itemId=${encodeURIComponent(item.id)}`});
+      if(!item){skipped++;continue;}
+      const driveId=item.parentReference?.driveId||entry.driveId;if(!driveId){skipped++;continue;}
+      photos.push({id:`${driveId}:${item.id}`,status:'new',day:idx.day>=0?row[idx.day]||'':'',place:idx.place>=0?row[idx.place]||'':'',program:idx.place>=0?row[idx.place]||'':'',description:idx.description>=0?row[idx.description]||'':'',name:(idx.name>=0?row[idx.name]:'')||(idx.email>=0?row[idx.email]:'')||'Unbekannt',email:idx.email>=0?row[idx.email]||'':'',submittedAt:idx.start>=0?excelSerialToText(row[idx.start]):'',fileName:item.name||entry.name||'',image:`${url.origin}/api/photo-inbox/image?driveId=${encodeURIComponent(driveId)}&itemId=${encodeURIComponent(item.id)}`});
     }
   }
-  return {photos,workbook:file,syncedAt:new Date().toISOString()};
+  return {photos,source:{...source,rowCount:rows.length-1,uploadColumn:headers[upload]||`Spalte ${upload+1}`,uploadEntries},diagnostics:{rows:rows.length-1,uploadEntries,photosFound:photos.length,skipped},syncedAt:new Date().toISOString()};
 }
 
 export default {async fetch(request,env){
@@ -177,6 +204,15 @@ export default {async fetch(request,env){
     }catch(error){
       return json({ok:false,message:error.message||String(error),durationMs:Date.now()-started,testedAt:new Date().toISOString(),state},502);
     }
+  }
+  if(url.pathname==='/api/microsoft/source-test'&&request.method==='POST'){
+    const denied=requireInboxPin(request,env);if(denied)return denied;
+    try{
+      const config=await loadConnectorConfig(url,env),state=microsoftState(env,config);
+      if(!state.ready)return json({ok:false,message:'Microsoft-Connector ist noch nicht vollständig eingerichtet.',state},503);
+      const token=await graphToken(env),source=await inspectFormsSource(token,config,{includeWorkbookRows:true});
+      return json({ok:true,message:'Forms-Antwortdatei und Uploadordner wurden gefunden.',source,testedAt:new Date().toISOString()});
+    }catch(error){return json({ok:false,message:error.message||String(error),testedAt:new Date().toISOString()},500)}
   }
   if(url.pathname==='/api/photo-inbox/sync'&&request.method==='POST'){
     const denied=requireInboxPin(request,env);if(denied)return denied;
