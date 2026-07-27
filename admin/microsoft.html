@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Microsoft 365 – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=11.1.2">
-  <link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.2">
+  <link rel="stylesheet" href="/admin/admin.css?v=11.1.3">
+  <link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.3">
 </head>
 <body>
 <header class="topbar">
@@ -20,7 +20,7 @@
   </section>
 
   <section class="inbox-panel">
-    <div class="section-heading"><div><p class="eyebrow">Version 11.1.2</p><h2>Microsoft-Graph-Verbindungstest</h2></div><button class="button primary" id="refresh" type="button">Verbindung testen</button></div>
+    <div class="section-heading"><div><p class="eyebrow">Verbindungsprüfung</p><h2>Microsoft-Graph-Verbindungstest</h2></div><button class="button primary" id="refresh" type="button">Verbindung testen</button></div>
     <div class="inbox-stats">
       <article><span>Tenant-ID</span><strong id="tenant">–</strong></article>
       <article><span>Client-ID</span><strong id="client">–</strong></article>
@@ -45,14 +45,14 @@
 
   <section class="inbox-panel" style="margin-top:1rem">
     <p class="eyebrow">Cloudflare-Einrichtung</p><h2>Vier geschützte Werte</h2>
-    <p>Unter <strong>Cloudflare → Workers &amp; Pages → bs-rohrbach-erasmus-v2 → Settings → Variables and Secrets</strong> werden folgende Namen benötigt:</p>
+    <p>Unter <strong>Cloudflare → Workers &amp; Pages → bs-rohrbach-erasmus → Settings → Variables and Secrets</strong> werden folgende Namen benötigt:</p>
     <div class="setup-code"><code>MS_TENANT_ID</code><code>MS_CLIENT_ID</code><code>MS_CLIENT_SECRET</code><code>PHOTO_INBOX_PIN</code></div>
     <p><strong>Wichtig:</strong> <code>MS_CLIENT_SECRET</code> und <code>PHOTO_INBOX_PIN</code> als verschlüsselte Secrets speichern. Keine dieser Angaben in GitHub eintragen.</p>
   </section>
 </main>
 <script>
 const text=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
-const mark=(id,ok,missing='Fehlt')=>text(id,ok?'✓':missing);
+const mark=(id,ok,missing='Fehlt',ready='Konfiguriert')=>{text(id,ok?ready:missing);const el=document.getElementById(id);el?.classList.toggle('status-ok',!!ok)};
 async function load(runExplicitTest=false){
   const button=document.getElementById('refresh');button.disabled=true;button.textContent='Wird geprüft …';
   try{
@@ -63,8 +63,8 @@ async function load(runExplicitTest=false){
     text('ms-title',connected?'Microsoft Graph verbunden':'Einrichtung noch nicht vollständig');
     text('ms-text',connected?'Anmeldung über Client Credentials erfolgreich':(d.message||state.connectionError||'Fehlende Angaben werden unten angezeigt'));
     document.getElementById('ms-status').classList.toggle('ready',connected);
-    mark('tenant',state.tenantIdConfigured);mark('client',state.clientIdConfigured);mark('secret',state.clientSecretConfigured);mark('pin',state.inboxPinConfigured);mark('source',state.sourceConfigured);
-    text('graph',connected?'✓':'Nicht verbunden');text('diag-graph',connected?'✅':'⚠️');
+    mark('tenant',state.tenantIdConfigured);mark('client',state.clientIdConfigured);mark('secret',state.clientSecretConfigured);mark('pin',state.inboxPinConfigured);mark('source',state.sourceConfigured,'Fehlt','Bereit');
+    text('graph',connected?'Verbunden':'Nicht verbunden');document.getElementById('graph')?.classList.toggle('status-ok',connected);text('diag-graph',connected?'Verbunden':'Noch offen');document.getElementById('diag-graph')?.classList.toggle('status-ok',connected);
     const testedAt=d.testedAt||state.testedAt;
     text('test-meta',testedAt?`Letzter Test: ${new Date(testedAt).toLocaleString('de-AT')} · Dauer: ${d.durationMs??state.connectionDurationMs??'–'} ms`:'Noch kein vollständiger Verbindungstest möglich.');
   }catch(e){text('ms-title','Status nicht erreichbar');text('ms-text',String(e));text('graph','Fehler');text('diag-graph','❌')}

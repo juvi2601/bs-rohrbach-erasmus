@@ -75,11 +75,11 @@ const renderPreflight = results => {
 async function loadDashboard() {
   const refresh = document.getElementById('preflightRefresh');
   if (refresh) refresh.disabled = true;
-  const [news, program, gallery, downloads, places, faq, diary, legal, site, cms, version, journey] = await Promise.all([
+  const [news, program, gallery, downloads, places, faq, diary, legal, site, cms, version, journey, microsoft] = await Promise.all([
     readJson('/content/news.json'), readJson('/content/program.json'), readJson('/content/gallery.json'),
     readJson('/content/downloads.json'), readJson('/content/places.json'), readJson('/content/faq.json'),
     readJson('/content/diary.json'), readJson('/content/legal.json'), readJson('/content/site.json'),
-    readJson('/api/cms-status'), readJson('/version.json'), readJson('/content/journey.json')
+    readJson('/api/cms-status'), readJson('/version.json'), readJson('/content/journey.json'), readJson('/api/microsoft-status')
   ]);
 
   setCount('count-news', itemCount(news, 'items', 'news'));
@@ -124,6 +124,10 @@ async function loadDashboard() {
     if (title) title.textContent = 'Einrichtung erforderlich';
     if (text) text.textContent = 'GitHub OAuth-Zugangsdaten fehlen';
   }
+
+  const msStatus=document.getElementById('microsoft-dashboard-status');
+  const msConnected=Boolean(microsoft?.connectionTest);
+  if(msStatus){msStatus.classList.toggle('ready',msConnected);const label=msStatus.querySelector('b');if(label)label.textContent=msConnected?'Microsoft Graph verbunden':'Einrichtung prüfen';}
 
   const files = [news, program, gallery, downloads, places, faq, diary, legal, site, version, journey];
   const placeRows = Array.isArray(places?.places) ? places.places : [];

@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Admin-Dashboard – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=11.1.2">
+  <link rel="stylesheet" href="/admin/admin.css?v=11.1.3">
 </head>
 <body>
   <header class="topbar">
@@ -25,7 +25,7 @@
       <div>
         <p class="eyebrow">Brüssel 2026</p>
         <h1>Admin-Dashboard</h1>
-        <p>Version 11.1.2 verbindet Microsoft Forms und OneDrive mit dem geschützten Fotoeingang.</p>
+        <p>Microsoft Forms, OneDrive und der geschützte Fotoeingang werden zentral verwaltet.</p>
       </div>
       <div class="status-card">
         <span class="status-dot"></span>
@@ -34,11 +34,25 @@
     </section>
 
     <section class="system-strip" aria-label="Systeminformationen">
-      <div><span>Version</span><strong>11.1.2</strong></div>
+      <div><span>Version</span><strong>11.1.3</strong></div>
       <div><span>Letzte Aktualisierung</span><strong>27.07.2026</strong></div>
       <div><span>Veröffentlichung</span><strong>GitHub → Cloudflare</strong></div>
     </section>
 
+
+
+    <section class="integrations-panel" aria-labelledby="integrations-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">Integrationen</p><h2 id="integrations-title">Verbundene Dienste</h2></div>
+      </div>
+      <div class="integration-grid">
+        <a class="integration-card" href="/admin/microsoft.html">
+          <span class="integration-icon">☁️</span>
+          <div><h3>Microsoft 365</h3><p>Microsoft Graph, Forms und OneDrive prüfen und verwalten.</p><span class="integration-status" id="microsoft-dashboard-status"><i></i><b>Status wird geprüft</b></span></div>
+          <strong class="integration-arrow">→</strong>
+        </a>
+      </div>
+    </section>
 
     <section class="preflight" aria-labelledby="preflight-title">
       <div class="section-heading">
@@ -119,11 +133,11 @@
 
     <section>
       <div class="section-heading">
-        <div><p class="eyebrow">Neu in Version 11.1.2</p><h2>Foto-Workflow für die Reise</h2></div>
+        <div><p class="eyebrow">Foto-Workflow</p><h2>Fotos für die Reise verwalten</h2></div>
       </div>
       <div class="grid featured-grid">
-        <a class="tile featured" href="/admin/photo-inbox.html"><span class="icon">📥</span><div><h3>Fotoeingang</h3><p>Eingereichte Reisefotos nach Status, Reisetag und Programmpunkt sichten.</p><span class="feature-note">Neu in 11.1.2</span></div><b>→</b></a>
-        <a class="tile featured" href="/admin/microsoft.html"><span class="icon">☁️</span><div><h3>Microsoft Forms verbinden</h3><p>Cloudflare-Zugangsdaten prüfen und die echte Forms-Synchronisierung vorbereiten.</p><span class="feature-note">Neu in 11.1.2</span></div><b>→</b></a>
+        <a class="tile featured" href="/admin/photo-inbox.html"><span class="icon">📥</span><div><h3>Fotoeingang</h3><p>Eingereichte Reisefotos nach Status, Reisetag und Programmpunkt sichten.</p><span class="feature-note">Foto-Workflow</span></div><b>→</b></a>
+        <a class="tile featured" href="/admin/microsoft.html"><span class="icon">☁️</span><div><h3>Microsoft Forms verbinden</h3><p>Cloudflare-Zugangsdaten prüfen und die echte Forms-Synchronisierung vorbereiten.</p><span class="feature-note">Foto-Workflow</span></div><b>→</b></a>
         <a class="tile featured" href="/admin/cms.html#/collections/diary"><span class="icon">📖</span><div><h3>Tagebucheinträge verwalten</h3><p>Neue Berichte als Entwurf anlegen, Fotos auswählen und nach der Prüfung veröffentlichen.</p><span class="feature-note">Neu in 10.5</span></div><b>→</b></a>
         <a class="tile featured" href="/admin/cms.html#/media"><span class="icon">📸</span><div><h3>Freigegebene Fotos auswählen</h3><p>Gesichtete Schülerfotos in der Mediathek bereitstellen und anschließend im Beitrag auswählen.</p><span class="feature-note">Redaktionell geprüft</span></div><b>→</b></a>
         <a class="tile featured" href="/#reisetagebuch" target="_blank" rel="noopener"><span class="icon">👀</span><div><h3>Reisetagebuch kontrollieren</h3><p>Veröffentlichte Einträge direkt auf der Website ansehen.</p><span class="feature-note">Öffentliche Vorschau</span></div><b>→</b></a>
@@ -201,6 +215,6 @@
       <div><strong>Hinweis zum Speichern</strong><p>Nach dem Speichern legt das CMS die Änderung in GitHub ab. Cloudflare veröffentlicht den neuen Stand anschließend automatisch. Das kann kurz dauern.</p></div>
     </section>
 </main>
-  <script src="/admin/admin.js?v=11.1.2"></script>
+  <script src="/admin/admin.js?v=11.1.3"></script>
 </body>
 </html>
