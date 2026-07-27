@@ -15,15 +15,15 @@
     "description": "Digitaler Reisebegleiter der Berufsschule Rohrbach für die Brüsselreise 2026."
   },
   "studentArea": {
-    "galleryButton": "📸 Schülergalerie öffnen",
+    "galleryButton": "",
     "eyebrow": "Nur mit Schulkonto",
-    "text": "Fotoupload, Schülergalerie und geschützte Informationen liegen in Microsoft 365. Auf der öffentlichen Website werden keine Schülerfotos gespeichert.",
+    "text": "Lade deine schönsten Reisefotos über Microsoft Forms hoch. Nach einer redaktionellen Prüfung können ausgewählte Bilder in der öffentlichen Galerie erscheinen.",
     "uploadUrl": "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=Z9b4aaCZ2k6zc0ILJIznMvKDmvvfCnpDoqGfIp0BMCJUQ1RXMjdKWEJVTTBMQ005WVRWSUw5NllNSS4u",
-    "note": "Anmeldung mit dem schulischen Microsoft-365-Konto erforderlich. Hochgeladene Fotos werden vor der Veröffentlichung geprüft.",
-    "uploadButton": "📤 Fotos hochladen",
-    "title": "Interner Bereich",
+    "note": "Für den Upload ist ein Schulkonto erforderlich. Die Fotos werden vor einer Veröffentlichung geprüft.",
+    "uploadButton": "📤 Jetzt Fotos hochladen",
+    "title": "Fotos hochladen",
     "icon": "🔒",
-    "galleryUrl": "https://bsrohrbach.sharepoint.com/sites/BSRohrbachBrsselreise2026?market=de-DE"
+    "galleryUrl": ""
   },
   "weatherLocations": [
     {
