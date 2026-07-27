@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '11.1.4';
+const VERSION = '11.1.4.1';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -82,9 +82,37 @@ async function graphToken(env){
 }
 
 async function graphFetch(path,token,options={}){
-  const r=await fetch(`https://graph.microsoft.com/v1.0${path}`,{...options,headers:{authorization:`Bearer ${token}`,...(options.headers||{})}});
-  if(!r.ok){let msg=`Microsoft Graph Fehler ${r.status}`;try{const d=await r.json();msg=d.error?.message||msg}catch{}throw new Error(msg)}
+  const url=`https://graph.microsoft.com/v1.0${path}`;
+  const r=await fetch(url,{...options,headers:{authorization:`Bearer ${token}`,...(options.headers||{})}});
+  if(!r.ok){
+    let details={status:r.status,statusText:r.statusText,url,code:null,message:`Microsoft Graph Fehler ${r.status}`,requestId:null,date:null,raw:null};
+    const raw=await r.text().catch(()=>"");
+    details.raw=raw.slice(0,2000);
+    try{
+      const d=JSON.parse(raw);
+      details.code=d.error?.code||null;
+      details.message=d.error?.message||details.message;
+      details.requestId=d.error?.innerError?.['request-id']||d.error?.innerError?.requestId||null;
+      details.date=d.error?.innerError?.date||null;
+    }catch{}
+    const error=new Error(details.message);
+    error.name='MicrosoftGraphError';
+    error.graph=details;
+    throw error;
+  }
   return r;
+}
+
+function errorPayload(error,stage='unknown'){
+  return {
+    ok:false,
+    stage,
+    message:error?.message||String(error),
+    errorName:error?.name||'Error',
+    graph:error?.graph||null,
+    stack:error?.stack?String(error.stack).split('\n').slice(0,8).join('\n'):null,
+    testedAt:new Date().toISOString()
+  };
 }
 
 function decodeXml(s=''){return s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&#xA;/gi,'\n').replace(/&#xD;/gi,'\r')}
@@ -121,10 +149,30 @@ function parseUploads(raw){
 }
 function pathEncode(path){return path.split('/').map(encodeURIComponent).join('/')}
 
-async function findResponseWorkbook(token,upn,fileName){
-  const q=encodeURIComponent(fileName.replace(/'/g,"''"));
-  const r=await graphFetch(`/users/${encodeURIComponent(upn)}/drive/root/search(q='${q}')?$select=id,name,parentReference,lastModifiedDateTime&$top=50`,token);
-  const d=await r.json();const exact=(d.value||[]).find(x=>x.name===fileName);if(!exact)throw new Error(`Antwortdatei „${fileName}“ wurde im OneDrive nicht gefunden.`);return exact;
+async function findResponseWorkbook(token,upn,fileName,uploadFolder=''){
+  const baseFolder=String(uploadFolder||'').split('/').slice(0,-1).join('/');
+  const directCandidates=[
+    baseFolder?`${baseFolder}/${fileName}`:'',
+    fileName
+  ].filter(Boolean);
+
+  for(const candidate of directCandidates){
+    try{
+      const r=await graphFetch(`/users/${encodeURIComponent(upn)}/drive/root:/${pathEncode(candidate)}?$select=id,name,parentReference,lastModifiedDateTime`,token);
+      const item=await r.json();
+      if(item?.name===fileName)return item;
+    }catch(error){
+      if(error?.graph?.status!==404)throw error;
+    }
+  }
+
+  const escaped=fileName.replace(/'/g,"''");
+  const searchPath=`/users/${encodeURIComponent(upn)}/drive/root/search(q='${encodeURIComponent(escaped)}')?$select=id,name,parentReference,lastModifiedDateTime&$top=50`;
+  const r=await graphFetch(searchPath,token);
+  const d=await r.json();
+  const exact=(d.value||[]).find(x=>x.name===fileName);
+  if(!exact)throw new Error(`Antwortdatei „${fileName}“ wurde im OneDrive nicht gefunden.`);
+  return exact;
 }
 async function getDriveItemByPath(token,upn,path){
   const r=await graphFetch(`/users/${encodeURIComponent(upn)}/drive/root:/${pathEncode(path)}?$select=id,name,parentReference,file,lastModifiedDateTime`,token);return r.json();
@@ -133,7 +181,7 @@ async function getDriveItemByPath(token,upn,path){
 async function inspectFormsSource(token,config,{includeWorkbookRows=true}={}){
   const upn=String(config.ownerUserPrincipalName||'').trim();
   if(!upn)throw new Error('In der Connector-Konfiguration fehlt ownerUserPrincipalName.');
-  const workbook=await findResponseWorkbook(token,upn,config.responsesFileName);
+  const workbook=await findResponseWorkbook(token,upn,config.responsesFileName,config.uploadFolder);
   const uploadFolder=await getDriveItemByPath(token,upn,config.uploadFolder);
   let rowCount=null,uploadColumn=null,uploadEntries=null,headers=[];
   if(includeWorkbookRows){
@@ -207,12 +255,20 @@ export default {async fetch(request,env){
   }
   if(url.pathname==='/api/microsoft/source-test'&&request.method==='POST'){
     const denied=requireInboxPin(request,env);if(denied)return denied;
+    let stage='connector-config';
     try{
       const config=await loadConnectorConfig(url,env),state=microsoftState(env,config);
       if(!state.ready)return json({ok:false,message:'Microsoft-Connector ist noch nicht vollständig eingerichtet.',state},503);
-      const token=await graphToken(env),source=await inspectFormsSource(token,config,{includeWorkbookRows:true});
+      stage='graph-token';
+      const token=await graphToken(env);
+      stage='forms-source';
+      const source=await inspectFormsSource(token,config,{includeWorkbookRows:true});
       return json({ok:true,message:'Forms-Antwortdatei und Uploadordner wurden gefunden.',source,testedAt:new Date().toISOString()});
-    }catch(error){return json({ok:false,message:error.message||String(error),testedAt:new Date().toISOString()},500)}
+    }catch(error){
+      const payload=errorPayload(error,stage);
+      console.error('Microsoft Forms source test failed',JSON.stringify(payload));
+      return json(payload,500);
+    }
   }
   if(url.pathname==='/api/photo-inbox/sync'&&request.method==='POST'){
     const denied=requireInboxPin(request,env);if(denied)return denied;

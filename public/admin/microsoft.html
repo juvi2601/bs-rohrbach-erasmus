@@ -80,7 +80,7 @@ async function testSource(){
   try{
     const r=await fetch('/api/microsoft/source-test',{method:'POST',headers:{'x-photo-inbox-pin':inboxPin},cache:'no-store'}),d=await r.json();
     if(r.status===401){sessionStorage.removeItem('photoInboxPin');throw new Error('PIN ist falsch. Bitte erneut testen.')}
-    if(!r.ok)throw new Error(d.message||'Forms-Quelle konnte nicht geprüft werden.');
+    if(!r.ok){const parts=[d.message||'Forms-Quelle konnte nicht geprüft werden.'];if(d.stage)parts.push(`Schritt: ${d.stage}`);if(d.graph?.code)parts.push(`Graph-Code: ${d.graph.code}`);if(d.graph?.status)parts.push(`HTTP ${d.graph.status}`);if(d.graph?.requestId)parts.push(`Request-ID: ${d.graph.requestId}`);throw new Error(parts.join(' · '));}
     const src=d.source||{};text('diag-drive','Erreichbar');text('diag-excel','Gefunden');text('diag-folder','Gefunden');text('diag-rows',`${src.rowCount??0} Antworten`);
     ['diag-drive','diag-excel','diag-folder','diag-rows'].forEach(id=>document.getElementById(id)?.classList.add('status-ok'));
     const result=document.getElementById('source-result');result.hidden=false;result.classList.add('ready');
