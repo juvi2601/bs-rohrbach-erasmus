@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071d49">
+  <title>Fotos hochladen · Brüssel 2026</title>
+  <link rel="icon" href="/images/bs-rohrbach-logo.png">
+  <link rel="stylesheet" href="/upload/upload.css?v=12.0.0-dev.1">
+</head>
+<body>
+<a class="skip-link" href="#uploadForm">Zum Formular springen</a>
+<header class="upload-header">
+  <a class="brand" href="/" aria-label="Zurück zur Reisewebsite">
+    <img src="/images/bs-rohrbach-logo.png" alt="BS Rohrbach">
+    <span><strong>BS Rohrbach Erasmus+</strong><small>Brüssel 2026</small></span>
+  </a>
+  <a class="back-link" href="/">← Zur Website</a>
+</header>
+
+<main>
+  <section class="upload-hero">
+    <div>
+      <p class="eyebrow">Interner Bereich · Foto-Upload</p>
+      <h1>Schöne Momente<br><span>sicher hochladen.</span></h1>
+      <p>Bitte wählt nur gelungene Fotos aus. Sie werden zunächst intern gespeichert und erst nach der Freigabe auf der Reisewebsite angezeigt.</p>
+      <div class="security-note"><span>🔒</span><div><strong>Später mit Microsoft-365-Anmeldung</strong><small>Die echte SharePoint-Anbindung wird nach der Freigabe durch den Administrator aktiviert.</small></div></div>
+    </div>
+    <div class="hero-card" aria-hidden="true">
+      <span>📷</span><b>Foto auswählen</b><i>→</i><span>☁️</span><b>Sicher hochladen</b><i>→</i><span>✅</span><b>Freigabe durch Lehrkraft</b>
+    </div>
+  </section>
+
+  <section class="upload-section">
+    <form id="uploadForm" class="upload-card" novalidate>
+      <div class="form-heading">
+        <div><p class="eyebrow">Schritt 1 von 2</p><h2>Angaben zum Foto</h2></div>
+        <span class="dev-badge">Vorschau · noch kein echter Upload</span>
+      </div>
+
+      <div class="form-grid">
+        <label>Reisetag
+          <select id="daySelect" required><option value="">Bitte auswählen</option></select>
+        </label>
+        <label>Programmpunkt
+          <select id="programSelect" required disabled><option value="">Zuerst Reisetag auswählen</option></select>
+        </label>
+      </div>
+
+      <label>Kurze Bildbeschreibung <span class="optional">optional</span>
+        <textarea id="description" maxlength="180" rows="3" placeholder="Was ist auf dem Foto zu sehen?"></textarea>
+        <small><span id="charCount">0</span>/180 Zeichen</small>
+      </label>
+
+      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Fotos auswählen">
+        <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden>
+        <span class="drop-icon">📷</span>
+        <h3>Fotos auswählen</h3>
+        <p>Am Handy antippen oder Dateien hierher ziehen.</p>
+        <button type="button" id="chooseButton">Dateien auswählen</button>
+        <small>JPG, PNG, WebP oder HEIC · maximal 10 Fotos · je höchstens 15 MB</small>
+      </div>
+
+      <div id="fileSummary" class="file-summary" hidden>
+        <div><strong id="fileCount">0 Fotos</strong><small id="totalSize"></small></div>
+        <button type="button" id="clearButton">Auswahl löschen</button>
+      </div>
+      <div id="previewGrid" class="preview-grid" aria-live="polite"></div>
+      <div id="formMessage" class="form-message" hidden></div>
+
+      <div class="privacy-box">
+        <span>ℹ️</span><p>Mit dem späteren echten Upload werden die Bilder ausschließlich in der vorgesehenen SharePoint-Seite der Brüsselreise gespeichert. Auf der Website erscheinen nur ausdrücklich freigegebene Fotos.</p>
+      </div>
+
+      <button class="submit-button" id="submitButton" type="submit">Upload testen</button>
+    </form>
+  </section>
+</main>
+
+<div id="successDialog" class="dialog" hidden>
+  <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <span>✅</span><h2 id="successTitle">Vorschau funktioniert</h2>
+    <p>Die Oberfläche ist bereit. In dieser Entwicklungsstufe wurden keine Dateien übertragen.</p>
+    <button id="closeDialog" type="button">Zurück zum Formular</button>
+  </div>
+</div>
+<script src="/upload/upload.js?v=12.0.0-dev.1" defer></script>
+</body>
+</html>

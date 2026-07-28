@@ -18,9 +18,9 @@
     "galleryButton": "",
     "eyebrow": "Nur mit Schulkonto",
     "text": "Lade deine schönsten Reisefotos über Microsoft Forms hoch. Nach einer redaktionellen Prüfung können ausgewählte Bilder in der öffentlichen Galerie erscheinen.",
-    "uploadUrl": "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=Z9b4aaCZ2k6zc0ILJIznMvKDmvvfCnpDoqGfIp0BMCJUQ1RXMjdKWEJVTTBMQ005WVRWSUw5NllNSS4u",
-    "note": "Für den Upload ist ein Schulkonto erforderlich. Die Fotos werden vor einer Veröffentlichung geprüft.",
-    "uploadButton": "📤 Jetzt Fotos hochladen",
+    "uploadUrl": "/upload.html",
+    "note": "Der neue Uploadbereich wird für Microsoft 365 vorbereitet.",
+    "uploadButton": "📤 Fotos hochladen",
     "title": "Fotos hochladen",
     "icon": "🔒",
     "galleryUrl": ""
