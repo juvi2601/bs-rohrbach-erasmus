@@ -200,14 +200,6 @@ function eventIcon(event){
 }
 
 
-function dayIcon(day){
-  const text=`${day.id||''} ${day.title||''} ${day.subtitle||''}`.toLowerCase();
-  if(/antwerpen|hafen|diamant/.test(text)) return svgIcon('diamond','day-svg');
-  if(/parlament|kommission|eu|vertretung|brüssel/.test(text)) return svgIcon('euflag','day-svg');
-  if(/heimreise|anreise|rohrbach|abfahrt|bus/.test(text)) return svgIcon('bus','day-svg');
-  if(/vortrag/.test(text)) return svgIcon('talk','day-svg');
-  return svgIcon('pin','day-svg');
-}
 
 function renderProgram(days){
   const tabs=qs("#dayTabs"),panels=qs("#dayPanels");
@@ -241,7 +233,6 @@ function renderProgram(days){
             ${pending?`<span class="chip-pending">○ ${pending} offen</span>`:''}
           </div>
         </div>
-        <span class="day-icon" aria-hidden="true">${dayIcon(d)}</span>
       </header>
 
       ${(d.gallery||[]).length?`<div class="day-photo-strip">${d.gallery.map((x,j)=>`<figure><img src="${esc(x)}" alt="${esc(d.title)} – Eindruck ${j+1}" loading="lazy"></figure>`).join("")}</div>`:''}

@@ -542,10 +542,6 @@ collections:
       - label: Untertitel
         name: subtitle
         widget: text
-      - label: Icon
-        name: icon
-        widget: string
-        required: false
       - label: Titelbild
         name: cover
         widget: image
