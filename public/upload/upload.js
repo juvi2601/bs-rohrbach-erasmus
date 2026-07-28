@@ -1,5 +1,16 @@
 const MAX_FILES=10,MAX_SIZE=15*1024*1024,ALLOWED=['image/jpeg','image/png','image/webp','image/heic','image/heif'];
 let selected=[];const $=id=>document.getElementById(id);
+
+$('loginButton').addEventListener('click',()=>{
+  $('loginView').hidden=true;
+  $('uploadView').hidden=false;
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+$('logoutButton').addEventListener('click',()=>{
+  $('uploadView').hidden=true;
+  $('loginView').hidden=false;
+  window.scrollTo({top:0,behavior:'smooth'});
+});
 const formatBytes=n=>n<1024*1024?`${(n/1024).toFixed(0)} KB`:`${(n/1024/1024).toFixed(1).replace('.',',')} MB`;
 async function loadProgram(){try{const r=await fetch('/content/program.json',{cache:'no-store'});if(!r.ok)throw new Error();const data=await r.json();const days=Array.isArray(data.days)?data.days:[];$('daySelect').insertAdjacentHTML('beforeend',days.map((d,i)=>`<option value="${i}">${d.short||''} ${d.date||''} · ${d.title||''}</option>`).join(''));$('daySelect').dataset.days=JSON.stringify(days)}catch{$('daySelect').innerHTML='<option value="">Programm konnte nicht geladen werden</option>'}}
 function updatePrograms(){const raw=$('daySelect').dataset.days;const days=raw?JSON.parse(raw):[];const idx=$('daySelect').value;const select=$('programSelect');if(idx===''){select.disabled=true;select.innerHTML='<option value="">Zuerst Reisetag auswählen</option>';return}const events=days[Number(idx)]?.events||[];select.disabled=false;select.innerHTML='<option value="">Bitte auswählen</option>'+events.map((e,i)=>`<option value="${i}">${e.time?e.time+' · ':''}${e.title||'Programmpunkt'}</option>`).join('')+'<option value="other">Anderer Ort / freie Zeit</option>'}

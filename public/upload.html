@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#071d49">
-  <title>Fotos hochladen · Brüssel 2026</title>
+  <title>Foto-Upload · Brüssel 2026</title>
   <link rel="icon" href="/images/bs-rohrbach-logo.png">
-  <link rel="stylesheet" href="/upload/upload.css?v=12.0.0-dev.1">
+  <link rel="stylesheet" href="/upload/upload.css?v=12.0.0-dev.2">
 </head>
 <body>
-<a class="skip-link" href="#uploadForm">Zum Formular springen</a>
+<a class="skip-link" href="#mainContent">Zum Inhalt springen</a>
 <header class="upload-header">
   <a class="brand" href="/" aria-label="Zurück zur Reisewebsite">
     <img src="/images/bs-rohrbach-logo.png" alt="BS Rohrbach">
@@ -18,24 +18,37 @@
   <a class="back-link" href="/">← Zur Website</a>
 </header>
 
-<main>
-  <section class="upload-hero">
-    <div>
-      <p class="eyebrow">Interner Bereich · Foto-Upload</p>
-      <h1>Schöne Momente<br><span>sicher hochladen.</span></h1>
-      <p>Bitte wählt nur gelungene Fotos aus. Sie werden zunächst intern gespeichert und erst nach der Freigabe auf der Reisewebsite angezeigt.</p>
-      <div class="security-note"><span>🔒</span><div><strong>Später mit Microsoft-365-Anmeldung</strong><small>Die echte SharePoint-Anbindung wird nach der Freigabe durch den Administrator aktiviert.</small></div></div>
+<main id="mainContent">
+  <section id="loginView" class="login-view">
+    <div class="login-copy">
+      <p class="eyebrow">Sicherer Foto-Upload</p>
+      <div class="camera-mark" aria-hidden="true">📷</div>
+      <h1>Teile deine schönsten<br><span>Erinnerungen.</span></h1>
+      <p class="lead">Lade ausgewählte Fotos unserer Erasmus+-Reise nach Brüssel hoch. Nach einer kurzen Prüfung können freigegebene Bilder in der Reisegalerie erscheinen.</p>
+      <button id="loginButton" class="login-button" type="button">
+        <span aria-hidden="true">🔐</span> Mit Microsoft-Schulkonto anmelden
+      </button>
+      <p class="login-hint">In DEV.2 wird die Anmeldung nur simuliert. Es werden noch keine Daten an Microsoft übertragen.</p>
     </div>
-    <div class="hero-card" aria-hidden="true">
-      <span>📷</span><b>Foto auswählen</b><i>→</i><span>☁️</span><b>Sicher hochladen</b><i>→</i><span>✅</span><b>Freigabe durch Lehrkraft</b>
+
+    <div class="steps" aria-label="So funktioniert der Foto-Upload">
+      <article><span>1</span><i>🔐</i><h2>Anmelden</h2><p>Mit deinem Microsoft-365-Schulkonto.</p></article>
+      <article><span>2</span><i>📷</i><h2>Fotos auswählen</h2><p>Einige gelungene Bilder auswählen und beschreiben.</p></article>
+      <article><span>3</span><i>☁️</i><h2>Sicher hochladen</h2><p>Später direkt in den geschützten SharePoint-Bereich.</p></article>
+      <article><span>4</span><i>✅</i><h2>Freigabe</h2><p>Nur geprüfte Fotos erscheinen in der Galerie.</p></article>
     </div>
   </section>
 
-  <section class="upload-section">
+  <section id="uploadView" class="upload-section" hidden>
+    <div class="signed-in-bar">
+      <div><span class="avatar">JV</span><p><small>Angemeldet als</small><strong>Testbenutzer · BS Rohrbach</strong></p></div>
+      <button id="logoutButton" type="button">Abmelden</button>
+    </div>
+
     <form id="uploadForm" class="upload-card" novalidate>
       <div class="form-heading">
-        <div><p class="eyebrow">Schritt 1 von 2</p><h2>Angaben zum Foto</h2></div>
-        <span class="dev-badge">Vorschau · noch kein echter Upload</span>
+        <div><p class="eyebrow">Foto-Upload</p><h1>Fotos auswählen</h1><p>Bitte nur ausgewählte, gelungene Bilder hochladen.</p></div>
+        <span class="dev-badge">DEV.2 · Testmodus</span>
       </div>
 
       <div class="form-grid">
@@ -48,14 +61,14 @@
       </div>
 
       <label>Kurze Bildbeschreibung <span class="optional">optional</span>
-        <textarea id="description" maxlength="180" rows="3" placeholder="Was ist auf dem Foto zu sehen?"></textarea>
+        <textarea id="description" maxlength="180" rows="3" placeholder="Was ist auf den Fotos zu sehen?"></textarea>
         <small><span id="charCount">0</span>/180 Zeichen</small>
       </label>
 
       <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Fotos auswählen">
         <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden>
         <span class="drop-icon">📷</span>
-        <h3>Fotos auswählen</h3>
+        <h2>Fotos auswählen</h2>
         <p>Am Handy antippen oder Dateien hierher ziehen.</p>
         <button type="button" id="chooseButton">Dateien auswählen</button>
         <small>JPG, PNG, WebP oder HEIC · maximal 10 Fotos · je höchstens 15 MB</small>
@@ -69,21 +82,21 @@
       <div id="formMessage" class="form-message" hidden></div>
 
       <div class="privacy-box">
-        <span>ℹ️</span><p>Mit dem späteren echten Upload werden die Bilder ausschließlich in der vorgesehenen SharePoint-Seite der Brüsselreise gespeichert. Auf der Website erscheinen nur ausdrücklich freigegebene Fotos.</p>
+        <span>🛡️</span><p>Später werden die Fotos ausschließlich in der dafür vorgesehenen SharePoint-Seite gespeichert. Auf der Website erscheinen nur Fotos, die von der Lehrkraft freigegeben wurden.</p>
       </div>
 
-      <button class="submit-button" id="submitButton" type="submit">Upload testen</button>
+      <button class="submit-button" id="submitButton" type="submit">☁️ Upload testen</button>
     </form>
   </section>
 </main>
 
 <div id="successDialog" class="dialog" hidden>
   <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="successTitle">
-    <span>✅</span><h2 id="successTitle">Vorschau funktioniert</h2>
-    <p>Die Oberfläche ist bereit. In dieser Entwicklungsstufe wurden keine Dateien übertragen.</p>
+    <span>✅</span><h2 id="successTitle">Test erfolgreich</h2>
+    <p>Die Fotos wurden nicht übertragen. Die Oberfläche ist für die spätere Microsoft-Anbindung vorbereitet.</p>
     <button id="closeDialog" type="button">Zurück zum Formular</button>
   </div>
 </div>
-<script src="/upload/upload.js?v=12.0.0-dev.1" defer></script>
+<script src="/upload/upload.js?v=12.0.0-dev.2" defer></script>
 </body>
 </html>

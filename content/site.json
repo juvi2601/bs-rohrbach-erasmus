@@ -199,13 +199,13 @@
     }
   ],
   "studentArea": {
-    "icon": "🔒",
-    "eyebrow": "Nur mit Schulkonto",
-    "title": "Fotos hochladen",
-    "text": "Lade deine schönsten Reisefotos über Microsoft Forms hoch. Nach einer redaktionellen Prüfung können ausgewählte Bilder in der öffentlichen Galerie erscheinen.",
-    "uploadButton": "📤 Fotos hochladen",
+    "icon": "📷",
+    "eyebrow": "Sicherer Foto-Upload",
+    "title": "Teile deine schönsten Erinnerungen",
+    "text": "Lade ausgewählte Fotos unserer Brüsselreise hoch. Nach einer kurzen Prüfung können freigegebene Bilder in der Reisegalerie erscheinen.",
+    "uploadButton": "🔐 Zum Foto-Upload",
     "galleryButton": "",
-    "note": "Der neue Uploadbereich wird für Microsoft 365 vorbereitet.",
+    "note": "Anmeldung mit dem Microsoft-365-Schulkonto erforderlich.",
     "uploadUrl": "/upload.html",
     "galleryUrl": ""
   },
