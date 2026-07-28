@@ -84,7 +84,7 @@
           "time": "09:30–13:00",
           "title": "Geführte Hafenrundfahrt",
           "text": "Containerterminals, Schleusen, Chemiehafen, Logistik sowie Binnen- und Seeschifffahrt.",
-          "status": "confirmed",
+          "status": "",
           "icon": "ship"
         },
         {
@@ -97,7 +97,7 @@
           "time": "14:30–15:00",
           "title": "Antwerpen-Centraal",
           "text": "Besichtigung, Gruppenfoto und kurze Pause.",
-          "icon": "photo"
+          "icon": "group"
         },
         {
           "time": "15:15–16:15",
