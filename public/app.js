@@ -151,6 +151,33 @@ function svgIcon(name,extraClass=''){
 }
 
 function eventIcon(event){
+  // Manuell im CMS gewähltes Programmsymbol hat Vorrang.
+  // Fehlt die Auswahl (oder steht sie auf „Automatisch“), bleibt die bisherige
+  // intelligente Erkennung anhand von Titel und Beschreibung aktiv.
+  const selectedIcon=String(event.icon||'').trim();
+  const iconMap={
+    bus:'bus',
+    train:'train',station:'train',
+    ship:'ship',harbor:'ship',
+    restaurant:'utensils',food:'utensils',fastfood:'utensils',waffle:'utensils',
+    breakfast:'coffee',cafe:'coffee',coffee:'coffee',
+    hotel:'bed',accommodation:'bed',
+    eu:'euflag',
+    parliament:'landmark',
+    institution:'building',museum:'building',
+    diamond:'diamond',
+    photo:'camera',
+    group:'users',leisure:'route',shopping:'route',
+    meeting:'mapPin',information:'mapPin',
+    security:'shield',
+    presentation:'mic',
+    ticket:'ticket',
+    highlight:'star'
+  };
+  if(selectedIcon&&selectedIcon!=='automatic'&&iconMap[selectedIcon]){
+    return svgIcon(iconMap[selectedIcon]);
+  }
+
   const text=`${event.title||''} ${event.text||''}`.toLowerCase();
   // Spezifische Begriffe stehen bewusst vor allgemeinen Wörtern wie „Fahrt“.
   if(/hafenrundfahrt|schifffahrt|schiff|hafen/.test(text)) return svgIcon('ship');

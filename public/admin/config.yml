@@ -2,13 +2,12 @@ backend:
   name: github
   repo: juvi2601/bs-rohrbach-erasmus
   branch: main
-  base_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
-  auth_endpoint: /auth
+  base_url: https://REPLACE-WITH-CMS-AUTH-WORKER.workers.dev
 locale: de
-media_folder: public/images/uploads
+media_folder: images/uploads
 public_folder: /images/uploads
-site_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
-display_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
+site_url: https://bs-rohrbach-erasmus.workers.dev
+display_url: https://bs-rohrbach-erasmus.workers.dev
 logo_url: /images/hero.jpg
 collections:
 - name: site
@@ -16,7 +15,7 @@ collections:
   files:
   - name: site
     label: Alle Seitentexte & Bilder
-    file: public/content/site.json
+    file: content/site.json
     format: json
     fields:
     - label: Browser & Grunddaten
@@ -378,40 +377,6 @@ collections:
       - label: SharePoint-Galerie-Link
         name: galleryUrl
         widget: string
-    - label: Notfallbereich
-      name: emergency
-      widget: object
-      fields:
-      - label: Kleine Überschrift
-        name: eyebrow
-        widget: string
-      - label: Titel
-        name: title
-        widget: string
-      - label: Einleitung
-        name: intro
-        widget: text
-      - label: Kontakte
-        name: items
-        widget: list
-        fields:
-        - label: Icon
-          name: icon
-          widget: string
-        - label: Titel
-          name: title
-          widget: string
-        - label: Text
-          name: text
-          widget: text
-        - label: Link
-          name: url
-          widget: string
-          required: false
-        - label: Buttontext
-          name: button
-          widget: string
-          required: false
     - label: Admin-Hinweis
       name: adminArea
       widget: object
@@ -457,7 +422,7 @@ collections:
   files:
   - name: news
     label: News & Hinweise
-    file: public/content/news.json
+    file: content/news.json
     format: json
     fields:
     - label: Meldungen
@@ -549,7 +514,7 @@ collections:
   files:
   - name: program
     label: Tagesprogramm
-    file: public/content/program.json
+    file: content/program.json
     format: json
     fields:
     - label: Reisetage
@@ -607,6 +572,33 @@ collections:
         - label: Beschreibung
           name: text
           widget: text
+        - label: Programmsymbol
+          name: icon
+          widget: select
+          required: false
+          default: automatic
+          hint: Wähle ein passendes Symbol. „Automatisch“ verwendet weiterhin Titel und Beschreibung.
+          options:
+          - { label: "✨ Automatisch erkennen", value: automatic }
+          - { label: "🚌 Bus / Fahrt", value: bus }
+          - { label: "🚆 Zug / Bahnhof / Metro", value: train }
+          - { label: "🚢 Schiff / Hafen", value: ship }
+          - { label: "🍽️ Restaurant / Essen", value: restaurant }
+          - { label: "☕ Frühstück / Café / Pause", value: breakfast }
+          - { label: "🏨 Hotel / Zimmer", value: hotel }
+          - { label: "🇪🇺 Europäische Union", value: eu }
+          - { label: "🏛️ Parlament", value: parliament }
+          - { label: "🏢 EU-Institution / Gebäude", value: institution }
+          - { label: "💎 Diamanten", value: diamond }
+          - { label: "🖼️ Museum", value: museum }
+          - { label: "📸 Foto / Fotostopp", value: photo }
+          - { label: "👥 Gruppe", value: group }
+          - { label: "🚶 Freizeit / Shopping / Rundgang", value: leisure }
+          - { label: "📍 Treffpunkt / Information", value: meeting }
+          - { label: "🛡️ Sicherheit / Kontrolle", value: security }
+          - { label: "🎤 Vortrag / Präsentation", value: presentation }
+          - { label: "🎟️ Ticket / Eintritt", value: ticket }
+          - { label: "⭐ Besonderer Höhepunkt", value: highlight }
         - label: Status
           name: status
           widget: select
@@ -623,7 +615,7 @@ collections:
   files:
   - name: gallery
     label: Öffentliche Galerie
-    file: public/content/gallery.json
+    file: content/gallery.json
     format: json
     fields:
     - label: Fotos
@@ -660,7 +652,7 @@ collections:
   files:
   - name: places
     label: Karte & Orte
-    file: public/content/places.json
+    file: content/places.json
     format: json
     fields:
     - label: Orte
@@ -732,7 +724,7 @@ collections:
   files:
   - name: downloads
     label: Downloads
-    file: public/content/downloads.json
+    file: content/downloads.json
     format: json
     fields:
     - label: Dokumente
@@ -769,7 +761,7 @@ collections:
   files:
   - name: faq
     label: FAQ
-    file: public/content/faq.json
+    file: content/faq.json
     format: json
     fields:
     - label: Fragen
@@ -886,7 +878,7 @@ collections:
   files:
   - name: legal
     label: Impressum, Datenschutz, Kontakt & Bildnachweise
-    file: public/content/legal.json
+    file: content/legal.json
     format: json
     fields:
     - label: Links in der Fußzeile

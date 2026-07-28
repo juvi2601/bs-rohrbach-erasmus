@@ -572,6 +572,33 @@ collections:
         - label: Beschreibung
           name: text
           widget: text
+        - label: Programmsymbol
+          name: icon
+          widget: select
+          required: false
+          default: automatic
+          hint: Wähle ein passendes Symbol. „Automatisch“ verwendet weiterhin Titel und Beschreibung.
+          options:
+          - { label: "✨ Automatisch erkennen", value: automatic }
+          - { label: "🚌 Bus / Fahrt", value: bus }
+          - { label: "🚆 Zug / Bahnhof / Metro", value: train }
+          - { label: "🚢 Schiff / Hafen", value: ship }
+          - { label: "🍽️ Restaurant / Essen", value: restaurant }
+          - { label: "☕ Frühstück / Café / Pause", value: breakfast }
+          - { label: "🏨 Hotel / Zimmer", value: hotel }
+          - { label: "🇪🇺 Europäische Union", value: eu }
+          - { label: "🏛️ Parlament", value: parliament }
+          - { label: "🏢 EU-Institution / Gebäude", value: institution }
+          - { label: "💎 Diamanten", value: diamond }
+          - { label: "🖼️ Museum", value: museum }
+          - { label: "📸 Foto / Fotostopp", value: photo }
+          - { label: "👥 Gruppe", value: group }
+          - { label: "🚶 Freizeit / Shopping / Rundgang", value: leisure }
+          - { label: "📍 Treffpunkt / Information", value: meeting }
+          - { label: "🛡️ Sicherheit / Kontrolle", value: security }
+          - { label: "🎤 Vortrag / Präsentation", value: presentation }
+          - { label: "🎟️ Ticket / Eintritt", value: ticket }
+          - { label: "⭐ Besonderer Höhepunkt", value: highlight }
         - label: Status
           name: status
           widget: select
