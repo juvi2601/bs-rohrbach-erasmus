@@ -3,7 +3,7 @@
     {
       "dayNumber": 0,
       "date": "21.11.",
-      "cover": "",
+      "cover": "/images/uploads/schule.png",
       "subtitle": "Der Start unserer gemeinsamen Reise.",
       "title": "Abreise aus Rohrbach",
       "icon": "🚌",
@@ -175,8 +175,8 @@
       "events": [
         {
           "time": "Vormittag",
-          "title": "Vortrag und Einblicke mit Andi",
-          "text": "Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel.",
+          "title": "Vortrag und Einblicke mit Andreas Gahleitner",
+          "text": "Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel. Eventuell zuvor Besuch des \"Haus der Europäischen Geschichte\".",
           "icon": "presentation"
         },
         {
@@ -193,20 +193,20 @@
       "date": "26.11.",
       "dayNumber": 5,
       "title": "Abschluss & Heimreise",
-      "subtitle": "Österreichische Vertretung und Rückfahrt.",
+      "subtitle": "Ständige Österreichische Vertretung, Waterloo, Rückreise nach Rohrbach",
       "cover": "/images/waterloo.jpg",
       "events": [
         {
           "time": "Vormittag",
           "title": "Ständige Vertretung Österreichs",
-          "text": "Abschließender offizieller Programmpunkt der BS Rohrbach.",
+          "text": "Aus dem Hotel auschecken. Besuch der Ständigen österreichischen Vertretung in Brüssel.",
           "status": "pending",
           "icon": "institution"
         },
         {
           "time": "Mittag",
           "title": "Beginn der Heimreise",
-          "text": "Rückfahrt nach Rohrbach mit Pausen nach Bedarf.",
+          "text": "Rückfahrt via Waterloo nach Rohrbach.",
           "icon": "bus"
         }
       ]
