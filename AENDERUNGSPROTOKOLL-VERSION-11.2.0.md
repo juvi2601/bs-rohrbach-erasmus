@@ -1,15 +1,16 @@
 # Änderungsprotokoll – Version 11.2.0
 
-## Neue Funktion
+Datum: 28.07.2026
 
-- Programmsymbole können bei jedem einzelnen Programmpunkt im CMS über ein Dropdown ausgewählt werden.
-- Die Auswahl verwendet weiterhin das bestehende einheitliche SVG-Icon-Set.
-- Die manuelle Auswahl hat Vorrang vor der automatischen Texterkennung.
-- Option **Automatisch erkennen** lässt das bisherige Verhalten unverändert.
-- Alte Programmpunkte ohne `icon` bleiben vollständig kompatibel.
+## Neu
 
-## Technische Änderungen
+- Auswählbare Programmsymbole im CMS
+- Auswahl „Automatisch erkennen“ als rückwärtskompatibler Standard
+- zentrale Icon-Zuordnung in `public/app.js`
 
-- `public/app.js`: zentrale Zuordnung der CMS-Werte zu den vorhandenen SVG-Icons ergänzt.
-- `public/admin/config.yml`: Select-Feld `icon` bei Programmpunkten ergänzt.
-- `admin/config.yml`: identische CMS-Konfiguration synchronisiert.
+## Technisch
+
+- `eventIcon(event)` berücksichtigt zuerst das manuell gewählte Symbol
+- ohne manuelle Auswahl greift weiterhin die bestehende Texterkennung
+- Admin-Dashboard und öffentliche Versionsdatei auf 11.2.0 aktualisiert
+- Cache-Busting der Admin-Ressourcen auf 11.2.0 erhöht
