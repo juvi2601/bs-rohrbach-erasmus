@@ -48,7 +48,7 @@
     <form id="uploadForm" class="upload-card" novalidate>
       <div class="form-heading">
         <div><p class="eyebrow">Foto-Upload</p><h1>Erinnerungen teilen</h1><p>Bitte nur ausgewählte, gelungene Bilder hochladen.</p></div>
-        <span class="dev-badge">DEV.3 · Testmodus</span>
+        <span class="dev-badge">DEV.4 · Testmodus</span>
       </div>
 
       <ol class="upload-progress" aria-label="Fortschritt">
@@ -117,12 +117,15 @@
 
 <div id="successDialog" class="dialog" hidden>
   <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="successTitle">
-    <span>✅</span><h2 id="successTitle">Test erfolgreich</h2>
+    <span>✅</span><h2 id="successTitle">Upload erfolgreich getestet</h2>
     <p><strong id="successCount"></strong> wurden im Testmodus vollständig verarbeitet. Es wurden noch keine Dateien übertragen.</p>
-    <p class="success-note">Nach der echten Microsoft-Anbindung landen neue Fotos zuerst in deinem geschützten Prüfbereich.</p>
-    <button id="newUploadButton" type="button">Weiteren Upload testen</button>
+    <p class="success-note">Nach der Microsoft-Anbindung werden deine Fotos zuerst von der Lehrkraft geprüft und anschließend veröffentlicht.</p>
+    <div class="success-actions">
+      <button id="newUploadButton" type="button">Weitere Fotos auswählen</button>
+      <a class="secondary-button" href="/">Zurück zur Website</a>
+    </div>
   </div>
 </div>
-<script src="/upload/upload.js?v=12.0.0-dev.3" defer></script>
+<script src="/upload/upload.js?v=12.0.0-dev.4" defer></script>
 </body>
 </html>

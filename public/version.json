@@ -1,1 +1,5 @@
-{"version":"12.0.0-DEV.3","channel":"DEV","label":"Foto-Upload mit Fortschritt und Qualitätsprüfung"}
+{
+  "version": "12.0.0-dev.4",
+  "channel": "development",
+  "released": "2026-07-29"
+}
