@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071d49">
   <title>Foto-Upload · Brüssel 2026</title>
   <link rel="icon" href="/images/bs-rohrbach-logo.png">
-  <link rel="stylesheet" href="/upload/upload.css?v=12.0.0-dev.2">
+  <link rel="stylesheet" href="/upload/upload.css?v=12.0.0-dev.3">
 </head>
 <body>
 <a class="skip-link" href="#mainContent">Zum Inhalt springen</a>
@@ -28,7 +28,7 @@
       <button id="loginButton" class="login-button" type="button">
         <span aria-hidden="true">🔐</span> Mit Microsoft-Schulkonto anmelden
       </button>
-      <p class="login-hint">In DEV.2 wird die Anmeldung nur simuliert. Es werden noch keine Daten an Microsoft übertragen.</p>
+      <p class="login-hint">Testmodus: Die Anmeldung wird derzeit simuliert. Es werden noch keine Daten an Microsoft übertragen.</p>
     </div>
 
     <div class="steps" aria-label="So funktioniert der Foto-Upload">
@@ -41,62 +41,88 @@
 
   <section id="uploadView" class="upload-section" hidden>
     <div class="signed-in-bar">
-      <div><span class="avatar">JV</span><p><small>Angemeldet als</small><strong>Testbenutzer · BS Rohrbach</strong></p></div>
+      <div><span class="avatar">TB</span><p><small>Angemeldet als</small><strong>Testbenutzer · BS Rohrbach</strong></p></div>
       <button id="logoutButton" type="button">Abmelden</button>
     </div>
 
     <form id="uploadForm" class="upload-card" novalidate>
       <div class="form-heading">
-        <div><p class="eyebrow">Foto-Upload</p><h1>Fotos auswählen</h1><p>Bitte nur ausgewählte, gelungene Bilder hochladen.</p></div>
-        <span class="dev-badge">DEV.2 · Testmodus</span>
+        <div><p class="eyebrow">Foto-Upload</p><h1>Erinnerungen teilen</h1><p>Bitte nur ausgewählte, gelungene Bilder hochladen.</p></div>
+        <span class="dev-badge">DEV.3 · Testmodus</span>
       </div>
 
-      <div class="form-grid">
-        <label>Reisetag
-          <select id="daySelect" required><option value="">Bitte auswählen</option></select>
+      <ol class="upload-progress" aria-label="Fortschritt">
+        <li class="active" data-step="1"><span>1</span><div><strong>Zuordnen</strong><small>Tag und Programmpunkt</small></div></li>
+        <li data-step="2"><span>2</span><div><strong>Fotos</strong><small>Auswählen und prüfen</small></div></li>
+        <li data-step="3"><span>3</span><div><strong>Hochladen</strong><small>Sicher übertragen</small></div></li>
+      </ol>
+
+      <section class="form-section" aria-labelledby="assignmentTitle">
+        <div class="section-title"><span>1</span><div><h2 id="assignmentTitle">Fotos zuordnen</h2><p>Damit die Bilder später richtig einsortiert werden.</p></div></div>
+        <div class="form-grid">
+          <label>Reisetag
+            <select id="daySelect" required><option value="">Bitte auswählen</option></select>
+          </label>
+          <label>Programmpunkt
+            <select id="programSelect" required disabled><option value="">Zuerst Reisetag auswählen</option></select>
+          </label>
+        </div>
+
+        <label>Kurze Bildbeschreibung <span class="optional">optional</span>
+          <textarea id="description" maxlength="180" rows="3" placeholder="Was ist auf den Fotos zu sehen?"></textarea>
+          <small><span id="charCount">0</span>/180 Zeichen</small>
         </label>
-        <label>Programmpunkt
-          <select id="programSelect" required disabled><option value="">Zuerst Reisetag auswählen</option></select>
-        </label>
-      </div>
+      </section>
 
-      <label>Kurze Bildbeschreibung <span class="optional">optional</span>
-        <textarea id="description" maxlength="180" rows="3" placeholder="Was ist auf den Fotos zu sehen?"></textarea>
-        <small><span id="charCount">0</span>/180 Zeichen</small>
-      </label>
+      <section class="form-section" aria-labelledby="photosTitle">
+        <div class="section-title"><span>2</span><div><h2 id="photosTitle">Fotos auswählen</h2><p>Bis zu 10 Bilder pro Upload.</p></div></div>
+        <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Fotos auswählen">
+          <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden>
+          <span class="drop-icon">📷</span>
+          <h2>Fotos auswählen</h2>
+          <p>Am Handy antippen oder Dateien hierher ziehen.</p>
+          <button type="button" id="chooseButton">Dateien auswählen</button>
+          <small>JPG, PNG, WebP oder HEIC · maximal 10 Fotos · je höchstens 15 MB</small>
+        </div>
 
-      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Fotos auswählen">
-        <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden>
-        <span class="drop-icon">📷</span>
-        <h2>Fotos auswählen</h2>
-        <p>Am Handy antippen oder Dateien hierher ziehen.</p>
-        <button type="button" id="chooseButton">Dateien auswählen</button>
-        <small>JPG, PNG, WebP oder HEIC · maximal 10 Fotos · je höchstens 15 MB</small>
-      </div>
+        <div id="fileSummary" class="file-summary" hidden>
+          <div><strong id="fileCount">0 Fotos</strong><small id="totalSize"></small></div>
+          <button type="button" id="clearButton">Auswahl löschen</button>
+        </div>
+        <div id="previewGrid" class="preview-grid" aria-live="polite"></div>
+      </section>
 
-      <div id="fileSummary" class="file-summary" hidden>
-        <div><strong id="fileCount">0 Fotos</strong><small id="totalSize"></small></div>
-        <button type="button" id="clearButton">Auswahl löschen</button>
-      </div>
-      <div id="previewGrid" class="preview-grid" aria-live="polite"></div>
       <div id="formMessage" class="form-message" hidden></div>
 
       <div class="privacy-box">
         <span>🛡️</span><p>Später werden die Fotos ausschließlich in der dafür vorgesehenen SharePoint-Seite gespeichert. Auf der Website erscheinen nur Fotos, die von der Lehrkraft freigegeben wurden.</p>
       </div>
 
-      <button class="submit-button" id="submitButton" type="submit">☁️ Upload testen</button>
+      <button class="submit-button" id="submitButton" type="submit" disabled>☁️ Upload testen</button>
+      <p class="submit-hint" id="submitHint">Bitte Reisetag, Programmpunkt und mindestens ein Foto auswählen.</p>
     </form>
   </section>
 </main>
 
+<div id="uploadDialog" class="dialog" hidden>
+  <div class="dialog-card upload-dialog-card" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+    <span class="dialog-icon">☁️</span>
+    <h2 id="uploadTitle">Fotos werden vorbereitet</h2>
+    <p id="uploadStatus">Die Dateien werden geprüft …</p>
+    <div class="progress-track" aria-label="Upload-Fortschritt"><div id="progressBar"></div></div>
+    <strong id="progressPercent">0 %</strong>
+    <small id="progressFiles">0 von 0 Fotos</small>
+  </div>
+</div>
+
 <div id="successDialog" class="dialog" hidden>
   <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="successTitle">
     <span>✅</span><h2 id="successTitle">Test erfolgreich</h2>
-    <p>Die Fotos wurden nicht übertragen. Die Oberfläche ist für die spätere Microsoft-Anbindung vorbereitet.</p>
-    <button id="closeDialog" type="button">Zurück zum Formular</button>
+    <p><strong id="successCount"></strong> wurden im Testmodus vollständig verarbeitet. Es wurden noch keine Dateien übertragen.</p>
+    <p class="success-note">Nach der echten Microsoft-Anbindung landen neue Fotos zuerst in deinem geschützten Prüfbereich.</p>
+    <button id="newUploadButton" type="button">Weiteren Upload testen</button>
   </div>
 </div>
-<script src="/upload/upload.js?v=12.0.0-dev.2" defer></script>
+<script src="/upload/upload.js?v=12.0.0-dev.3" defer></script>
 </body>
 </html>
