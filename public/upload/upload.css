@@ -4,3 +4,31 @@
 .upload-progress{list-style:none;margin:0 0 38px;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.upload-progress li{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid var(--line);border-radius:16px;background:#f8fafc;color:var(--muted);transition:.2s}.upload-progress li>span{flex:0 0 34px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e6ebf2;font-weight:950}.upload-progress strong,.upload-progress small{display:block}.upload-progress small{font-size:11px}.upload-progress li.active{border-color:#8fc2f3;background:#edf7ff;color:var(--ink)}.upload-progress li.active>span{background:var(--blue2);color:#fff}.upload-progress li.complete{border-color:#9fd9b4;background:#effaf3;color:#185f33}.upload-progress li.complete>span{font-size:0;background:#23894b;color:#fff}.upload-progress li.complete>span::after{content:'✓';font-size:17px}.form-section{padding:25px 0;border-top:1px solid #e6edf5}.section-title{display:flex;align-items:center;gap:13px;margin-bottom:20px}.section-title>span{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:#eaf4ff;color:var(--blue);font-weight:950}.section-title h2{margin:0;font-size:24px}.section-title p{margin:1px 0 0;color:var(--muted);font-size:14px}.preview-image-wrap{position:relative}.quality-warning{position:absolute;left:8px;bottom:8px;padding:5px 8px;border-radius:999px;background:rgba(124,74,0,.92);color:#fff;font-size:11px;font-weight:900}.preview-item.low-resolution{border-color:#e7b24a}.submit-button:disabled{cursor:not-allowed;box-shadow:none;background:#a8b4c4;transform:none}.submit-hint{text-align:center;margin:9px 0 0;color:var(--muted);font-size:13px}.upload-dialog-card{min-width:min(430px,100%)}.dialog-icon{display:block}.progress-track{height:12px;margin:24px 0 10px;border-radius:999px;background:#e6ebf2;overflow:hidden}.progress-track>div{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--blue2));transition:width .08s linear}.upload-dialog-card>strong,.upload-dialog-card>small{display:block}.upload-dialog-card>strong{font-size:25px}.upload-dialog-card>small{color:var(--muted)}.success-note{padding:12px;border-radius:12px;background:#eff7ff;font-size:14px}@media(max-width:760px){.upload-progress{grid-template-columns:1fr}.upload-progress li{padding:10px}.upload-progress small{font-size:12px}}
 
 .success-actions{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}.success-actions button,.success-actions .secondary-button{min-width:190px}.secondary-button{display:inline-flex;align-items:center;justify-content:center;padding:13px 18px;border:2px solid var(--ink);border-radius:14px;color:var(--ink);background:#fff;font-weight:900;text-decoration:none;transition:transform .2s ease,background .2s ease}.secondary-button:hover{background:#f3f6fa;transform:translateY(-1px)}@media(max-width:520px){.success-actions{flex-direction:column}.success-actions button,.success-actions .secondary-button{width:100%}}
+
+/* DEV.6: gemeinsame linke Achse im Upload-Teaser */
+.upload-entry-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  text-align:left;
+}
+.upload-entry-copy .eyebrow,
+.upload-entry-copy h2,
+.upload-entry-copy p,
+.upload-entry-copy .upload-entry-actions,
+.upload-entry-copy .login-note{
+  width:100%;
+  max-width:none;
+  margin-left:0;
+  margin-right:0;
+  text-align:left;
+}
+.upload-entry-copy .upload-entry-actions{justify-content:flex-start}
+@media(max-width:720px){
+  .upload-entry-copy{align-items:center;text-align:center}
+  .upload-entry-copy .eyebrow,
+  .upload-entry-copy h2,
+  .upload-entry-copy p,
+  .upload-entry-copy .login-note{text-align:center}
+  .upload-entry-copy .upload-entry-actions{justify-content:center}
+}
