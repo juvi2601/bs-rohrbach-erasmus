@@ -4,23 +4,49 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Microsoft 365 – BS Rohrbach Erasmus+</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=11.1.2">
-  <link rel="stylesheet" href="/admin/photo-inbox.css?v=11.1.2">
+  <title>Microsoft 365 – Erasmus+ BS Rohrbach</title>
+  <link rel="stylesheet" href="/admin/admin.css?v=12.1.0-dev.1">
+  <link rel="stylesheet" href="/admin/photo-inbox.css?v=12.1.0-dev.1">
+  <style>
+    .rights-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:1rem}.rights-card{padding:1rem;border:1px solid #dce5f0;border-radius:16px;background:#f8fbff}.rights-card strong,.rights-card small{display:block}.rights-card small{margin-top:.25rem;color:#607086}.rights-card.good{border-color:#99d8ae;background:#effaf3}.rights-card.warn{border-color:#f0cf77;background:#fff8df}.rights-card.bad{border-color:#efabb4;background:#fff1f3}.action-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}.diagnostic-box{margin-top:1rem;padding:1rem;border-radius:16px;background:#0d2348;color:#eaf2ff;white-space:pre-wrap;overflow-wrap:anywhere}.diagnostic-box code{color:#ffdc63}.setup-note{padding:1rem 1.15rem;border-left:4px solid #1675d1;background:#eef7ff;border-radius:0 14px 14px 0}.setup-note p{margin:.3rem 0}.scope-list{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem}.scope-list span{padding:.35rem .65rem;border-radius:999px;background:#eaf2ff;color:#124c8f;font-size:.82rem;font-weight:800}@media(max-width:850px){.rights-grid{grid-template-columns:1fr}.action-row .button{width:100%;justify-content:center}}
+  </style>
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Microsoft Forms Connector</small></span></a>
+  <a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>Erasmus+ BS Rohrbach</strong><small>Microsoft-365-Rechtetest</small></span></a>
   <div class="top-actions"><a class="button ghost" href="/admin/photo-inbox.html">Fotoeingang</a><a class="button primary" href="/admin/">Dashboard</a></div>
 </header>
 <main class="shell">
   <section class="welcome">
-    <div><p class="eyebrow">Microsoft 365</p><h1>☁️ Microsoft Graph</h1><p>Verbindung zwischen Cloudflare, Microsoft Graph, Forms und OneDrive prüfen.</p></div>
-    <div class="status-card" id="ms-status"><span class="status-dot"></span><div><strong id="ms-title">Status wird geprüft</strong><small id="ms-text">Cloudflare-Konfiguration wird geladen</small></div></div>
+    <div><p class="eyebrow">Version 12.1 · DEV.1</p><h1>☁️ Microsoft 365 prüfen</h1><p>Wir testen jetzt zuerst, was mit deinem eigenen Schulkonto und den bereits vorhandenen Entra-Einstellungen möglich ist.</p></div>
+    <div class="status-card" id="ms-status"><span class="status-dot"></span><div><strong id="ms-title">Konfiguration wird geladen</strong><small id="ms-text">Tenant- und Client-ID werden geprüft</small></div></div>
   </section>
 
   <section class="inbox-panel">
-    <div class="section-heading"><div><p class="eyebrow">Version 11.1.2</p><h2>Microsoft-Graph-Verbindungstest</h2></div><button class="button primary" id="refresh" type="button">Verbindung testen</button></div>
+    <div class="section-heading"><div><p class="eyebrow">Empfohlener Weg</p><h2>Delegierte Anmeldung mit deinem Schulkonto</h2></div><span class="dev-badge">🧪 Rechtetest</span></div>
+    <p>Dieser Test benötigt <strong>kein Client Secret</strong>. Microsoft stellt nach deiner Anmeldung nur jene Rechte bereit, denen dein Konto beziehungsweise eure Organisation zustimmt.</p>
+    <div class="setup-note">
+      <p><strong>Benötigte SPA-Redirect-URI in Entra:</strong></p>
+      <p><code id="redirect-uri">wird geladen …</code></p>
+      <p>Plattformtyp: <strong>Single-Page Application (SPA)</strong></p>
+    </div>
+    <div class="action-row">
+      <button class="button primary" id="delegated-test" type="button">Mit Microsoft anmelden und Rechte testen</button>
+      <button class="button ghost" id="delegated-logout" type="button" hidden>Microsoft-Test abmelden</button>
+    </div>
+    <div class="rights-grid">
+      <article class="rights-card" id="right-login"><strong>Microsoft-Anmeldung</strong><small>Noch nicht getestet</small></article>
+      <article class="rights-card" id="right-user"><strong>Benutzerprofil</strong><small>Noch nicht getestet</small></article>
+      <article class="rights-card" id="right-files"><strong>Dateizugriff</strong><small>Noch nicht getestet</small></article>
+    </div>
+    <div class="scope-list" id="scope-list"></div>
+    <div class="diagnostic-box" id="delegated-result">Noch kein delegierter Rechtetest durchgeführt.</div>
+  </section>
+
+  <section class="inbox-panel" style="margin-top:1rem">
+    <div class="section-heading"><div><p class="eyebrow">Bisherige Technik</p><h2>App-only-Verbindung kontrollieren</h2></div><button class="button ghost" id="refresh" type="button">App-only testen</button></div>
+    <p>Dieser bestehende Test verwendet Client Credentials und benötigt Application-Rollen. Der frühere HTTP-401-Fehler kam daher, dass im Token keine passenden App-Rollen enthalten waren.</p>
     <div class="inbox-stats">
       <article><span>Tenant-ID</span><strong id="tenant">–</strong></article>
       <article><span>Client-ID</span><strong id="client">–</strong></article>
@@ -29,48 +55,82 @@
       <article><span>Forms-Quelle</span><strong id="source">–</strong></article>
       <article><span>Graph-Verbindung</span><strong id="graph">–</strong></article>
     </div>
-    <p id="test-meta" style="margin-top:1rem">Noch kein Verbindungstest durchgeführt.</p>
+    <p id="test-meta" style="margin-top:1rem">Noch kein App-only-Test durchgeführt.</p>
   </section>
 
   <section class="inbox-panel" style="margin-top:1rem">
-    <p class="eyebrow">Systemdiagnose</p><h2>Integrationsfortschritt</h2>
-    <div class="inbox-stats">
-      <article><span>Microsoft Graph</span><strong id="diag-graph">⏳</strong></article>
-      <article><span>OneDrive erreichbar</span><strong>Vorbereitet</strong></article>
-      <article><span>Excel gefunden</span><strong>Vorbereitet</strong></article>
-      <article><span>Uploadordner gefunden</span><strong>Vorbereitet</strong></article>
-      <article><span>Synchronisierung</span><strong>Vorbereitet</strong></article>
+    <p class="eyebrow">Auswertung</p><h2>Was der Rechtetest entscheidet</h2>
+    <div class="rights-grid">
+      <article class="rights-card"><strong>Files.ReadWrite funktioniert</strong><small>Dann entwickeln wir den echten Upload zunächst im Benutzerkontext weiter.</small></article>
+      <article class="rights-card"><strong>Zustimmung wird blockiert</strong><small>Dann bleibt Forms/Power Automate als Microsoft-Plan B oder wir wählen einen externen Speicherdienst.</small></article>
+      <article class="rights-card"><strong>SharePoint-Zugriff fehlt</strong><small>Dann testen wir im nächsten Schritt gezielt die konkrete Brüssel-SharePoint-Seite.</small></article>
     </div>
-  </section>
-
-  <section class="inbox-panel" style="margin-top:1rem">
-    <p class="eyebrow">Cloudflare-Einrichtung</p><h2>Vier geschützte Werte</h2>
-    <p>Unter <strong>Cloudflare → Workers &amp; Pages → bs-rohrbach-erasmus-v2 → Settings → Variables and Secrets</strong> werden folgende Namen benötigt:</p>
-    <div class="setup-code"><code>MS_TENANT_ID</code><code>MS_CLIENT_ID</code><code>MS_CLIENT_SECRET</code><code>PHOTO_INBOX_PIN</code></div>
-    <p><strong>Wichtig:</strong> <code>MS_CLIENT_SECRET</code> und <code>PHOTO_INBOX_PIN</code> als verschlüsselte Secrets speichern. Keine dieser Angaben in GitHub eintragen.</p>
   </section>
 </main>
 <script>
 const text=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
 const mark=(id,ok,missing='Fehlt')=>text(id,ok?'✓':missing);
-async function load(runExplicitTest=false){
-  const button=document.getElementById('refresh');button.disabled=true;button.textContent='Wird geprüft …';
-  try{
-    const endpoint=runExplicitTest?'/api/microsoft/test':'/api/microsoft-status';
-    const r=await fetch(endpoint,{method:runExplicitTest?'POST':'GET',cache:'no-store'}),d=await r.json();
-    const state=d.state||d;
-    const connected=runExplicitTest?!!d.ok:!!d.connectionTest;
-    text('ms-title',connected?'Microsoft Graph verbunden':'Einrichtung noch nicht vollständig');
-    text('ms-text',connected?'Anmeldung über Client Credentials erfolgreich':(d.message||state.connectionError||'Fehlende Angaben werden unten angezeigt'));
-    document.getElementById('ms-status').classList.toggle('ready',connected);
-    mark('tenant',state.tenantIdConfigured);mark('client',state.clientIdConfigured);mark('secret',state.clientSecretConfigured);mark('pin',state.inboxPinConfigured);mark('source',state.sourceConfigured);
-    text('graph',connected?'✓':'Nicht verbunden');text('diag-graph',connected?'✅':'⚠️');
-    const testedAt=d.testedAt||state.testedAt;
-    text('test-meta',testedAt?`Letzter Test: ${new Date(testedAt).toLocaleString('de-AT')} · Dauer: ${d.durationMs??state.connectionDurationMs??'–'} ms`:'Noch kein vollständiger Verbindungstest möglich.');
-  }catch(e){text('ms-title','Status nicht erreichbar');text('ms-text',String(e));text('graph','Fehler');text('diag-graph','❌')}
-  finally{button.disabled=false;button.textContent='Verbindung testen'}
+const setRight=(id,state,detail)=>{const el=document.getElementById(id);el.classList.remove('good','warn','bad');if(state)el.classList.add(state);el.querySelector('small').textContent=detail};
+const decodeJwt=token=>{try{const p=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(decodeURIComponent(escape(atob(p.padEnd(Math.ceil(p.length/4)*4,'=')))))}catch{return {}}};
+let publicConfig=null,msalApp=null,currentAccount=null;
+async function loadPublicConfig(){
+  const r=await fetch('/api/microsoft/public-config',{cache:'no-store'});publicConfig=await r.json();
+  text('redirect-uri',publicConfig.redirectUri||location.origin+'/admin/microsoft.html');
+  if(!publicConfig.configured){text('ms-title','Tenant- oder Client-ID fehlt');text('ms-text','Cloudflare-Variablen MS_TENANT_ID und MS_CLIENT_ID prüfen');return}
+  msalApp=new msal.PublicClientApplication({auth:{clientId:publicConfig.clientId,authority:`https://login.microsoftonline.com/${publicConfig.tenantId}`,redirectUri:publicConfig.redirectUri},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false}});
+  text('ms-title','Delegierter Rechtetest bereit');text('ms-text','Mit deinem Schulkonto anmelden und minimale Dateirechte prüfen');document.getElementById('ms-status').classList.add('ready');
 }
-document.getElementById('refresh').onclick=()=>load(true);load(false);
+async function delegatedTest(){
+  const btn=document.getElementById('delegated-test');btn.disabled=true;btn.textContent='Microsoft-Anmeldung läuft …';
+  setRight('right-login','warn','Anmeldung läuft');setRight('right-user','','Wartet auf Anmeldung');setRight('right-files','','Wartet auf Token');text('delegated-result','Microsoft-Anmeldung wird geöffnet …');
+  try{
+    if(!msalApp)throw new Error('Die öffentliche Microsoft-Konfiguration ist nicht bereit.');
+    const scopes=['openid','profile','email','User.Read','Files.ReadWrite'];
+    const login=await msalApp.loginPopup({scopes,prompt:'select_account'});currentAccount=login.account;msalApp.setActiveAccount(currentAccount);
+    setRight('right-login','good',`${currentAccount.name||'Benutzer'} erfolgreich angemeldet`);
+    let token;
+    try{token=await msalApp.acquireTokenSilent({scopes,account:currentAccount})}catch{token=await msalApp.acquireTokenPopup({scopes,account:currentAccount})}
+    const claims=decodeJwt(token.accessToken),granted=String(claims.scp||'').split(/\s+/).filter(Boolean);
+    document.getElementById('scope-list').innerHTML=granted.map(x=>`<span>${x}</span>`).join('');
+    const graphHeaders={Authorization:`Bearer ${token.accessToken}`};
+    const meRes=await fetch('https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName',{headers:graphHeaders});
+    const me=await meRes.json();if(!meRes.ok)throw new Error(me.error?.message||`Benutzerprofil: HTTP ${meRes.status}`);
+    setRight('right-user','good',`${me.displayName} · ${me.userPrincipalName}`);
+    const driveRes=await fetch('https://graph.microsoft.com/v1.0/me/drive?$select=id,driveType,webUrl',{headers:graphHeaders});
+    const drive=await driveRes.json();
+    const hasFiles=granted.some(x=>['Files.ReadWrite','Files.ReadWrite.All','Sites.ReadWrite.All'].includes(x));
+    if(driveRes.ok&&hasFiles)setRight('right-files','good',`Files.ReadWrite vorhanden · ${drive.driveType||'Drive'} erreichbar`);
+    else if(hasFiles)setRight('right-files','warn',`Dateirecht vorhanden, Drive-Test HTTP ${driveRes.status}`);
+    else setRight('right-files','bad','Files.ReadWrite wurde nicht erteilt');
+    text('delegated-result',`ERGEBNIS: Delegierte Anmeldung funktioniert.
+
+Benutzer: ${me.displayName} (${me.userPrincipalName})
+Tenant: ${claims.tid||'–'}
+Client-ID: ${claims.azp||claims.appid||publicConfig.clientId}
+Erteilte Scopes: ${granted.join(', ')||'keine'}
+OneDrive/Drive: ${driveRes.ok?'erreichbar':'nicht erreichbar'}
+
+Nächster Schritt: Zugriff auf die konkrete SharePoint-Seite „BS Rohrbach Brüsselreise 2026“ testen.`);
+    document.getElementById('delegated-logout').hidden=false;
+  }catch(e){
+    const code=e.errorCode||e.code||'';setRight('right-login','bad','Anmeldung oder Zustimmung fehlgeschlagen');
+    text('delegated-result',`FEHLER: ${e.message||String(e)}
+
+Code: ${code||'–'}
+
+Häufigste Ursachen:
+1. Redirect-URI nicht als SPA eingetragen.
+2. Delegierte Berechtigung Files.ReadWrite fehlt in der Entra-App.
+3. Benutzerzustimmung wurde durch die Organisation blockiert.`);
+  }finally{btn.disabled=false;btn.textContent='Mit Microsoft anmelden und Rechte testen'}
+}
+async function delegatedLogout(){if(msalApp&&currentAccount)await msalApp.logoutPopup({account:currentAccount,postLogoutRedirectUri:location.href});sessionStorage.clear();location.reload()}
+async function loadAppOnly(runExplicitTest=false){
+  const button=document.getElementById('refresh');button.disabled=true;button.textContent='Wird geprüft …';
+  try{const endpoint=runExplicitTest?'/api/microsoft/test':'/api/microsoft-status';const r=await fetch(endpoint,{method:runExplicitTest?'POST':'GET',cache:'no-store'}),d=await r.json();const state=d.state||d;const connected=runExplicitTest?!!d.ok:!!d.connectionTest;mark('tenant',state.tenantIdConfigured);mark('client',state.clientIdConfigured);mark('secret',state.clientSecretConfigured);mark('pin',state.inboxPinConfigured);mark('source',state.sourceConfigured);text('graph',connected?'✓':'Nicht verbunden');const testedAt=d.testedAt||state.testedAt;text('test-meta',testedAt?`${connected?'Erfolgreich':'Nicht verbunden'} · ${new Date(testedAt).toLocaleString('de-AT')} · ${d.message||state.connectionError||''}`:'Noch kein vollständiger App-only-Test möglich.')}catch(e){text('graph','Fehler');text('test-meta',String(e))}finally{button.disabled=false;button.textContent='App-only testen'}
+}
+document.getElementById('delegated-test').onclick=delegatedTest;document.getElementById('delegated-logout').onclick=delegatedLogout;document.getElementById('refresh').onclick=()=>loadAppOnly(true);
+loadPublicConfig().catch(e=>{text('ms-title','Konfiguration nicht erreichbar');text('ms-text',String(e));text('delegated-result',String(e))});loadAppOnly(false);
 </script>
 </body>
 </html>

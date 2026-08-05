@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '11.2.2';
+const VERSION = '12.1.0-dev.1';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -255,6 +255,17 @@ export default {async fetch(request,env){
   const url=new URL(request.url);
   if(url.pathname==='/auth')return handleAuth(url,env);
   if(url.pathname==='/callback')return handleCallback(url,env);
+  if(url.pathname==='/api/microsoft/public-config'&&request.method==='GET'){
+    const tenantId=String(env.MS_TENANT_ID||'').trim();
+    const clientId=String(env.MS_CLIENT_ID||'').trim();
+    return json({
+      configured:Boolean(tenantId&&clientId),
+      tenantId,
+      clientId,
+      redirectUri:`${url.origin}/admin/microsoft.html`,
+      version:VERSION
+    });
+  }
   if(url.pathname==='/api/microsoft-status'){
     let config={};try{config=await loadConnectorConfig(url,env)}catch{}
     const state=microsoftState(env,config);
