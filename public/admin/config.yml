@@ -2,12 +2,12 @@ backend:
   name: github
   repo: juvi2601/bs-rohrbach-erasmus
   branch: main
-  base_url: https://REPLACE-WITH-CMS-AUTH-WORKER.workers.dev
+  base_url: https://erasmus-bsrohrbach.eu
 locale: de
 media_folder: public/images/uploads
 public_folder: /images/uploads
-site_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
-display_url: https://bs-rohrbach-erasmus.j-vierlinger.workers.dev
+site_url: https://erasmus-bsrohrbach.eu
+display_url: https://erasmus-bsrohrbach.eu
 logo_url: /images/hero.jpg
 collections:
 - name: site
