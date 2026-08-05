@@ -23,7 +23,7 @@ Netlify Identity/Git Gateway funktioniert auf Cloudflare Pages nicht. Die Datei 
 
 Suche in `admin/config.yml` nach:
 
-`https://REPLACE-WITH-CMS-AUTH-WORKER.workers.dev`
+`https://erasmus-bsrohrbach.eu`
 
 und ersetze die Adresse nach Einrichtung des Workers.
 

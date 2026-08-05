@@ -20,7 +20,7 @@ Die Datei `wrangler.jsonc` übernimmt alle technischen Einstellungen. Die statis
 
 Die Website ist voraussichtlich unter
 
-`https://bs-rohrbach-erasmus.<dein-workers-subdomain>.workers.dev`
+`https://erasmus-bsrohrbach.eu`
 
 erreichbar. Cloudflare zeigt die genaue Adresse nach dem Deploy an.
 
@@ -32,6 +32,6 @@ Die öffentliche Website funktioniert sofort. Der Redaktionsbereich unter `/admi
 
 Vor dem CMS-Login muss nur noch die Zeile
 
-`base_url: https://REPLACE-WITH-CMS-AUTH-WORKER.workers.dev`
+`base_url: https://erasmus-bsrohrbach.eu`
 
 mit der Adresse des OAuth-Workers ersetzt werden. Das wird in einem getrennten Schritt eingerichtet, damit keine GitHub-Geheimnisse in der öffentlichen ZIP-Datei landen.

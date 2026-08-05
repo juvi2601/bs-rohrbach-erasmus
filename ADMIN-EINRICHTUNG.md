@@ -9,7 +9,7 @@ In Cloudflare müssen vorhanden sein:
 
 In der GitHub OAuth App muss die Callback-URL lauten:
 
-`https://bs-rohrbach-erasmus.j-vierlinger.workers.dev/callback`
+`https://erasmus-bsrohrbach.eu/callback`
 
 GitHub akzeptiert dabei den vom Worker ergänzten Query-Parameter `?provider=github`.
 
@@ -18,7 +18,7 @@ GitHub akzeptiert dabei den vom Worker ergänzten Query-Parameter `?provider=git
 1. Dateien in GitHub ersetzen und committen.
 2. Cloudflare-Deployment abwarten.
 3. Diese Diagnoseadresse öffnen:
-   `https://bs-rohrbach-erasmus.j-vierlinger.workers.dev/api/cms-status`
+   `https://erasmus-bsrohrbach.eu/api/cms-status`
 4. Dort müssen `ready`, `clientIdConfigured` und `clientSecretConfigured` jeweils `true` sein.
 5. Danach `/admin/cms/` in einem Inkognito-Fenster öffnen und mit GitHub anmelden.
 
