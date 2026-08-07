@@ -6,11 +6,11 @@
   const SHAREPOINT_URL = 'https://bsrohrbach.sharepoint.com/sites/BSRohrbachBrsselreise2026';
   const $ = (id) => document.getElementById(id);
   const setText = (id, value) => { const el = $(id); if (el) el.textContent = value; };
-  let config = null, app = null, account = null;
+  let config = null, app = null, account = null, detectedSite = null;
 
   function setState(kind, title, detail) { const card=$('ms-status'); card?.classList.remove('ready','warning','error'); if(kind)card?.classList.add(kind); setText('ms-title',title); setText('ms-text',detail); }
   function markCard(id, kind){ const el=$(id); el?.classList.remove('good','warn','bad'); if(kind)el?.classList.add(kind); }
-  function setLoginView(isLoggedIn) { $('login-button').hidden=isLoggedIn; $('permission-button').hidden=!isLoggedIn; $('logout-button').hidden=!isLoggedIn; $('account-panel').hidden=!isLoggedIn; $('storage-button').hidden=!isLoggedIn; }
+  function setLoginView(isLoggedIn) { $('login-button').hidden=isLoggedIn; $('permission-button').hidden=!isLoggedIn; $('logout-button').hidden=!isLoggedIn; $('account-panel').hidden=!isLoggedIn; $('storage-button').hidden=!isLoggedIn; $('library-button').hidden=!isLoggedIn; }
   function displayAccount(current) {
     account=current||null; setLoginView(Boolean(account)); if(!account)return;
     setText('account-name',account.name||'Microsoft-Benutzer'); setText('account-user',account.username||'–'); setText('account-tenant',account.tenantId||'–');
@@ -41,7 +41,7 @@
     try{
       const token=await getToken();
       try{oneDrive=await graph('https://graph.microsoft.com/v1.0/me/drive?$select=id,driveType,webUrl,quota',token);setText('onedrive-status',`✓ ${oneDrive.driveType||'OneDrive'} erreichbar`);markCard('onedrive-card','good')}catch(e){setText('onedrive-status',`✗ ${e.message}`);markCard('onedrive-card','bad')}
-      try{sharePoint=await graph('https://graph.microsoft.com/v1.0/sites/bsrohrbach.sharepoint.com:/sites/BSRohrbachBrsselreise2026?$select=id,displayName,webUrl',token);setText('sharepoint-status',`✓ ${sharePoint.displayName||'SharePoint'} erreichbar`);markCard('sharepoint-card','good')}catch(e){sharePointError=e;setText('sharepoint-status',`Noch nicht freigegeben: ${e.code||e.status||'Graph'} `);markCard('sharepoint-card','warn')}
+      try{sharePoint=await graph('https://graph.microsoft.com/v1.0/sites/bsrohrbach.sharepoint.com:/sites/BSRohrbachBrsselreise2026?$select=id,displayName,webUrl',token);detectedSite=sharePoint;setText('sharepoint-status',`✓ ${sharePoint.displayName||'SharePoint'} erreichbar`);markCard('sharepoint-card','good')}catch(e){sharePointError=e;setText('sharepoint-status',`Noch nicht freigegeben: ${e.code||e.status||'Graph'} `);markCard('sharepoint-card','warn')}
       let next='';
       if(oneDrive&&sharePoint){next='SharePoint ist lesend erreichbar. Als Nächstes ermitteln wir die Dokumentbibliothek und den Foto-Zielordner.';markCard('next-card','good')}
       else if(oneDrive&&sharePointError){next='Login und OneDrive funktionieren. Für den gezielten SharePoint-Zugriff fehlt noch eine SharePoint-Berechtigung. DEV.4 hat nichts verändert.';markCard('next-card','warn')}
@@ -56,6 +56,44 @@
       setText('storage-result',lines.join('\n'));
     }catch(error){setText('storage-result',`SPEICHERTEST FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nEs wurden keine Daten verändert.`);markCard('next-card','bad');setText('next-status','Fehler auswerten, bevor wir Rechte oder Dateien ändern.')}finally{b.disabled=false;b.textContent='Speicherzugriff prüfen'}
   }
+
+  async function checkLibraries(){
+    const b=$('library-button'); b.disabled=true; b.textContent='Bibliotheken werden ermittelt …';
+    markCard('libraries-card');markCard('folders-card');markCard('target-card');
+    setText('libraries-status','Prüfung läuft …');setText('folders-status','Prüfung läuft …');setText('target-status','Auswertung läuft …');
+    setText('library-result','BIBLIOTHEKSTEST LÄUFT …\n\nNur Namen und Metadaten werden gelesen.');
+    try{
+      const token=await getToken();
+      const site=detectedSite||await graph('https://graph.microsoft.com/v1.0/sites/bsrohrbach.sharepoint.com:/sites/BSRohrbachBrsselreise2026?$select=id,displayName,webUrl',token);
+      detectedSite=site;
+      const drives=await graph(`https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(site.id)}/drives?$select=id,name,driveType,webUrl`,token);
+      const libs=Array.isArray(drives.value)?drives.value:[];
+      if(!libs.length)throw new Error('Keine Dokumentbibliothek wurde gefunden.');
+      setText('libraries-status',`✓ ${libs.length} Dokumentbibliothek${libs.length===1?'':'en'} gefunden`);markCard('libraries-card','good');
+      const lines=['DOKUMENTBIBLIOTHEKEN GEFUNDEN',''];
+      libs.forEach((d,i)=>lines.push(`${i+1}. ${d.name||'Ohne Namen'}\n   Typ: ${d.driveType||'–'}\n   Web: ${d.webUrl||'–'}`));
+      let best=null, bestChildren=[];
+      for(const d of libs){
+        try{
+          const children=await graph(`https://graph.microsoft.com/v1.0/drives/${encodeURIComponent(d.id)}/root/children?$select=id,name,folder,file,webUrl&$top=100`,token);
+          const folders=(children.value||[]).filter(x=>x.folder);
+          if(!best || folders.length>bestChildren.length){best=d;bestChildren=folders;}
+        }catch(e){}
+      }
+      if(best){
+        setText('folders-status',bestChildren.length?`✓ ${bestChildren.length} Ordner in „${best.name}“ sichtbar`:`✓ „${best.name}“ erreichbar; aktuell keine Ordner auf oberster Ebene`);markCard('folders-card','good');
+        lines.push('','ORDNER AUF OBERSTER EBENE',`Bibliothek: ${best.name}`);
+        if(bestChildren.length)bestChildren.forEach((f,i)=>lines.push(`${i+1}. ${f.name}`));else lines.push('(keine Ordner gefunden)');
+        const photo=bestChildren.find(f=>/foto|photo|upload|bilder|images|erasmus|br[uü]ssel/i.test(f.name||''));
+        if(photo){setText('target-status',`Möglicher Foto-Zielordner gefunden: „${photo.name}“. Noch nichts verändert.`);markCard('target-card','good');lines.push('','MÖGLICHER FOTO-ZIELORDNER',photo.name,photo.webUrl||'');}
+        else{setText('target-status','Noch kein eindeutiger Foto-Zielordner gefunden. Im nächsten Schritt legen wir gemeinsam den Zielordner fest.');markCard('target-card','warn');lines.push('','ERGEBNIS','Kein eindeutiger Foto-Zielordner anhand des Namens erkannt.');}
+      }else{setText('folders-status','Bibliotheken gefunden, Ordner konnten aber nicht gelesen werden.');markCard('folders-card','warn');setText('target-status','Zielordner noch offen.');markCard('target-card','warn');}
+      lines.push('','WICHTIG: DEV.5 war ausschließlich lesend. Es wurde kein Ordner und keine Datei erstellt, geändert oder gelöscht.');
+      setText('library-result',lines.join('\n'));
+    }catch(error){setText('library-result',`BIBLIOTHEKSTEST FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nEs wurden keine Daten verändert.`);markCard('target-card','bad');setText('target-status','Fehler zuerst auswerten; nichts verändern.');}
+    finally{b.disabled=false;b.textContent='Dokumentbibliotheken & Ordner prüfen';}
+  }
+
   async function logout(){if(!app||!account)return;await app.logoutPopup({account,postLogoutRedirectUri:config.redirectUri});sessionStorage.clear();location.reload()}
-  document.addEventListener('DOMContentLoaded',()=>{$('login-button').addEventListener('click',login);$('permission-button').addEventListener('click',checkPermissions);$('storage-button').addEventListener('click',checkStorage);$('logout-button').addEventListener('click',logout);init()});
+  document.addEventListener('DOMContentLoaded',()=>{$('login-button').addEventListener('click',login);$('permission-button').addEventListener('click',checkPermissions);$('storage-button').addEventListener('click',checkStorage);$('library-button').addEventListener('click',checkLibraries);$('logout-button').addEventListener('click',logout);init()});
 })();
