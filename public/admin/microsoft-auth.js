@@ -57,41 +57,125 @@
     }catch(error){setText('storage-result',`SPEICHERTEST FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nEs wurden keine Daten verändert.`);markCard('next-card','bad');setText('next-status','Fehler auswerten, bevor wir Rechte oder Dateien ändern.')}finally{b.disabled=false;b.textContent='Speicherzugriff prüfen'}
   }
 
+  async function graphDiagnostic(url, token){
+    const started=Date.now();
+    let response=null, text='', data=null;
+    try{
+      response=await fetch(url,{headers:{Authorization:`Bearer ${token.accessToken}`}});
+      text=await response.text();
+      try{data=text?JSON.parse(text):null}catch{}
+      return {
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        msRequestId: response.headers.get('request-id')||response.headers.get('x-ms-request-id')||'',
+        elapsed: Date.now()-started,
+        data,
+        text
+      };
+    }catch(error){
+      return {ok:false,status:0,statusText:'FETCH_ERROR',msRequestId:'',elapsed:Date.now()-started,data:null,text:'',error};
+    }
+  }
+
+  function diagnosticLines(label,url,result){
+    const lines=[`[${label}]`, `URL: ${url}`, `HTTP: ${result.status||'–'} ${result.statusText||''}`.trim(), `Dauer: ${result.elapsed} ms`];
+    if(result.msRequestId)lines.push(`Request-ID: ${result.msRequestId}`);
+    if(result.ok){
+      const count=Array.isArray(result.data?.value)?result.data.value.length:null;
+      lines.push('Ergebnis: ERFOLGREICH');
+      if(count!==null)lines.push(`Gefundene Elemente: ${count}`);
+      if(result.data?.name)lines.push(`Name: ${result.data.name}`);
+      if(result.data?.webUrl)lines.push(`Web: ${result.data.webUrl}`);
+    }else{
+      const code=result.data?.error?.code||result.error?.name||'–';
+      const message=result.data?.error?.message||result.error?.message||result.text||'Keine Fehlermeldung';
+      lines.push('Ergebnis: FEHLER',`Graph-Code: ${code}`,`Meldung: ${message}`);
+    }
+    return lines;
+  }
+
   async function checkLibraries(){
-    const b=$('library-button'); b.disabled=true; b.textContent='Bibliotheken werden ermittelt …';
+    const b=$('library-button'); b.disabled=true; b.textContent='Diagnose läuft …';
     markCard('libraries-card');markCard('folders-card');markCard('target-card');
-    setText('libraries-status','Prüfung läuft …');setText('folders-status','Prüfung läuft …');setText('target-status','Auswertung läuft …');
-    setText('library-result','BIBLIOTHEKSTEST LÄUFT …\n\nNur Namen und Metadaten werden gelesen.');
+    setText('libraries-status','Diagnose läuft …');setText('folders-status','Noch nicht geprüft');setText('target-status','Auswertung läuft …');
+    setText('library-result','BIBLIOTHEKS-DIAGNOSE LÄUFT …\n\nEs werden ausschließlich Metadaten gelesen.');
     try{
       const token=await getToken();
-      const site=detectedSite||await graph('https://graph.microsoft.com/v1.0/sites/bsrohrbach.sharepoint.com:/sites/BSRohrbachBrsselreise2026?$select=id,displayName,webUrl',token);
-      detectedSite=site;
-      const drives=await graph(`https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(site.id)}/drives?$select=id,name,driveType,webUrl`,token);
-      const libs=Array.isArray(drives.value)?drives.value:[];
-      if(!libs.length)throw new Error('Keine Dokumentbibliothek wurde gefunden.');
-      setText('libraries-status',`✓ ${libs.length} Dokumentbibliothek${libs.length===1?'':'en'} gefunden`);markCard('libraries-card','good');
-      const lines=['DOKUMENTBIBLIOTHEKEN GEFUNDEN',''];
-      libs.forEach((d,i)=>lines.push(`${i+1}. ${d.name||'Ohne Namen'}\n   Typ: ${d.driveType||'–'}\n   Web: ${d.webUrl||'–'}`));
-      let best=null, bestChildren=[];
-      for(const d of libs){
-        try{
-          const children=await graph(`https://graph.microsoft.com/v1.0/drives/${encodeURIComponent(d.id)}/root/children?$select=id,name,folder,file,webUrl&$top=100`,token);
-          const folders=(children.value||[]).filter(x=>x.folder);
-          if(!best || folders.length>bestChildren.length){best=d;bestChildren=folders;}
-        }catch(e){}
+      const claims=token.accessToken.split('.')[1];
+      const decoded=JSON.parse(atob(claims.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(claims.length/4)*4,'=')));
+      const scopes=String(decoded.scp||'').split(/\s+/).filter(Boolean);
+
+      const siteUrl='https://graph.microsoft.com/v1.0/sites/bsrohrbach.sharepoint.com:/sites/BSRohrbachBrsselreise2026?$select=id,displayName,webUrl';
+      const siteRes=await graphDiagnostic(siteUrl,token);
+      const lines=['DEV.6 – SHAREPOINT/BIBLIOTHEKS-DIAGNOSE','',`Token-Scopes: ${scopes.join(', ')||'keine'}`,''];
+      lines.push(...diagnosticLines('1. SharePoint-Site',siteUrl,siteRes),'');
+      if(!siteRes.ok||!siteRes.data?.id){
+        setText('libraries-status','✗ SharePoint-Site konnte nicht erneut gelesen werden');markCard('libraries-card','bad');
+        setText('folders-status','Nicht getestet');markCard('folders-card','warn');
+        setText('target-status','Site-Zugriff zuerst klären');markCard('target-card','bad');
+        lines.push('AUSWERTUNG','Der Fehler liegt bereits beim Zugriff auf die SharePoint-Site. Es wurden keine Daten verändert.');
+        setText('library-result',lines.join('\n'));return;
       }
-      if(best){
-        setText('folders-status',bestChildren.length?`✓ ${bestChildren.length} Ordner in „${best.name}“ sichtbar`:`✓ „${best.name}“ erreichbar; aktuell keine Ordner auf oberster Ebene`);markCard('folders-card','good');
-        lines.push('','ORDNER AUF OBERSTER EBENE',`Bibliothek: ${best.name}`);
-        if(bestChildren.length)bestChildren.forEach((f,i)=>lines.push(`${i+1}. ${f.name}`));else lines.push('(keine Ordner gefunden)');
-        const photo=bestChildren.find(f=>/foto|photo|upload|bilder|images|erasmus|br[uü]ssel/i.test(f.name||''));
-        if(photo){setText('target-status',`Möglicher Foto-Zielordner gefunden: „${photo.name}“. Noch nichts verändert.`);markCard('target-card','good');lines.push('','MÖGLICHER FOTO-ZIELORDNER',photo.name,photo.webUrl||'');}
-        else{setText('target-status','Noch kein eindeutiger Foto-Zielordner gefunden. Im nächsten Schritt legen wir gemeinsam den Zielordner fest.');markCard('target-card','warn');lines.push('','ERGEBNIS','Kein eindeutiger Foto-Zielordner anhand des Namens erkannt.');}
-      }else{setText('folders-status','Bibliotheken gefunden, Ordner konnten aber nicht gelesen werden.');markCard('folders-card','warn');setText('target-status','Zielordner noch offen.');markCard('target-card','warn');}
-      lines.push('','WICHTIG: DEV.5 war ausschließlich lesend. Es wurde kein Ordner und keine Datei erstellt, geändert oder gelöscht.');
+      detectedSite=siteRes.data;
+      const siteId=siteRes.data.id;
+
+      const drivesUrl=`https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(siteId)}/drives?$select=id,name,driveType,webUrl`;
+      const drivesRes=await graphDiagnostic(drivesUrl,token);
+      lines.push(...diagnosticLines('2. Alle Dokumentbibliotheken (/drives)',drivesUrl,drivesRes),'');
+
+      const defaultDriveUrl=`https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(siteId)}/drive?$select=id,name,driveType,webUrl`;
+      const defaultDriveRes=await graphDiagnostic(defaultDriveUrl,token);
+      lines.push(...diagnosticLines('3. Standard-Dokumentbibliothek (/drive)',defaultDriveUrl,defaultDriveRes),'');
+
+      let drives=[];
+      if(drivesRes.ok&&Array.isArray(drivesRes.data?.value))drives=drivesRes.data.value;
+      let chosen=drives[0]||null;
+      if(!chosen&&defaultDriveRes.ok&&defaultDriveRes.data?.id)chosen=defaultDriveRes.data;
+
+      if(drivesRes.ok){
+        setText('libraries-status',`✓ ${drives.length} Dokumentbibliothek${drives.length===1?'':'en'} über /drives gefunden`);markCard('libraries-card','good');
+      }else if(defaultDriveRes.ok){
+        setText('libraries-status','⚠ Liste blockiert, aber Standard-Dokumentbibliothek ist erreichbar');markCard('libraries-card','warn');
+      }else{
+        setText('libraries-status',`✗ Bibliothekszugriff: HTTP ${drivesRes.status||defaultDriveRes.status||'–'}`);markCard('libraries-card','bad');
+      }
+
+      if(chosen){
+        const childrenUrl=`https://graph.microsoft.com/v1.0/drives/${encodeURIComponent(chosen.id)}/root/children?$select=id,name,folder,file,webUrl&$top=100`;
+        const childrenRes=await graphDiagnostic(childrenUrl,token);
+        lines.push(...diagnosticLines('4. Ordner im Stammverzeichnis',childrenUrl,childrenRes),'');
+        if(childrenRes.ok){
+          const folders=(childrenRes.data?.value||[]).filter(x=>x.folder);
+          setText('folders-status',folders.length?`✓ ${folders.length} Ordner in „${chosen.name||'Dokumente'}“ sichtbar`:`✓ „${chosen.name||'Dokumente'}“ erreichbar; keine Ordner auf oberster Ebene`);markCard('folders-card','good');
+          if(folders.length){lines.push('Sichtbare Ordner:');folders.forEach((f,i)=>lines.push(`${i+1}. ${f.name}`));lines.push('');}
+          const photo=folders.find(f=>/foto|photo|upload|bilder|images|erasmus|br[uü]ssel/i.test(f.name||''));
+          if(photo){setText('target-status',`✓ Möglicher Zielordner: „${photo.name}“`);markCard('target-card','good');lines.push('MÖGLICHER FOTO-ZIELORDNER',photo.name,photo.webUrl||'','');}
+          else{setText('target-status','Kein eindeutiger Foto-Zielordner erkannt; Ziel können wir nach der Diagnose festlegen.');markCard('target-card','warn');}
+        }else{
+          setText('folders-status',`✗ Ordnerzugriff: HTTP ${childrenRes.status||'–'}`);markCard('folders-card','bad');
+          setText('target-status','Zielordner noch nicht lesbar');markCard('target-card','warn');
+        }
+      }else{
+        setText('folders-status','Nicht getestet – keine Bibliothek-ID verfügbar');markCard('folders-card','warn');
+        setText('target-status','Noch offen');markCard('target-card','warn');
+      }
+
+      lines.push('AUSWERTUNG');
+      if(!drivesRes.ok&&[401,403].includes(drivesRes.status)){
+        lines.push('Der SharePoint selbst ist erreichbar, aber das Auflisten aller Dokumentbibliotheken wird vom delegierten Token abgewiesen. Das deutet auf eine fehlende delegierte SharePoint/Files-Leseberechtigung für genau diesen Graph-Endpunkt hin. DEV.6 ändert trotzdem noch keine Entra-Berechtigung.');
+      }else if(drivesRes.ok){
+        lines.push('Das Auflisten der Dokumentbibliotheken funktioniert. Wir können im nächsten Schritt den Zielordner festlegen.');
+      }else if(defaultDriveRes.ok){
+        lines.push('Die vollständige Bibliotheksliste ist nicht verfügbar, die Standard-Dokumentbibliothek aber schon. Das kann für unseren Foto-Workflow bereits ausreichen.');
+      }else{
+        lines.push('Die genaue Graph-Antwort steht oben. Wir werten sie aus, bevor wir Berechtigungen ändern.');
+      }
+      lines.push('','WICHTIG: DEV.6 war ausschließlich lesend. Es wurde kein Ordner und keine Datei erstellt, geändert oder gelöscht.');
       setText('library-result',lines.join('\n'));
-    }catch(error){setText('library-result',`BIBLIOTHEKSTEST FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nEs wurden keine Daten verändert.`);markCard('target-card','bad');setText('target-status','Fehler zuerst auswerten; nichts verändern.');}
-    finally{b.disabled=false;b.textContent='Dokumentbibliotheken & Ordner prüfen';}
+    }catch(error){
+      setText('library-result',`DIAGNOSE FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nEs wurden keine Daten verändert.`);markCard('target-card','bad');setText('target-status','Fehler zuerst auswerten; nichts verändern.');
+    }finally{b.disabled=false;b.textContent='Bibliothekszugriff diagnostizieren';}
   }
 
   async function logout(){if(!app||!account)return;await app.logoutPopup({account,postLogoutRedirectUri:config.redirectUri});sessionStorage.clear();location.reload()}
