@@ -2,7 +2,7 @@
   'use strict';
 
   const REQUIRED_DOMAIN = 'bs-rohrbach.ac.at';
-  const SCOPES = ['openid', 'profile', 'email', 'User.Read', 'Files.ReadWrite'];
+  const SCOPES = ['User.Read', 'Files.ReadWrite'];
   const $ = (id) => document.getElementById(id);
   const setText = (id, value) => { const el = $(id); if (el) el.textContent = value; };
 
@@ -40,6 +40,7 @@
 
   async function init() {
     try {
+      if (typeof window.msal === 'undefined') throw new Error('MSAL-Bibliothek konnte nicht geladen werden.');
       const response = await fetch('/api/microsoft/public-config', { cache: 'no-store' });
       config = await response.json();
       if (!response.ok || !config.configured) throw new Error(config.message || 'Tenant-ID oder Client-ID fehlt in Cloudflare.');

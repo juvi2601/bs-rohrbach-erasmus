@@ -5,22 +5,22 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Microsoft 365 – Erasmus+ BS Rohrbach</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=12.1.0-dev.1">
-  <link rel="stylesheet" href="/admin/photo-inbox.css?v=12.1.0-dev.1">
+  <link rel="stylesheet" href="/admin/admin.css?v=12.1.0-dev.3">
+  <link rel="stylesheet" href="/admin/photo-inbox.css?v=12.1.0-dev.3">
   <style>
-    .rights-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:1rem}.rights-card{padding:1rem;border:1px solid #dce5f0;border-radius:16px;background:#f8fbff}.rights-card strong,.rights-card small{display:block}.rights-card small{margin-top:.25rem;color:#607086}.rights-card.good{border-color:#99d8ae;background:#effaf3}.rights-card.warn{border-color:#f0cf77;background:#fff8df}.rights-card.bad{border-color:#efabb4;background:#fff1f3}.action-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}.diagnostic-box{margin-top:1rem;padding:1rem;border-radius:16px;background:#0d2348;color:#eaf2ff;white-space:pre-wrap;overflow-wrap:anywhere}.diagnostic-box code{color:#ffdc63}.setup-note{padding:1rem 1.15rem;border-left:4px solid #1675d1;background:#eef7ff;border-radius:0 14px 14px 0}.setup-note p{margin:.3rem 0}.scope-list{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem}.scope-list span{padding:.35rem .65rem;border-radius:999px;background:#eaf2ff;color:#124c8f;font-size:.82rem;font-weight:800}@media(max-width:850px){.rights-grid{grid-template-columns:1fr}.action-row .button{width:100%;justify-content:center}}
+    .rights-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:1rem}.rights-card{padding:1rem;border:1px solid #dce5f0;border-radius:16px;background:#f8fbff}.rights-card strong,.rights-card small{display:block}.rights-card small{margin-top:.25rem;color:#607086}.rights-card.good{border-color:#99d8ae;background:#effaf3}.rights-card.warn{border-color:#f0cf77;background:#fff8df}.rights-card.bad{border-color:#efabb4;background:#fff1f3}.action-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}.diagnostic-box{margin-top:1rem;padding:1rem;border-radius:16px;background:#0d2348;color:#eaf2ff;white-space:pre-wrap;overflow-wrap:anywhere}.diagnostic-box code{color:#ffdc63}.setup-note{padding:1rem 1.15rem;border-left:4px solid #1675d1;background:#eef7ff;border-radius:0 14px 14px 0}.setup-note p{margin:.3rem 0}.scope-list{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem}.scope-list span{padding:.35rem .65rem;border-radius:999px;background:#eaf2ff;color:#124c8f;font-size:.82rem;font-weight:800}.account-panel{display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:1rem;border:1px solid #dce5f0;border-radius:16px;background:#f8fbff}.account-avatar{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#0d5db8;color:#fff;font-weight:900}.account-panel strong,.account-panel span,.account-panel small{display:block}.bad-text{color:#a82436;font-weight:700}@media(max-width:850px){.rights-grid{grid-template-columns:1fr}.action-row .button{width:100%;justify-content:center}}
   </style>
-  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js" crossorigin="anonymous"></script>
-
-  <style>
-    .account-panel{display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:1rem;border:1px solid #dce5f0;border-radius:16px;background:#f8fbff}.account-avatar{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#0d5db8;color:#fff;font-weight:900}.account-panel strong,.account-panel span,.account-panel small{display:<main class="shell">
+  <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+</head>
+<body>
+<main class="shell">
   <section class="welcome">
     <div><p class="eyebrow">Version 12.1 · Modul 1</p><h1>🔐 Microsoft-Anmeldung</h1><p>Der erste Baustein des echten Foto-Workflows: sichere Anmeldung mit dem Microsoft-365-Schulkonto der BS Rohrbach.</p></div>
     <div class="status-card" id="ms-status"><span class="status-dot"></span><div><strong id="ms-title">Konfiguration wird geladen</strong><small id="ms-text">Tenant- und Client-ID werden geprüft</small></div></div>
   </section>
 
   <section class="inbox-panel">
-    <div class="section-heading"><div><p class="eyebrow">Modul 1</p><h2>Anmelden und Berechtigungen prüfen</h2></div><span class="dev-badge">DEV.2</span></div>
+    <div class="section-heading"><div><p class="eyebrow">Modul 1</p><h2>Anmelden und Berechtigungen prüfen</h2></div><span class="dev-badge">DEV.3</span></div>
     <p>Die Anmeldung erfolgt direkt bei Microsoft. Das Passwort wird weder von der Website noch von Cloudflare gespeichert.</p>
     <div class="setup-note">
       <p><strong>SPA-Redirect-URI:</strong> <code id="redirect-uri">wird geladen …</code></p>
@@ -48,11 +48,12 @@
 
   <section class="notice" style="margin-top:1rem"><span>ℹ️</span><div><strong>Was Modul 1 noch nicht macht</strong><p>Es werden noch keine Fotos übertragen. Nach erfolgreichem Login folgt in Modul 2 der gezielte Speicher- und SharePoint-Zugriffstest.</p></div></section>
 </main>
-<script src="/admin/microsoft-auth.js?v=12.1.0-dev.2"></script>
-caleString('de-AT')} · ${d.message||state.connectionError||''}`:'Noch kein vollständiger App-only-Test möglich.')}catch(e){text('graph','Fehler');text('test-meta',String(e))}finally{button.disabled=false;button.textContent='App-only testen'}
-}
-document.getElementById('delegated-test').onclick=delegatedTest;document.getElementById('delegated-logout').onclick=delegatedLogout;document.getElementById('refresh').onclick=()=>loadAppOnly(true);
-loadPublicConfig().catch(e=>{text('ms-title','Konfiguration nicht erreichbar');text('ms-text',String(e));text('delegated-result',String(e))});loadAppOnly(false);
+<script>
+  if (typeof window.msal === 'undefined') {
+    const box = document.getElementById('auth-result');
+    if (box) box.textContent = 'MSAL konnte nicht geladen werden. Bitte Seite neu laden. Falls der Fehler bleibt, prüfen wir die Microsoft-CDN-Verbindung.';
+  }
 </script>
+<script src="/admin/microsoft-auth.js?v=12.1.0-dev.3"></script>
 </body>
 </html>
