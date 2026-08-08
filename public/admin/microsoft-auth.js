@@ -2,7 +2,7 @@
   'use strict';
 
   const REQUIRED_DOMAIN = 'bs-rohrbach.ac.at';
-  const SCOPES = ['User.Read', 'Files.ReadWrite'];
+  const SCOPES = ['User.Read', 'Files.ReadWrite', 'Sites.Read.All'];
   const SHAREPOINT_URL = 'https://bsrohrbach.sharepoint.com/sites/BSRohrbachBrsselreise2026';
   const $ = (id) => document.getElementById(id);
   const setText = (id, value) => { const el = $(id); if (el) el.textContent = value; };
@@ -32,7 +32,7 @@
     } catch(error){setState('error','Microsoft-Konfiguration nicht bereit',error.message||String(error));setText('auth-result',`FEHLER: ${error.message||String(error)}`);$('login-button').disabled=true;}
   }
   async function login(){const b=$('login-button');b.disabled=true;b.textContent='Microsoft-Anmeldung wird geöffnet …';setText('auth-result','Microsoft-Anmeldefenster wird geöffnet …');try{const result=await app.loginPopup({scopes:SCOPES,prompt:'select_account'});app.setActiveAccount(result.account);displayAccount(result.account);setText('auth-result',`ANMELDUNG ERFOLGREICH\n\n${result.account.name||''}\n${result.account.username||''}\n\nModul 2 kann jetzt den Speicherzugriff prüfen.`)}catch(error){if(error.errorCode==='user_cancelled')setText('auth-result','Die Anmeldung wurde abgebrochen. Es wurden keine Daten verändert.');else setText('auth-result',`ANMELDUNG FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nCode: ${error.errorCode||'–'}`);setState('error','Microsoft-Anmeldung fehlgeschlagen',error.errorCode||error.message||String(error))}finally{b.disabled=false;b.textContent='Mit Microsoft-365-Schulkonto anmelden'}}
-  async function checkPermissions(){const b=$('permission-button');b.disabled=true;b.textContent='Berechtigungen werden geprüft …';try{const token=await getToken();const profile=await graph('https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName',token);const claims=token.accessToken.split('.')[1];const decoded=JSON.parse(atob(claims.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(claims.length/4)*4,'=')));const scopes=String(decoded.scp||'').split(/\s+/).filter(Boolean);const hasFiles=scopes.includes('Files.ReadWrite')||scopes.includes('Files.ReadWrite.All');setText('profile-status',`✓ ${profile.displayName} (${profile.userPrincipalName})`);setText('files-status',hasFiles?'✓ Files.ReadWrite wurde erteilt':'✗ Files.ReadWrite fehlt');markCard('profile-card','good');markCard('files-card',hasFiles?'good':'bad');$('scope-list').innerHTML=scopes.map(s=>`<span>${s}</span>`).join('');setText('auth-result',`RECHTETEST ERFOLGREICH\n\nBenutzer: ${profile.displayName}\nKonto: ${profile.userPrincipalName}\nTenant: ${decoded.tid||'–'}\nErteilte Scopes: ${scopes.join(', ')||'keine'}\n\nModul 1 ist abgeschlossen. Jetzt kann Modul 2 getestet werden.`)}catch(error){setText('auth-result',`RECHTETEST FEHLGESCHLAGEN\n\n${error.message||String(error)}`)}finally{b.disabled=false;b.textContent='Berechtigungen prüfen'}}
+  async function checkPermissions(){const b=$('permission-button');b.disabled=true;b.textContent='Berechtigungen werden geprüft …';try{const token=await getToken();const profile=await graph('https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName',token);const claims=token.accessToken.split('.')[1];const decoded=JSON.parse(atob(claims.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(claims.length/4)*4,'=')));const scopes=String(decoded.scp||'').split(/\s+/).filter(Boolean);const hasFiles=scopes.includes('Files.ReadWrite')||scopes.includes('Files.ReadWrite.All');const hasSites=scopes.includes('Sites.Read.All')||scopes.includes('Sites.ReadWrite.All');setText('profile-status',`✓ ${profile.displayName} (${profile.userPrincipalName})`);setText('files-status',hasFiles&&hasSites?'✓ Files.ReadWrite + Sites.Read.All erteilt':(!hasFiles?'✗ Files.ReadWrite fehlt':'✗ Sites.Read.All fehlt'));markCard('profile-card','good');markCard('files-card',hasFiles&&hasSites?'good':'bad');$('scope-list').innerHTML=scopes.map(s=>`<span>${s}</span>`).join('');setText('auth-result',`RECHTETEST ERFOLGREICH\n\nBenutzer: ${profile.displayName}\nKonto: ${profile.userPrincipalName}\nTenant: ${decoded.tid||'–'}\nErteilte Scopes: ${scopes.join(', ')||'keine'}\n\nModul 1 ist abgeschlossen. Jetzt kann Modul 2 getestet werden.`)}catch(error){setText('auth-result',`RECHTETEST FEHLGESCHLAGEN\n\n${error.message||String(error)}`)}finally{b.disabled=false;b.textContent='Berechtigungen prüfen'}}
 
   async function checkStorage(){
     const b=$('storage-button'); b.disabled=true; b.textContent='Speicher wird geprüft …';
@@ -108,7 +108,7 @@
 
       const siteUrl='https://graph.microsoft.com/v1.0/sites/bsrohrbach.sharepoint.com:/sites/BSRohrbachBrsselreise2026?$select=id,displayName,webUrl';
       const siteRes=await graphDiagnostic(siteUrl,token);
-      const lines=['DEV.6 – SHAREPOINT/BIBLIOTHEKS-DIAGNOSE','',`Token-Scopes: ${scopes.join(', ')||'keine'}`,''];
+      const lines=['DEV.7 – SHAREPOINT/BIBLIOTHEKS-DIAGNOSE','',`Token-Scopes: ${scopes.join(', ')||'keine'}`,''];
       lines.push(...diagnosticLines('1. SharePoint-Site',siteUrl,siteRes),'');
       if(!siteRes.ok||!siteRes.data?.id){
         setText('libraries-status','✗ SharePoint-Site konnte nicht erneut gelesen werden');markCard('libraries-card','bad');
@@ -163,15 +163,17 @@
 
       lines.push('AUSWERTUNG');
       if(!drivesRes.ok&&[401,403].includes(drivesRes.status)){
-        lines.push('Der SharePoint selbst ist erreichbar, aber das Auflisten aller Dokumentbibliotheken wird vom delegierten Token abgewiesen. Das deutet auf eine fehlende delegierte SharePoint/Files-Leseberechtigung für genau diesen Graph-Endpunkt hin. DEV.6 ändert trotzdem noch keine Entra-Berechtigung.');
+        lines.push('Der SharePoint selbst ist erreichbar, aber das Auflisten aller Dokumentbibliotheken wird vom delegierten Token abgewiesen. DEV.7 fordert dafür nun Sites.Read.All im delegierten Token an.');
+      }else if(drivesRes.ok && drives.length===0 && !defaultDriveRes.ok){
+        lines.push('Die Site ist erreichbar, aber /drives liefert 0 Bibliotheken und /drive ist weiterhin nicht erlaubt. Prüfe oben, ob Sites.Read.All wirklich im Token steht.');
       }else if(drivesRes.ok){
-        lines.push('Das Auflisten der Dokumentbibliotheken funktioniert. Wir können im nächsten Schritt den Zielordner festlegen.');
+        lines.push('Das Auflisten der Dokumentbibliotheken funktioniert und mindestens eine Bibliothek ist verwertbar. Wir können im nächsten Schritt den Zielordner festlegen.');
       }else if(defaultDriveRes.ok){
         lines.push('Die vollständige Bibliotheksliste ist nicht verfügbar, die Standard-Dokumentbibliothek aber schon. Das kann für unseren Foto-Workflow bereits ausreichen.');
       }else{
         lines.push('Die genaue Graph-Antwort steht oben. Wir werten sie aus, bevor wir Berechtigungen ändern.');
       }
-      lines.push('','WICHTIG: DEV.6 war ausschließlich lesend. Es wurde kein Ordner und keine Datei erstellt, geändert oder gelöscht.');
+      lines.push('','WICHTIG: DEV.7 ist weiterhin ausschließlich lesend. Es wurde kein Ordner und keine Datei erstellt, geändert oder gelöscht.');
       setText('library-result',lines.join('\n'));
     }catch(error){
       setText('library-result',`DIAGNOSE FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nEs wurden keine Daten verändert.`);markCard('target-card','bad');setText('target-status','Fehler zuerst auswerten; nichts verändern.');
