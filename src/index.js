@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '12.1.0-dev.11';
+const VERSION = '12.1.0-dev.11.1';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -517,7 +517,7 @@ async function handleMediaGallery(env,url){
     cursor=page.truncated?page.cursor:undefined;
   }while(cursor);
   items.sort((a,b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
-  return json({ok:true,project:MEDIA_PROJECT,items},{headers:{'cache-control':'public, max-age=60'}});
+  return json({ok:true,project:MEDIA_PROJECT,items},200,{'cache-control':'public, max-age=60'});
 }
 async function handleMediaGalleryFile(env,url){
   if(!env.MEDIA_BUCKET)return new Response('Nicht verfügbar',{status:503});
