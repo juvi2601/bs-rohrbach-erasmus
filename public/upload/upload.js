@@ -1,267 +1,188 @@
-const MAX_FILES = 10;
-const MAX_SIZE = 15 * 1024 * 1024;
-const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
-const MIN_RECOMMENDED_WIDTH = 1000;
+const $ = id => document.getElementById(id);
+let config = null;
+let msalApp = null;
+let account = null;
 let selected = [];
 let isUploading = false;
-const $ = id => document.getElementById(id);
 
-$('loginButton').addEventListener('click', () => {
-  $('loginView').hidden = true;
-  $('uploadView').hidden = false;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+const IMAGE_TYPES = new Set(['image/jpeg','image/png','image/webp','image/heic','image/heif']);
+const VIDEO_TYPES = new Set(['video/mp4','video/quicktime']);
+const IMAGE_EXT = /\.(jpe?g|png|webp|heic|heif)$/i;
+const VIDEO_EXT = /\.(mp4|mov)$/i;
 
-$('logoutButton').addEventListener('click', () => {
-  if (isUploading) return;
-  $('uploadView').hidden = true;
-  $('loginView').hidden = false;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-const formatBytes = n => n < 1024 * 1024
-  ? `${(n / 1024).toFixed(0)} KB`
-  : `${(n / 1024 / 1024).toFixed(1).replace('.', ',')} MB`;
-
-const photoLabel = count => `${count} Foto${count === 1 ? '' : 's'}`;
-
-async function loadProgram() {
-  try {
-    const response = await fetch('/content/program.json', { cache: 'no-store' });
-    if (!response.ok) throw new Error();
-    const data = await response.json();
-    const days = Array.isArray(data.days) ? data.days : [];
-    $('daySelect').insertAdjacentHTML('beforeend', days.map((day, index) =>
-      `<option value="${index}">${day.short || ''} ${day.date || ''} · ${day.title || ''}</option>`
-    ).join(''));
-    $('daySelect').dataset.days = JSON.stringify(days);
-  } catch {
-    $('daySelect').innerHTML = '<option value="">Programm konnte nicht geladen werden</option>';
-    showMessage('Das Reiseprogramm konnte nicht geladen werden. Bitte die Seite neu laden.');
-  }
-}
-
-function updatePrograms() {
-  const raw = $('daySelect').dataset.days;
-  const days = raw ? JSON.parse(raw) : [];
-  const index = $('daySelect').value;
-  const select = $('programSelect');
-
-  if (index === '') {
-    select.disabled = true;
-    select.innerHTML = '<option value="">Zuerst Reisetag auswählen</option>';
-  } else {
-    const events = days[Number(index)]?.events || [];
-    select.disabled = false;
-    select.innerHTML = '<option value="">Bitte auswählen</option>' + events.map((event, eventIndex) =>
-      `<option value="${eventIndex}">${event.time ? `${event.time} · ` : ''}${event.title || 'Programmpunkt'}</option>`
-    ).join('') + '<option value="other">Anderer Ort / freie Zeit</option>';
-  }
-
-  refreshState();
-}
+const formatBytes = n => {
+  const value = Number(n || 0);
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 ** 2) return `${(value / 1024).toFixed(0)} KB`;
+  if (value < 1024 ** 3) return `${(value / 1024 ** 2).toFixed(1).replace('.', ',')} MB`;
+  return `${(value / 1024 ** 3).toFixed(2).replace('.', ',')} GB`;
+};
+const mediaLabel = count => `${count} Medium${count === 1 ? '' : 'ien'}`;
 
 function showMessage(text, type = 'error') {
-  const box = $('formMessage');
-  box.textContent = text;
-  box.className = `form-message ${type}`;
-  box.hidden = false;
-  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const box = $('formMessage'); box.textContent = text; box.className = `form-message ${type}`; box.hidden = false;
+  box.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function clearMessage(){ $('formMessage').hidden = true; }
+function setLoginMessage(text){ $('loginMessage').textContent = text || ''; }
+
+async function loadConfig(){
+  const response = await fetch('/api/media/config',{cache:'no-store'});
+  if(!response.ok) throw new Error('Upload-Konfiguration konnte nicht geladen werden.');
+  config = await response.json();
+  if(!config.configured) throw new Error('Microsoft-Konfiguration ist noch nicht vollständig.');
+  if(typeof window.msal === 'undefined') throw new Error('Microsoft-Anmeldung konnte nicht geladen werden. Bitte Seite neu laden.');
+  msalApp = new msal.PublicClientApplication({auth:{clientId:config.clientId,authority:`https://login.microsoftonline.com/${config.tenantId}`,redirectUri:config.redirectUri,postLogoutRedirectUri:config.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});
+  await msalApp.initialize?.();
+  account = msalApp.getAllAccounts()[0] || null;
+  if(account) await showUploadForAccount();
 }
 
-function clearMessage() {
-  $('formMessage').hidden = true;
-}
-
-function fileKey(file) {
-  return `${file.name}-${file.size}-${file.lastModified}`;
-}
-
-function readImageDimensions(file) {
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return Promise.resolve(null);
-  return new Promise(resolve => {
-    const url = URL.createObjectURL(file);
-    const image = new Image();
-    image.onload = () => {
-      const result = { width: image.naturalWidth, height: image.naturalHeight };
-      URL.revokeObjectURL(url);
-      resolve(result);
-    };
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve(null);
-    };
-    image.src = url;
-  });
-}
-
-async function addFiles(files) {
-  clearMessage();
-  const incoming = [...files];
-  if (selected.length + incoming.length > MAX_FILES) {
-    showMessage(`Bitte höchstens ${MAX_FILES} Fotos auswählen.`);
-    return;
+async function getGraphToken(interactive=false){
+  if(!msalApp) throw new Error('Microsoft-Anmeldung ist noch nicht bereit.');
+  if(!account){
+    if(!interactive) throw new Error('Bitte zuerst mit dem Schulkonto anmelden.');
+    const login = await msalApp.loginPopup({scopes:['User.Read'],prompt:'select_account'});
+    account = login.account || msalApp.getAllAccounts()[0];
   }
+  try{
+    const result = await msalApp.acquireTokenSilent({scopes:['User.Read'],account});
+    return result.accessToken;
+  }catch(error){
+    if(!interactive) throw error;
+    const result = await msalApp.acquireTokenPopup({scopes:['User.Read'],account});
+    account = result.account || account;
+    return result.accessToken;
+  }
+}
 
-  for (const file of incoming) {
-    const extensionAllowed = file.name.match(/\.(jpe?g|png|webp|heic|heif)$/i);
-    if (!ALLOWED.includes(file.type) && !extensionAllowed) {
-      showMessage(`${file.name}: Dateiformat wird nicht unterstützt.`);
-      continue;
+async function fetchStatus(){
+  const token = await getGraphToken(true);
+  const response = await fetch('/api/media/status',{headers:{authorization:`Bearer ${token}`},cache:'no-store'});
+  const data = await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error(data.message || 'Schulkonto konnte nicht geprüft werden.');
+  return data;
+}
+
+async function showUploadForAccount(){
+  try{
+    setLoginMessage('Schulkonto wird geprüft …');
+    const status = await fetchStatus();
+    account = msalApp.getAllAccounts().find(a => a.homeAccountId === account?.homeAccountId) || account;
+    $('accountName').textContent = status.user.name || account?.name || 'BS Rohrbach';
+    $('accountEmail').textContent = status.user.email || account?.username || '';
+    $('avatar').textContent = (status.user.name || 'MS').split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || 'MS';
+    updateStorage(status.usage?.totalBytes || 0, status.limitBytes || config.storageLimitBytes);
+    $('loginView').hidden = true; $('uploadView').hidden = false; setLoginMessage('');
+  }catch(error){
+    setLoginMessage(error.message || String(error));
+    account = null;
+    try{await msalApp.logoutPopup({postLogoutRedirectUri:config.redirectUri})}catch{}
+  }
+}
+
+async function login(){
+  try{
+    setLoginMessage('Microsoft-Anmeldung wird geöffnet …');
+    const result = await msalApp.loginPopup({scopes:['User.Read'],prompt:'select_account'});
+    account = result.account || msalApp.getAllAccounts()[0];
+    await showUploadForAccount();
+  }catch(error){setLoginMessage(error?.message || 'Anmeldung wurde abgebrochen.');}
+}
+async function logout(){
+  if(isUploading || !msalApp) return;
+  try{if(account) await msalApp.logoutPopup({account,postLogoutRedirectUri:config.redirectUri});}catch{}
+  sessionStorage.clear(); account=null; selected=[]; location.reload();
+}
+
+function updateStorage(used, limit){
+  $('storageBox').hidden = false;
+  const ratio = Math.min(1, used / Math.max(1, limit));
+  $('storageBar').style.width = `${Math.round(ratio*100)}%`;
+  $('storageText').textContent = `${formatBytes(used)} von ${formatBytes(limit)} Sicherheitsgrenze belegt`;
+  $('storageBox').classList.toggle('warning', ratio >= .8);
+}
+
+async function loadProgram(){
+  try{
+    const response=await fetch('/content/program.json',{cache:'no-store'}); if(!response.ok) throw new Error();
+    const data=await response.json(),days=Array.isArray(data.days)?data.days:[];
+    $('daySelect').insertAdjacentHTML('beforeend',days.map((day,index)=>`<option value="${index}">${day.short||''} ${day.date||''} · ${day.title||''}</option>`).join(''));
+    $('daySelect').dataset.days=JSON.stringify(days);
+  }catch{$('daySelect').innerHTML='<option value="">Programm konnte nicht geladen werden</option>'; showMessage('Das Reiseprogramm konnte nicht geladen werden.');}
+}
+function updatePrograms(){
+  const days=$('daySelect').dataset.days?JSON.parse($('daySelect').dataset.days):[],index=$('daySelect').value,select=$('programSelect');
+  if(index===''){select.disabled=true;select.innerHTML='<option value="">Zuerst Reisetag auswählen</option>';}
+  else{const events=days[Number(index)]?.events||[];select.disabled=false;select.innerHTML='<option value="">Bitte auswählen</option>'+events.map((event,i)=>`<option value="${i}">${event.time?`${event.time} · `:''}${event.title||'Programmpunkt'}</option>`).join('')+'<option value="other">Anderer Ort / freie Zeit</option>';}
+  refreshState();
+}
+function currentAssignment(){
+  const days=$('daySelect').dataset.days?JSON.parse($('daySelect').dataset.days):[],di=$('daySelect').value,pi=$('programSelect').value;
+  const day=di===''?'':days[Number(di)];
+  const program=pi===''?'':pi==='other'?'Anderer Ort / freie Zeit':day?.events?.[Number(pi)];
+  return {day:day?`${day.short||''} ${day.date||''} · ${day.title||''}`.trim():'',program:typeof program==='string'?program:(program?`${program.time?`${program.time} · `:''}${program.title||'Programmpunkt'}`:'')};
+}
+
+function fileKind(file){if(IMAGE_TYPES.has(file.type)||IMAGE_EXT.test(file.name))return'image';if(VIDEO_TYPES.has(file.type)||VIDEO_EXT.test(file.name))return'video';return null;}
+function fileKey(file){return `${file.name}-${file.size}-${file.lastModified}`;}
+function videoDuration(file){
+  return new Promise(resolve=>{const url=URL.createObjectURL(file),video=document.createElement('video');video.preload='metadata';video.onloadedmetadata=()=>{const d=Number(video.duration||0);URL.revokeObjectURL(url);resolve(Number.isFinite(d)?d:0)};video.onerror=()=>{URL.revokeObjectURL(url);resolve(0)};video.src=url;});
+}
+async function addFiles(files){
+  clearMessage(); const incoming=[...files];
+  if(selected.length+incoming.length>config.maxFiles){showMessage(`Bitte höchstens ${config.maxFiles} Medien pro Upload auswählen.`);return;}
+  for(const file of incoming){
+    const kind=fileKind(file); if(!kind){showMessage(`${file.name}: Format wird nicht unterstützt.`);continue;}
+    const max=kind==='image'?config.maxImageBytes:config.maxVideoBytes;
+    if(file.size>max){showMessage(`${file.name}: ${kind==='image'?'Foto':'Video'} ist größer als ${formatBytes(max)}.`);continue;}
+    if(selected.some(item=>item.key===fileKey(file)))continue;
+    let duration=0;
+    if(kind==='video'){
+      duration=await videoDuration(file);
+      if(!duration){showMessage(`${file.name}: Videodauer konnte nicht gelesen werden.`);continue;}
+      if(duration>config.maxVideoSeconds+.25){showMessage(`${file.name}: Video ist ${Math.ceil(duration)} Sekunden lang. Erlaubt sind maximal ${config.maxVideoSeconds} Sekunden.`);continue;}
     }
-    if (file.size > MAX_SIZE) {
-      showMessage(`${file.name}: Die Datei ist größer als 15 MB.`);
-      continue;
-    }
-    if (selected.some(item => item.key === fileKey(file))) continue;
-
-    const dimensions = await readImageDimensions(file);
-    selected.push({ file, key: fileKey(file), dimensions });
+    selected.push({file,key:fileKey(file),kind,duration});
   }
-
   renderFiles();
 }
-
-function renderFiles() {
-  const grid = $('previewGrid');
-  grid.innerHTML = '';
-
-  selected.forEach((item, index) => {
-    const { file, dimensions } = item;
-    const url = URL.createObjectURL(file);
-    const card = document.createElement('article');
-    const isSmall = dimensions && Math.max(dimensions.width, dimensions.height) < MIN_RECOMMENDED_WIDTH;
-    card.className = `preview-item${isSmall ? ' low-resolution' : ''}`;
-    card.innerHTML = `
-      <div class="preview-image-wrap">
-        <img src="${url}" alt="Vorschau ${index + 1}">
-        ${isSmall ? '<span class="quality-warning" title="Für große Darstellungen möglicherweise zu klein">Kleine Auflösung</span>' : ''}
-      </div>
-      <button class="remove-file" type="button" aria-label="${file.name} entfernen">×</button>
-      <div class="preview-meta">
-        <strong title="${file.name}"></strong>
-        <small>${formatBytes(file.size)}${dimensions ? ` · ${dimensions.width} × ${dimensions.height} px` : ''}</small>
-      </div>`;
-    card.querySelector('strong').textContent = file.name;
-    card.querySelector('img').onload = () => URL.revokeObjectURL(url);
-    card.querySelector('.remove-file').onclick = () => {
-      selected.splice(index, 1);
-      renderFiles();
-    };
-    grid.appendChild(card);
+function renderFiles(){
+  const grid=$('previewGrid');grid.innerHTML='';
+  selected.forEach((item,index)=>{
+    const {file,kind,duration}=item,url=URL.createObjectURL(file),card=document.createElement('article');card.className='preview-item';
+    const media=kind==='image'?`<img src="${url}" alt="Vorschau ${index+1}">`:`<video src="${url}" muted controls playsinline preload="metadata"></video>`;
+    card.innerHTML=`<div class="preview-image-wrap">${media}<span class="media-badge">${kind==='image'?'📷 Foto':'🎥 Video'}</span></div><button class="remove-file" type="button" aria-label="Datei entfernen">×</button><div class="preview-meta"><strong></strong><small>${formatBytes(file.size)}${kind==='video'?` · ${duration.toFixed(1).replace('.',',')} s`:''}</small></div>`;
+    card.querySelector('strong').textContent=file.name;
+    const preview=card.querySelector(kind==='image'?'img':'video');preview.addEventListener(kind==='image'?'load':'loadedmetadata',()=>URL.revokeObjectURL(url),{once:true});
+    card.querySelector('.remove-file').onclick=()=>{selected.splice(index,1);renderFiles()};grid.appendChild(card);
   });
-
-  $('fileSummary').hidden = !selected.length;
-  $('fileCount').textContent = photoLabel(selected.length);
-  $('totalSize').textContent = selected.length
-    ? `Gesamt: ${formatBytes(selected.reduce((sum, item) => sum + item.file.size, 0))}`
-    : '';
-  refreshState();
+  $('fileSummary').hidden=!selected.length;$('fileCount').textContent=mediaLabel(selected.length);$('totalSize').textContent=selected.length?`Gesamt: ${formatBytes(selected.reduce((s,x)=>s+x.file.size,0))}`:'';refreshState();
 }
-
-function refreshState() {
-  const hasAssignment = Boolean($('daySelect').value && $('programSelect').value);
-  const hasFiles = selected.length > 0;
-  const ready = hasAssignment && hasFiles && !isUploading;
-
-  document.querySelector('[data-step="1"]').classList.toggle('complete', hasAssignment);
-  document.querySelector('[data-step="2"]').classList.toggle('active', hasAssignment && !hasFiles);
-  document.querySelector('[data-step="2"]').classList.toggle('complete', hasFiles);
-  document.querySelector('[data-step="3"]').classList.toggle('active', ready);
-
-  $('submitButton').disabled = !ready;
-  $('submitHint').textContent = ready
-    ? `${photoLabel(selected.length)} bereit zum sicheren Upload.`
-    : 'Bitte Reisetag, Programmpunkt und mindestens ein Foto auswählen.';
+function refreshState(){
+  const hasAssignment=Boolean($('daySelect').value&&$('programSelect').value),hasFiles=selected.length>0,ready=hasAssignment&&hasFiles&&!isUploading;
+  document.querySelector('[data-step="1"]').classList.toggle('complete',hasAssignment);document.querySelector('[data-step="2"]').classList.toggle('active',hasAssignment&&!hasFiles);document.querySelector('[data-step="2"]').classList.toggle('complete',hasFiles);document.querySelector('[data-step="3"]').classList.toggle('active',ready);$('submitButton').disabled=!ready;$('submitHint').textContent=ready?`${mediaLabel(selected.length)} bereit zum sicheren Upload.`:'Bitte Reisetag, Programmpunkt und mindestens eine Datei auswählen.';
 }
-
-function openPicker() {
-  if (!isUploading) $('fileInput').click();
+function base64UrlJson(value){const bytes=new TextEncoder().encode(JSON.stringify(value));let binary='';bytes.forEach(b=>binary+=String.fromCharCode(b));return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+async function uploadOne(item,meta){
+  const token=await getGraphToken(true);
+  const response=await fetch('/api/media/upload',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':item.file.type||'application/octet-stream','x-file-name':encodeURIComponent(item.file.name),'x-file-size':String(item.file.size),'x-video-duration':item.kind==='video'?String(item.duration):'0','x-media-meta':base64UrlJson(meta)},body:item.file});
+  const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||`${item.file.name}: Upload fehlgeschlagen.`);return data;
 }
-
-$('chooseButton').addEventListener('click', event => {
-  event.stopPropagation();
-  openPicker();
-});
-$('dropZone').addEventListener('click', openPicker);
-$('dropZone').addEventListener('keydown', event => {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    openPicker();
-  }
-});
-$('fileInput').addEventListener('change', event => {
-  addFiles(event.target.files);
-  event.target.value = '';
-});
-['dragenter', 'dragover'].forEach(name => $('dropZone').addEventListener(name, event => {
-  event.preventDefault();
-  $('dropZone').classList.add('dragging');
-}));
-['dragleave', 'drop'].forEach(name => $('dropZone').addEventListener(name, event => {
-  event.preventDefault();
-  $('dropZone').classList.remove('dragging');
-}));
-$('dropZone').addEventListener('drop', event => addFiles(event.dataTransfer.files));
-$('clearButton').addEventListener('click', () => {
-  selected = [];
-  renderFiles();
-});
-$('daySelect').addEventListener('change', updatePrograms);
-$('programSelect').addEventListener('change', refreshState);
-$('description').addEventListener('input', event => $('charCount').textContent = event.target.value.length);
-
-function wait(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
+async function performUpload(){
+  isUploading=true;refreshState();$('uploadDialog').hidden=false;const assignment=currentAssignment(),meta={...assignment,description:$('description').value.trim()},total=selected.length;let last=null;
+  try{
+    for(let i=0;i<total;i++){
+      const item=selected[i];$('uploadStatus').textContent=`${item.file.name} wird sicher übertragen …`;$('progressFiles').textContent=`${i+1} von ${total} Medien`;$('progressBar').style.width=`${Math.round((i/total)*100)}%`;$('progressPercent').textContent=`${Math.round((i/total)*100)} %`;last=await uploadOne(item,meta);$('progressBar').style.width=`${Math.round(((i+1)/total)*100)}%`;$('progressPercent').textContent=`${Math.round(((i+1)/total)*100)} %`;
+    }
+    $('uploadDialog').hidden=true;$('successCount').textContent=mediaLabel(total);$('successDialog').hidden=false;
+    try{const status=await fetchStatus();updateStorage(status.usage?.totalBytes||0,status.limitBytes||config.storageLimitBytes)}catch{}
+    selected=[];renderFiles();
+  }catch(error){$('uploadDialog').hidden=true;showMessage(error.message||String(error));}
+  finally{isUploading=false;refreshState();}
 }
+function resetForm(){$('uploadForm').reset();$('charCount').textContent='0';selected=[];updatePrograms();renderFiles();clearMessage();$('successDialog').hidden=true;window.scrollTo({top:0,behavior:'smooth'});}
 
-async function simulateUpload() {
-  isUploading = true;
-  refreshState();
-  $('uploadDialog').hidden = false;
-  const total = selected.length;
+$('loginButton').addEventListener('click',login);$('logoutButton').addEventListener('click',logout);$('chooseButton').addEventListener('click',e=>{e.stopPropagation();if(!isUploading)$('fileInput').click()});$('dropZone').addEventListener('click',()=>{if(!isUploading)$('fileInput').click()});$('dropZone').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('fileInput').click()}});$('fileInput').addEventListener('change',e=>{addFiles(e.target.files);e.target.value=''});['dragenter','dragover'].forEach(n=>$('dropZone').addEventListener(n,e=>{e.preventDefault();$('dropZone').classList.add('dragging')}));['dragleave','drop'].forEach(n=>$('dropZone').addEventListener(n,e=>{e.preventDefault();$('dropZone').classList.remove('dragging')}));$('dropZone').addEventListener('drop',e=>addFiles(e.dataTransfer.files));$('clearButton').addEventListener('click',()=>{selected=[];renderFiles()});$('daySelect').addEventListener('change',updatePrograms);$('programSelect').addEventListener('change',refreshState);$('description').addEventListener('input',e=>$('charCount').textContent=e.target.value.length);$('uploadForm').addEventListener('submit',e=>{e.preventDefault();clearMessage();if(!$('daySelect').value)return showMessage('Bitte einen Reisetag auswählen.');if(!$('programSelect').value)return showMessage('Bitte einen Programmpunkt auswählen.');if(!selected.length)return showMessage('Bitte mindestens eine Datei auswählen.');performUpload()});$('newUploadButton').addEventListener('click',resetForm);
 
-  for (let progress = 0; progress <= 100; progress += 2) {
-    const processed = Math.min(total, Math.max(0, Math.ceil((progress / 100) * total)));
-    $('progressBar').style.width = `${progress}%`;
-    $('progressPercent').textContent = `${progress} %`;
-    $('progressFiles').textContent = `${processed} von ${total} Fotos`;
-    $('uploadStatus').textContent = progress < 25
-      ? 'Die Dateien werden geprüft …'
-      : progress < 90
-        ? 'Fotos werden sicher übertragen …'
-        : 'Upload wird abgeschlossen …';
-    await wait(35);
-  }
-
-  await wait(250);
-  $('uploadDialog').hidden = true;
-  $('successCount').textContent = photoLabel(total);
-  $('successDialog').hidden = false;
-  isUploading = false;
-  refreshState();
-}
-
-$('uploadForm').addEventListener('submit', event => {
-  event.preventDefault();
-  clearMessage();
-  if (!$('daySelect').value) return showMessage('Bitte einen Reisetag auswählen.');
-  if (!$('programSelect').value) return showMessage('Bitte einen Programmpunkt auswählen.');
-  if (!selected.length) return showMessage('Bitte mindestens ein Foto auswählen.');
-  simulateUpload();
-});
-
-function resetForm() {
-  $('uploadForm').reset();
-  $('charCount').textContent = '0';
-  selected = [];
-  updatePrograms();
-  renderFiles();
-  clearMessage();
-  $('successDialog').hidden = true;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-$('newUploadButton').addEventListener('click', resetForm);
-loadProgram();
-refreshState();
+Promise.all([loadConfig(),loadProgram()]).catch(error=>setLoginMessage(error.message||String(error)));

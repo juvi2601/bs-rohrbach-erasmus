@@ -14,5 +14,11 @@
       "/callback",
       "/api/*"
     ]
-  }
+  },
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "bs-rohrbach-erasmus-photos"
+    }
+  ]
 }

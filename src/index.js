@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '12.1.0-dev.4';
+const VERSION = '12.1.0-dev.9';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -251,10 +251,184 @@ async function buildPhotoRows(url,env,config){
   return {photos,source:{...source,rowCount:rows.length-1,uploadColumn:headers[upload]||`Spalte ${upload+1}`,uploadEntries},diagnostics:{rows:rows.length-1,uploadEntries,photosFound:photos.length,skipped},syncedAt:new Date().toISOString()};
 }
 
+
+
+// --- DEV.9: geschützter R2-Medieneingang (Fotos + kurze Videos) ---
+const MEDIA_PROJECT = 'bruessel-2026';
+const MEDIA_ALLOWED_DOMAIN = 'bs-rohrbach.ac.at';
+const MEDIA_MAX_IMAGE_BYTES = 12 * 1024 * 1024;
+// Cloudflare Free erlaubt max. 100 MB Request-Body. 90 MB lässt Reserve für den Upload.
+const MEDIA_MAX_VIDEO_BYTES = 90 * 1024 * 1024;
+const MEDIA_MAX_VIDEO_SECONDS = 30;
+const MEDIA_MAX_FILES_PER_BATCH = 10;
+// Bewusste Sicherheitsreserve unter dem kostenlosen 10-GB-R2-Kontingent.
+const MEDIA_STORAGE_LIMIT_BYTES = 9_000_000_000;
+const MEDIA_IMAGE_TYPES = new Map([
+  ['image/jpeg','jpg'], ['image/png','png'], ['image/webp','webp'],
+  ['image/heic','heic'], ['image/heif','heif']
+]);
+const MEDIA_VIDEO_TYPES = new Map([
+  ['video/mp4','mp4'], ['video/quicktime','mov']
+]);
+
+function base64UrlDecodeJson(token=''){
+  try{
+    const part=String(token).split('.')[1]||'';
+    const normalized=part.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(part.length/4)*4,'=');
+    const bytes=Uint8Array.from(atob(normalized),c=>c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }catch{return {}}
+}
+
+function bearerToken(request){
+  const value=String(request.headers.get('authorization')||'');
+  return /^Bearer\s+/i.test(value)?value.replace(/^Bearer\s+/i,'').trim():'';
+}
+
+async function verifySchoolUser(request,env){
+  const token=bearerToken(request);
+  if(!token)throw Object.assign(new Error('Microsoft-Anmeldung fehlt.'),{status:401});
+
+  // Graph validiert das Token kryptografisch. /me liefert nur bei einem gültigen User-Token Daten.
+  const response=await fetch('https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName,mail',{headers:{authorization:`Bearer ${token}`}});
+  if(!response.ok){
+    const raw=await response.text().catch(()=>"");
+    const error=Object.assign(new Error('Microsoft-Anmeldung ist abgelaufen oder ungültig.'),{status:401,raw:raw.slice(0,600)});
+    throw error;
+  }
+  const me=await response.json();
+  const claims=base64UrlDecodeJson(token);
+  const expectedTenant=String(env.MS_TENANT_ID||'').trim().toLowerCase();
+  const tenant=String(claims.tid||'').trim().toLowerCase();
+  const email=String(me.userPrincipalName||me.mail||'').trim().toLowerCase();
+  if(!expectedTenant||tenant!==expectedTenant)throw Object.assign(new Error('Dieses Microsoft-Konto gehört nicht zum BS-Rohrbach-Mandanten.'),{status:403});
+  if(!email.endsWith(`@${MEDIA_ALLOWED_DOMAIN}`))throw Object.assign(new Error('Nur Microsoft-Konten der BS Rohrbach dürfen Medien hochladen.'),{status:403});
+  return {
+    id:String(me.id||claims.oid||claims.sub||'').trim(),
+    name:String(me.displayName||email).trim().slice(0,120),
+    email,
+    tenantId:tenant
+  };
+}
+
+function cleanText(value,max=180){return String(value||'').trim().replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').slice(0,max)}
+function decodeHeader(value=''){try{return decodeURIComponent(String(value||''))}catch{return String(value||'')}}
+function safeObjectSegment(value=''){return String(value||'unknown').replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,80)||'unknown'}
+function mediaKindForType(type=''){if(MEDIA_IMAGE_TYPES.has(type))return'image';if(MEDIA_VIDEO_TYPES.has(type))return'video';return null}
+function mediaExtension(type=''){return MEDIA_IMAGE_TYPES.get(type)||MEDIA_VIDEO_TYPES.get(type)||'bin'}
+
+async function r2Usage(bucket){
+  let cursor=undefined,totalBytes=0,totalObjects=0,pages=0;
+  do{
+    const page=await bucket.list({limit:1000,cursor});
+    pages++;
+    for(const object of page.objects||[]){
+      if(!String(object.key||'').startsWith('__system/')){totalBytes+=Number(object.size||0);totalObjects++}
+    }
+    cursor=page.truncated?page.cursor:undefined;
+    if(pages>1000)throw new Error('Speicherstatistik konnte nicht vollständig gelesen werden.');
+  }while(cursor);
+  return {totalBytes,totalObjects};
+}
+
+function mediaError(error){
+  const status=Number(error?.status)||500;
+  return json({ok:false,message:error?.message||String(error)},status);
+}
+
+async function handleMediaConfig(url,env){
+  const tenantId=String(env.MS_TENANT_ID||'').trim();
+  const clientId=String(env.MS_CLIENT_ID||'').trim();
+  return json({
+    configured:Boolean(tenantId&&clientId),tenantId,clientId,
+    redirectUri:`${url.origin}/upload.html`,project:MEDIA_PROJECT,
+    schoolDomain:MEDIA_ALLOWED_DOMAIN,
+    maxFiles:MEDIA_MAX_FILES_PER_BATCH,
+    maxImageBytes:MEDIA_MAX_IMAGE_BYTES,
+    maxVideoBytes:MEDIA_MAX_VIDEO_BYTES,
+    maxVideoSeconds:MEDIA_MAX_VIDEO_SECONDS,
+    storageLimitBytes:MEDIA_STORAGE_LIMIT_BYTES,
+    version:VERSION
+  });
+}
+
+async function handleMediaStatus(request,env){
+  if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
+  try{
+    const user=await verifySchoolUser(request,env);
+    const usage=await r2Usage(env.MEDIA_BUCKET);
+    return json({ok:true,user,usage,limitBytes:MEDIA_STORAGE_LIMIT_BYTES,remainingBytes:Math.max(0,MEDIA_STORAGE_LIMIT_BYTES-usage.totalBytes),project:MEDIA_PROJECT});
+  }catch(error){return mediaError(error)}
+}
+
+async function handleMediaUpload(request,env){
+  if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
+  try{
+    const user=await verifySchoolUser(request,env);
+    if(!user.id)throw Object.assign(new Error('Microsoft-Benutzerkennung fehlt.'),{status:403});
+
+    const contentType=String(request.headers.get('content-type')||'').split(';')[0].trim().toLowerCase();
+    const kind=mediaKindForType(contentType);
+    if(!kind)throw Object.assign(new Error('Dieses Datei-/Medienformat wird nicht unterstützt.'),{status:415});
+
+    const declaredSize=Number(request.headers.get('x-file-size')||request.headers.get('content-length')||0);
+    const contentLength=Number(request.headers.get('content-length')||0);
+    const maxBytes=kind==='image'?MEDIA_MAX_IMAGE_BYTES:MEDIA_MAX_VIDEO_BYTES;
+    if(!Number.isFinite(declaredSize)||declaredSize<=0)throw Object.assign(new Error('Dateigröße fehlt.'),{status:400});
+    if(declaredSize>maxBytes||contentLength>maxBytes)throw Object.assign(new Error(kind==='image'?'Foto ist größer als 12 MB.':'Video ist größer als 90 MB.'),{status:413});
+
+    const duration=Number(request.headers.get('x-video-duration')||0);
+    if(kind==='video'&&(!Number.isFinite(duration)||duration<=0||duration>MEDIA_MAX_VIDEO_SECONDS+0.25)){
+      throw Object.assign(new Error('Videos dürfen höchstens 30 Sekunden lang sein.'),{status:400});
+    }
+
+    const originalName=cleanText(decodeHeader(request.headers.get('x-file-name')),160)||`datei.${mediaExtension(contentType)}`;
+    let meta={};
+    const encodedMeta=String(request.headers.get('x-media-meta')||'');
+    if(encodedMeta){
+      try{
+        const normalized=encodedMeta.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(encodedMeta.length/4)*4,'=');
+        const bytes=Uint8Array.from(atob(normalized),c=>c.charCodeAt(0));
+        meta=JSON.parse(new TextDecoder().decode(bytes));
+      }catch{throw Object.assign(new Error('Upload-Metadaten sind ungültig.'),{status:400})}
+    }
+    const day=cleanText(meta.day,80),program=cleanText(meta.program,140),description=cleanText(meta.description,180);
+    if(!day||!program)throw Object.assign(new Error('Reisetag und Programmpunkt sind erforderlich.'),{status:400});
+
+    const usage=await r2Usage(env.MEDIA_BUCKET);
+    if(usage.totalBytes+declaredSize>MEDIA_STORAGE_LIMIT_BYTES){
+      throw Object.assign(new Error('Der sichere Speichergrenzwert ist erreicht. Bitte zuerst alte Medien archivieren oder löschen.'),{status:507});
+    }
+
+    const now=new Date();
+    const uploadedAt=now.toISOString();
+    const ext=mediaExtension(contentType);
+    const folder=kind==='image'?'images':'videos';
+    const userSegment=safeObjectSegment(user.id);
+    const key=`${MEDIA_PROJECT}/pending/${folder}/${userSegment}/${now.getTime()}-${crypto.randomUUID()}.${ext}`;
+
+    await env.MEDIA_BUCKET.put(key,request.body,{
+      httpMetadata:{contentType,contentDisposition:`inline; filename*=UTF-8''${encodeURIComponent(originalName)}`},
+      customMetadata:{
+        status:'pending',project:MEDIA_PROJECT,mediaType:kind,originalName,
+        uploaderId:user.id.slice(0,120),uploaderName:user.name,uploaderEmail:user.email,
+        day,program,description,uploadedAt,
+        durationSeconds:kind==='video'?String(Math.round(duration*10)/10):''
+      }
+    });
+
+    return json({ok:true,key,status:'pending',mediaType:kind,uploadedAt,fileName:originalName,size:declaredSize,storage:{usedBefore:usage.totalBytes,limitBytes:MEDIA_STORAGE_LIMIT_BYTES}});
+  }catch(error){return mediaError(error)}
+}
+// --- Ende DEV.9 R2-Medieneingang ---
+
 export default {async fetch(request,env){
   const url=new URL(request.url);
   if(url.pathname==='/auth')return handleAuth(url,env);
   if(url.pathname==='/callback')return handleCallback(url,env);
+  if(url.pathname==='/api/media/config'&&request.method==='GET')return handleMediaConfig(url,env);
+  if(url.pathname==='/api/media/status'&&request.method==='GET')return handleMediaStatus(request,env);
+  if(url.pathname==='/api/media/upload'&&request.method==='POST')return handleMediaUpload(request,env);
   if(url.pathname==='/api/microsoft/public-config'&&request.method==='GET'){
     const tenantId=String(env.MS_TENANT_ID||'').trim();
     const clientId=String(env.MS_CLIENT_ID||'').trim();
