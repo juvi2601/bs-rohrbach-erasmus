@@ -16,11 +16,11 @@
   },
   "studentArea": {
     "galleryButton": "",
-    "eyebrow": "Sicherer Foto-Upload",
-    "text": "Lade ausgewählte Fotos unserer Brüsselreise hoch. Nach einer kurzen Prüfung können freigegebene Bilder in der Reisegalerie erscheinen.",
+    "eyebrow": "Sicherer Foto- & Video-Upload",
+    "text": "Lade ausgewählte Fotos und kurze Videos direkt über unsere Reisewebsite hoch. Nach der Prüfung durch die Lehrkraft können freigegebene Medien in der Reisegalerie erscheinen.",
     "uploadUrl": "/upload.html",
-    "note": "Anmeldung mit dem Microsoft-365-Schulkonto erforderlich.",
-    "uploadButton": "🔐 Zum Foto-Upload",
+    "note": "Anmeldung mit dem Microsoft-365-Schulkonto der BS Rohrbach erforderlich.",
+    "uploadButton": "🔐 Zum Foto- & Video-Upload",
     "title": "Teile deine schönsten Erinnerungen",
     "icon": "📷",
     "galleryUrl": ""

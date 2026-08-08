@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Microsoft 365 – Erasmus+ BS Rohrbach</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=12.1.0-dev.11.1">
-  <link rel="stylesheet" href="/admin/photo-inbox.css?v=12.1.0-dev.11.1">
+  <link rel="stylesheet" href="/admin/admin.css?v=12.1.0-dev.12">
+  <link rel="stylesheet" href="/admin/photo-inbox.css?v=12.1.0-dev.12">
   <style>
     .rights-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:1rem}.rights-card{padding:1rem;border:1px solid #dce5f0;border-radius:16px;background:#f8fbff}.rights-card strong,.rights-card small{display:block}.rights-card small{margin-top:.25rem;color:#607086}.rights-card.good{border-color:#99d8ae;background:#effaf3}.rights-card.warn{border-color:#f0cf77;background:#fff8df}.rights-card.bad{border-color:#efabb4;background:#fff1f3}.action-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}.diagnostic-box{margin-top:1rem;padding:1rem;border-radius:16px;background:#0d2348;color:#eaf2ff;white-space:pre-wrap;overflow-wrap:anywhere}.diagnostic-box code{color:#ffdc63}.setup-note{padding:1rem 1.15rem;border-left:4px solid #1675d1;background:#eef7ff;border-radius:0 14px 14px 0}.setup-note p{margin:.3rem 0}.scope-list{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem}.scope-list span{padding:.35rem .65rem;border-radius:999px;background:#eaf2ff;color:#124c8f;font-size:.82rem;font-weight:800}@media(max-width:850px){.rights-grid{grid-template-columns:1fr}.action-row .button{width:100%;justify-content:center}}
   </style>
@@ -19,7 +19,7 @@
 </header>
 <main class="shell">
   <section class="welcome">
-    <div><p class="eyebrow">Version <span data-current-version>12.1.0-dev.11.1</span></p><h1>☁️ Microsoft 365 prüfen</h1><p>Wir testen jetzt zuerst, was mit deinem eigenen Schulkonto und den bereits vorhandenen Entra-Einstellungen möglich ist.</p></div>
+    <div><p class="eyebrow">Version <span data-current-version>12.1.0-dev.12</span></p><h1>☁️ Microsoft 365 prüfen</h1><p>Wir testen jetzt zuerst, was mit deinem eigenen Schulkonto und den bereits vorhandenen Entra-Einstellungen möglich ist.</p></div>
     <div class="status-card" id="ms-status"><span class="status-dot"></span><div><strong id="ms-title">Konfiguration wird geladen</strong><small id="ms-text">Tenant- und Client-ID werden geprüft</small></div></div>
   </section>
 
@@ -132,5 +132,5 @@ async function loadAppOnly(runExplicitTest=false){
 document.getElementById('delegated-test').onclick=delegatedTest;document.getElementById('delegated-logout').onclick=delegatedLogout;document.getElementById('refresh').onclick=()=>loadAppOnly(true);
 loadPublicConfig().catch(e=>{text('ms-title','Konfiguration nicht erreichbar');text('ms-text',String(e));text('delegated-result',String(e))});loadAppOnly(false);
 </script>
-<script src="/version-display.js?v=12.1.0-dev.11.1"></script></body>
+<script src="/version-display.js?v=12.1.0-dev.12"></script></body>
 </html>
