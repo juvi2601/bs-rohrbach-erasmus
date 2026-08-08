@@ -10,7 +10,19 @@
 
   function setState(kind, title, detail) { const card=$('ms-status'); card?.classList.remove('ready','warning','error'); if(kind)card?.classList.add(kind); setText('ms-title',title); setText('ms-text',detail); }
   function markCard(id, kind){ const el=$(id); el?.classList.remove('good','warn','bad'); if(kind)el?.classList.add(kind); }
-  function setLoginView(isLoggedIn) { $('login-button').hidden=isLoggedIn; $('permission-button').hidden=!isLoggedIn; $('logout-button').hidden=!isLoggedIn; $('account-panel').hidden=!isLoggedIn; $('storage-button').hidden=!isLoggedIn; $('library-button').hidden=!isLoggedIn; }
+  function setLoginView(isLoggedIn) {
+    const visibility = {
+      'login-button': isLoggedIn,
+      'permission-button': !isLoggedIn,
+      'logout-button': !isLoggedIn,
+      'account-panel': !isLoggedIn,
+      'storage-button': !isLoggedIn
+    };
+    for (const [id, hidden] of Object.entries(visibility)) {
+      const el = $(id);
+      if (el) el.hidden = hidden;
+    }
+  }
   function displayAccount(current) {
     account=current||null; setLoginView(Boolean(account)); if(!account)return;
     setText('account-name',account.name||'Microsoft-Benutzer'); setText('account-user',account.username||'–'); setText('account-tenant',account.tenantId||'–');
@@ -211,14 +223,14 @@
     b.disabled=true; b.textContent='Freigabelink wird geprüft …';
     markCard('shared-item-card'); markCard('shared-children-card'); markCard('shared-next-card');
     setText('shared-item-status','Prüfung läuft …'); setText('shared-children-status','Wartet auf Zielordner …'); setText('shared-next-status','Auswertung läuft …');
-    setText('shared-result','DEV.8.1 – FREIGABELINK-TEST LÄUFT …\n\nEs werden ausschließlich Metadaten gelesen.');
+    setText('shared-result','DEV.8.2 – FREIGABELINK-TEST LÄUFT …\n\nEs werden ausschließlich Metadaten gelesen.');
     try{
       sessionStorage.setItem('erasmusSharedFolderUrl',raw);
       const token=await getToken(['User.Read','Files.ReadWrite']);
       const shareId=encodeSharingUrl(raw);
       const itemUrl=`https://graph.microsoft.com/v1.0/shares/${encodeURIComponent(shareId)}/driveItem?$select=id,name,webUrl,folder,file,parentReference,remoteItem,shared`;
       const itemRes=await graphDiagnostic(itemUrl,token);
-      const lines=['DEV.8.1 – ADMINFREIER FREIGABELINK-TEST','',`Freigabelink: ${raw}`,'',...diagnosticLines('1. Freigegebenes Element',itemUrl,itemRes),''];
+      const lines=['DEV.8.2 – ADMINFREIER FREIGABELINK-TEST','',`Freigabelink: ${raw}`,'',...diagnosticLines('1. Freigegebenes Element',itemUrl,itemRes),''];
       if(!itemRes.ok){
         setText('shared-item-status',`✗ HTTP ${itemRes.status||'–'} ${itemRes.statusText||''}`); markCard('shared-item-card','bad');
         setText('shared-children-status','Nicht getestet'); markCard('shared-children-card','warn');
@@ -265,5 +277,5 @@
   }
 
   async function logout(){if(!app||!account)return;await app.logoutPopup({account,postLogoutRedirectUri:config.redirectUri});sessionStorage.clear();location.reload()}
-  document.addEventListener('DOMContentLoaded',()=>{$('login-button').addEventListener('click',login);$('permission-button').addEventListener('click',checkPermissions);$('storage-button').addEventListener('click',checkStorage);$('library-button')?.addEventListener('click',checkLibraries);$('shared-button')?.addEventListener('click',checkSharedFolder);const saved=sessionStorage.getItem('erasmusSharedFolderUrl');if(saved&&$('shared-url'))$('shared-url').value=saved;$('logout-button').addEventListener('click',logout);init()});
+  document.addEventListener('DOMContentLoaded',()=>{$('login-button').addEventListener('click',login);$('permission-button').addEventListener('click',checkPermissions);$('storage-button').addEventListener('click',checkStorage);$('shared-button')?.addEventListener('click',checkSharedFolder);const saved=sessionStorage.getItem('erasmusSharedFolderUrl');if(saved&&$('shared-url'))$('shared-url').value=saved;$('logout-button').addEventListener('click',logout);init()});
 })();
