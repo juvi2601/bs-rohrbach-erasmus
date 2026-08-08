@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Microsoft 365 – Erasmus+ BS Rohrbach</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=12.1.0-dev.8">
-  <link rel="stylesheet" href="/admin/photo-inbox.css?v=12.1.0-dev.8">
+  <link rel="stylesheet" href="/admin/admin.css?v=12.1.0-dev.8.1">
+  <link rel="stylesheet" href="/admin/photo-inbox.css?v=12.1.0-dev.8.1">
   <style>
     .rights-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:1rem}.rights-card{padding:1rem;border:1px solid #dce5f0;border-radius:16px;background:#f8fbff}.rights-card strong,.rights-card small{display:block}.rights-card small{margin-top:.25rem;color:#607086}.rights-card.good{border-color:#99d8ae;background:#effaf3}.rights-card.warn{border-color:#f0cf77;background:#fff8df}.rights-card.bad{border-color:#efabb4;background:#fff1f3}.action-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}.diagnostic-box{margin-top:1rem;padding:1rem;border-radius:16px;background:#0d2348;color:#eaf2ff;white-space:pre-wrap;overflow-wrap:anywhere}.setup-note{padding:1rem 1.15rem;border-left:4px solid #1675d1;background:#eef7ff;border-radius:0 14px 14px 0}.setup-note p{margin:.3rem 0}.scope-list{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem}.scope-list span{padding:.35rem .65rem;border-radius:999px;background:#eaf2ff;color:#124c8f;font-size:.82rem;font-weight:800}.account-panel{display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:1rem;border:1px solid #dce5f0;border-radius:16px;background:#f8fbff}.account-avatar{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#0d5db8;color:#fff;font-weight:900}.account-panel strong,.account-panel span,.account-panel small{display:block}.bad-text{color:#a82436;font-weight:700}.module-divider{margin:1.5rem 0;border:0;border-top:1px solid #dce5f0}.target-url{overflow-wrap:anywhere}.mini{font-size:.88rem;color:#607086}@media(max-width:850px){.rights-grid{grid-template-columns:1fr}.action-row .button{width:100%;justify-content:center}}
   </style>
@@ -20,7 +20,7 @@
   </section>
 
   <section class="inbox-panel">
-    <div class="section-heading"><div><p class="eyebrow">Modul 1</p><h2>Anmeldung und Berechtigungen</h2></div><span class="dev-badge">DEV.8</span></div>
+    <div class="section-heading"><div><p class="eyebrow">Modul 1</p><h2>Anmeldung und Berechtigungen</h2></div><span class="dev-badge">DEV.8.1</span></div>
     <div class="setup-note"><p><strong>SPA-Redirect-URI:</strong> <code id="redirect-uri">wird geladen …</code></p><p><strong>Client-ID:</strong> <code id="client-id-short">wird geladen …</code></p></div>
     <div class="action-row">
       <button class="button primary" id="login-button" type="button">Mit Microsoft-365-Schulkonto anmelden</button>
@@ -47,11 +47,11 @@
       <article class="rights-card" id="next-card"><strong>Nächster Schritt</strong><small id="next-status">Ergebnis des Zugriffstests abwarten</small></article>
     </div>
     <div class="diagnostic-box" id="storage-result">Modul 2 wartet auf eine erfolgreiche Microsoft-Anmeldung.</div>
-    <p class="mini"><strong>DEV.8:</strong> Sites.Read.All wird bewusst nicht mehr angefordert. Die Anmeldung verwendet nur User.Read und Files.ReadWrite.</p>
+    <p class="mini"><strong>DEV.8.1:</strong> Sites.Read.All wird bewusst nicht mehr angefordert. Die Anmeldung verwendet nur User.Read und Files.ReadWrite.</p>
 
     <hr class="module-divider">
     <div class="section-heading"><div><p class="eyebrow">Modul 2 · Schritt 2</p><h2>Adminfreier Zielordner-Test per Freigabelink</h2></div><span class="dev-badge">READ ONLY</span></div>
-    <p>Dieser Weg benötigt <strong>kein Sites.Read.All</strong>. Füge einen Freigabelink zu dem SharePoint- oder OneDrive-Ordner ein, der später als Fotoeingang dienen soll. DEV.8 liest nur den Ordner und seine Metadaten.</p>
+    <p>Dieser Weg benötigt <strong>kein Sites.Read.All</strong>. Füge einen Freigabelink zu dem SharePoint- oder OneDrive-Ordner ein, der später als Fotoeingang dienen soll. DEV.8.1 liest nur den Ordner und seine Metadaten.</p>
     <div class="setup-note">
       <p><strong>Benötigt:</strong> einen normalen Microsoft-Freigabelink zu einem <strong>Ordner</strong>, auf den dein Schulkonto Zugriff hat.</p>
       <p class="mini">Der Link wird nur im Browser (Session Storage) gespeichert und nicht an unseren Server übertragen.</p>
@@ -65,10 +65,10 @@
       <article class="rights-card" id="shared-children-card"><strong>Ordnerinhalt</strong><small id="shared-children-status">Noch nicht geprüft</small></article>
       <article class="rights-card" id="shared-next-card"><strong>Upload-Weg</strong><small id="shared-next-status">Ergebnis abwarten</small></article>
     </div>
-    <div class="diagnostic-box" id="shared-result">DEV.8 wartet auf einen Freigabelink. Es wird nichts verändert.</div>
+    <div class="diagnostic-box" id="shared-result">DEV.8.1 wartet auf einen Freigabelink. Es wird nichts verändert.</div>
   </section>
 </main>
 <script>if(typeof window.msal==='undefined'){const box=document.getElementById('auth-result');if(box)box.textContent='MSAL konnte nicht geladen werden. Bitte Seite neu laden.'}</script>
-<script src="/admin/microsoft-auth.js?v=12.1.0-dev.8"></script>
+<script src="/admin/microsoft-auth.js?v=12.1.0-dev.8.1"></script>
 </body>
 </html>
