@@ -2,7 +2,7 @@
   'use strict';
 
   const REQUIRED_DOMAIN = 'bs-rohrbach.ac.at';
-  const SCOPES = ['User.Read', 'Files.ReadWrite', 'Sites.Read.All'];
+  const SCOPES = ['User.Read', 'Files.ReadWrite'];
   const SHAREPOINT_URL = 'https://bsrohrbach.sharepoint.com/sites/BSRohrbachBrsselreise2026';
   const $ = (id) => document.getElementById(id);
   const setText = (id, value) => { const el = $(id); if (el) el.textContent = value; };
@@ -32,7 +32,23 @@
     } catch(error){setState('error','Microsoft-Konfiguration nicht bereit',error.message||String(error));setText('auth-result',`FEHLER: ${error.message||String(error)}`);$('login-button').disabled=true;}
   }
   async function login(){const b=$('login-button');b.disabled=true;b.textContent='Microsoft-Anmeldung wird geöffnet …';setText('auth-result','Microsoft-Anmeldefenster wird geöffnet …');try{const result=await app.loginPopup({scopes:SCOPES,prompt:'select_account'});app.setActiveAccount(result.account);displayAccount(result.account);setText('auth-result',`ANMELDUNG ERFOLGREICH\n\n${result.account.name||''}\n${result.account.username||''}\n\nModul 2 kann jetzt den Speicherzugriff prüfen.`)}catch(error){if(error.errorCode==='user_cancelled')setText('auth-result','Die Anmeldung wurde abgebrochen. Es wurden keine Daten verändert.');else setText('auth-result',`ANMELDUNG FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nCode: ${error.errorCode||'–'}`);setState('error','Microsoft-Anmeldung fehlgeschlagen',error.errorCode||error.message||String(error))}finally{b.disabled=false;b.textContent='Mit Microsoft-365-Schulkonto anmelden'}}
-  async function checkPermissions(){const b=$('permission-button');b.disabled=true;b.textContent='Berechtigungen werden geprüft …';try{const token=await getToken();const profile=await graph('https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName',token);const claims=token.accessToken.split('.')[1];const decoded=JSON.parse(atob(claims.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(claims.length/4)*4,'=')));const scopes=String(decoded.scp||'').split(/\s+/).filter(Boolean);const hasFiles=scopes.includes('Files.ReadWrite')||scopes.includes('Files.ReadWrite.All');const hasSites=scopes.includes('Sites.Read.All')||scopes.includes('Sites.ReadWrite.All');setText('profile-status',`✓ ${profile.displayName} (${profile.userPrincipalName})`);setText('files-status',hasFiles&&hasSites?'✓ Files.ReadWrite + Sites.Read.All erteilt':(!hasFiles?'✗ Files.ReadWrite fehlt':'✗ Sites.Read.All fehlt'));markCard('profile-card','good');markCard('files-card',hasFiles&&hasSites?'good':'bad');$('scope-list').innerHTML=scopes.map(s=>`<span>${s}</span>`).join('');setText('auth-result',`RECHTETEST ERFOLGREICH\n\nBenutzer: ${profile.displayName}\nKonto: ${profile.userPrincipalName}\nTenant: ${decoded.tid||'–'}\nErteilte Scopes: ${scopes.join(', ')||'keine'}\n\nModul 1 ist abgeschlossen. Jetzt kann Modul 2 getestet werden.`)}catch(error){setText('auth-result',`RECHTETEST FEHLGESCHLAGEN\n\n${error.message||String(error)}`)}finally{b.disabled=false;b.textContent='Berechtigungen prüfen'}}
+  async function checkPermissions(){
+    const b=$('permission-button'); b.disabled=true; b.textContent='Berechtigungen werden geprüft …';
+    try{
+      const token=await getToken();
+      const profile=await graph('https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName',token);
+      const claims=token.accessToken.split('.')[1];
+      const decoded=JSON.parse(atob(claims.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(claims.length/4)*4,'=')));
+      const scopes=String(decoded.scp||'').split(/\s+/).filter(Boolean);
+      const hasFiles=scopes.includes('Files.ReadWrite')||scopes.includes('Files.ReadWrite.All');
+      setText('profile-status',`✓ ${profile.displayName} (${profile.userPrincipalName})`);
+      setText('files-status',hasFiles?'✓ Files.ReadWrite erteilt':'✗ Files.ReadWrite fehlt');
+      markCard('profile-card','good'); markCard('files-card',hasFiles?'good':'bad');
+      $('scope-list').innerHTML=scopes.map(s=>`<span>${s}</span>`).join('');
+      setText('auth-result',`RECHTETEST ERFOLGREICH\n\nBenutzer: ${profile.displayName}\nKonto: ${profile.userPrincipalName}\nTenant: ${decoded.tid||'–'}\nErteilte Scopes: ${scopes.join(', ')||'keine'}\n\nDEV.8 verwendet bewusst keine Sites.Read.All-Berechtigung.`);
+    }catch(error){setText('auth-result',`RECHTETEST FEHLGESCHLAGEN\n\n${error.message||String(error)}`)}
+    finally{b.disabled=false;b.textContent='Berechtigungen prüfen'}
+  }
 
   async function checkStorage(){
     const b=$('storage-button'); b.disabled=true; b.textContent='Speicher wird geprüft …';
@@ -180,6 +196,74 @@
     }finally{b.disabled=false;b.textContent='Bibliothekszugriff diagnostizieren';}
   }
 
+
+  function encodeSharingUrl(url){
+    const bytes=new TextEncoder().encode(url);
+    let binary=''; bytes.forEach(b=>binary+=String.fromCharCode(b));
+    return 'u!'+btoa(binary).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+  }
+
+  async function checkSharedFolder(){
+    const b=$('shared-button'); const input=$('shared-url');
+    const raw=String(input?.value||'').trim();
+    if(!raw){setText('shared-result','Bitte zuerst einen Freigabelink zu einem SharePoint-/OneDrive-Ordner einfügen.');return;}
+    if(!/^https:\/\//i.test(raw)){setText('shared-result','Der Freigabelink muss mit https:// beginnen.');return;}
+    b.disabled=true; b.textContent='Freigabelink wird geprüft …';
+    markCard('shared-item-card'); markCard('shared-children-card'); markCard('shared-next-card');
+    setText('shared-item-status','Prüfung läuft …'); setText('shared-children-status','Wartet auf Zielordner …'); setText('shared-next-status','Auswertung läuft …');
+    setText('shared-result','DEV.8 – FREIGABELINK-TEST LÄUFT …\n\nEs werden ausschließlich Metadaten gelesen.');
+    try{
+      sessionStorage.setItem('erasmusSharedFolderUrl',raw);
+      const token=await getToken(['User.Read','Files.ReadWrite']);
+      const shareId=encodeSharingUrl(raw);
+      const itemUrl=`https://graph.microsoft.com/v1.0/shares/${encodeURIComponent(shareId)}/driveItem?$select=id,name,webUrl,folder,file,parentReference,remoteItem,shared`;
+      const itemRes=await graphDiagnostic(itemUrl,token);
+      const lines=['DEV.8 – ADMINFREIER FREIGABELINK-TEST','',`Freigabelink: ${raw}`,'',...diagnosticLines('1. Freigegebenes Element',itemUrl,itemRes),''];
+      if(!itemRes.ok){
+        setText('shared-item-status',`✗ HTTP ${itemRes.status||'–'} ${itemRes.statusText||''}`); markCard('shared-item-card','bad');
+        setText('shared-children-status','Nicht getestet'); markCard('shared-children-card','warn');
+        setText('shared-next-status','Link/Berechtigung prüfen'); markCard('shared-next-card','warn');
+        lines.push('AUSWERTUNG','Der Freigabelink konnte mit Files.ReadWrite nicht geöffnet werden. Es wurde nichts verändert.');
+        setText('shared-result',lines.join('\n')); return;
+      }
+      const item=itemRes.data||{};
+      const remote=item.remoteItem||{};
+      const effective=Object.keys(remote).length?remote:item;
+      const parent=effective.parentReference||item.parentReference||{};
+      const driveId=parent.driveId||'';
+      const itemId=effective.id||item.id||'';
+      const isFolder=Boolean(effective.folder||item.folder);
+      setText('shared-item-status',`✓ ${effective.name||item.name||'Element'} erreichbar${isFolder?' (Ordner)':''}`); markCard('shared-item-card','good');
+      lines.push(`Name: ${effective.name||item.name||'–'}`,`Typ: ${isFolder?'Ordner':(effective.file?'Datei':'Element')}`,`Drive-ID: ${driveId||'nicht geliefert'}`,`Item-ID: ${itemId||'nicht geliefert'}`,'');
+      let children=[];
+      if(isFolder&&driveId&&itemId){
+        const childrenUrl=`https://graph.microsoft.com/v1.0/drives/${encodeURIComponent(driveId)}/items/${encodeURIComponent(itemId)}/children?$select=id,name,folder,file,webUrl&$top=50`;
+        const childrenRes=await graphDiagnostic(childrenUrl,token);
+        lines.push(...diagnosticLines('2. Ordnerinhalt (nur lesend)',childrenUrl,childrenRes),'');
+        if(childrenRes.ok){
+          children=Array.isArray(childrenRes.data?.value)?childrenRes.data.value:[];
+          setText('shared-children-status',`✓ ${children.length} Element${children.length===1?'':'e'} lesbar`); markCard('shared-children-card','good');
+          if(children.length){lines.push('Gefundene Elemente:');children.slice(0,20).forEach(x=>lines.push(`- ${x.folder?'📁':'📄'} ${x.name}`));lines.push('');}
+        }else{
+          setText('shared-children-status',`✗ HTTP ${childrenRes.status||'–'} ${childrenRes.data?.error?.code||''}`); markCard('shared-children-card','bad');
+        }
+      }else{
+        setText('shared-children-status',isFolder?'Ordner erkannt, aber Drive-/Item-ID fehlt':'Der Link zeigt nicht auf einen Ordner'); markCard('shared-children-card','warn');
+      }
+      if(isFolder&&driveId&&itemId){
+        setText('shared-next-status','✓ Zielordner technisch adressierbar – nächster Test kann ein kontrollierter Upload sein'); markCard('shared-next-card','good');
+        lines.push('AUSWERTUNG','Der Freigabelink führt auf einen adressierbaren Ordner. Damit haben wir einen möglichen Weg ohne Sites.Read.All und ohne Adminzustimmung gefunden.','', 'WICHTIG: DEV.8 hat nichts hochgeladen, erstellt, geändert oder gelöscht.');
+      }else{
+        setText('shared-next-status','Noch kein eindeutig adressierbarer Ordner'); markCard('shared-next-card','warn');
+        lines.push('AUSWERTUNG','Der Link ist erreichbar, aber noch nicht als beschreibbarer Zielordner identifiziert. Es wurde nichts verändert.');
+      }
+      setText('shared-result',lines.join('\n'));
+    }catch(error){
+      setText('shared-result',`FREIGABELINK-TEST FEHLGESCHLAGEN\n\n${error.message||String(error)}\n\nEs wurden keine Daten verändert.`);
+      markCard('shared-next-card','bad'); setText('shared-next-status','Fehler zuerst auswerten');
+    }finally{b.disabled=false;b.textContent='Freigabelink prüfen (READ ONLY)';}
+  }
+
   async function logout(){if(!app||!account)return;await app.logoutPopup({account,postLogoutRedirectUri:config.redirectUri});sessionStorage.clear();location.reload()}
-  document.addEventListener('DOMContentLoaded',()=>{$('login-button').addEventListener('click',login);$('permission-button').addEventListener('click',checkPermissions);$('storage-button').addEventListener('click',checkStorage);$('library-button').addEventListener('click',checkLibraries);$('logout-button').addEventListener('click',logout);init()});
+  document.addEventListener('DOMContentLoaded',()=>{$('login-button').addEventListener('click',login);$('permission-button').addEventListener('click',checkPermissions);$('storage-button').addEventListener('click',checkStorage);$('library-button').addEventListener('click',checkLibraries);$('shared-button')?.addEventListener('click',checkSharedFolder);const saved=sessionStorage.getItem('erasmusSharedFolderUrl');if(saved&&$('shared-url'))$('shared-url').value=saved;$('logout-button').addEventListener('click',logout);init()});
 })();
