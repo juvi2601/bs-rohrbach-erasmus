@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '12.1.0-dev.9';
+const VERSION = '12.1.0-dev.10';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -422,6 +422,82 @@ async function handleMediaUpload(request,env){
 }
 // --- Ende DEV.9 R2-Medieneingang ---
 
+// --- DEV.10: Admin-Medienfreigabe ---
+const MEDIA_ADMIN_EMAILS = new Set(['j.vierlinger@bs-rohrbach.ac.at']);
+
+async function verifyMediaAdmin(request,env){
+  const user=await verifySchoolUser(request,env);
+  if(!MEDIA_ADMIN_EMAILS.has(String(user.email||'').toLowerCase())){
+    throw Object.assign(new Error('Für die Medienfreigabe ist ein Admin-Konto erforderlich.'),{status:403});
+  }
+  return user;
+}
+function pendingPrefix(){return `${MEDIA_PROJECT}/pending/`}
+function approvedKeyFor(key){return String(key).replace(`/${'pending'}/`,`/approved/`)}
+function validPendingKey(key){return String(key||'').startsWith(pendingPrefix()) && !String(key).includes('..')}
+
+async function handleMediaAdminList(request,env){
+  if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
+  try{
+    const user=await verifyMediaAdmin(request,env);
+    let cursor=undefined,items=[];
+    do{
+      const page=await env.MEDIA_BUCKET.list({prefix:pendingPrefix(),limit:1000,cursor,include:['httpMetadata','customMetadata']});
+      for(const o of page.objects||[]){
+        const m=o.customMetadata||{};
+        items.push({key:o.key,size:Number(o.size||0),uploaded:o.uploaded||m.uploadedAt||'',etag:o.etag||'',contentType:o.httpMetadata?.contentType||'',metadata:m});
+      }
+      cursor=page.truncated?page.cursor:undefined;
+    }while(cursor);
+    items.sort((a,b)=>String(b.metadata?.uploadedAt||b.uploaded).localeCompare(String(a.metadata?.uploadedAt||a.uploaded)));
+    const usage=await r2Usage(env.MEDIA_BUCKET);
+    return json({ok:true,user,items,usage,limitBytes:MEDIA_STORAGE_LIMIT_BYTES,project:MEDIA_PROJECT});
+  }catch(error){return mediaError(error)}
+}
+
+async function handleMediaAdminFile(request,env,url){
+  if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
+  try{
+    await verifyMediaAdmin(request,env);
+    const key=url.searchParams.get('key')||'';
+    if(!validPendingKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
+    const object=await env.MEDIA_BUCKET.get(key);
+    if(!object)throw Object.assign(new Error('Medium wurde nicht gefunden.'),{status:404});
+    const headers=new Headers(); object.writeHttpMetadata(headers); headers.set('etag',object.httpEtag||''); headers.set('cache-control','private, no-store'); headers.set('x-content-type-options','nosniff');
+    return new Response(object.body,{headers});
+  }catch(error){return mediaError(error)}
+}
+
+async function handleMediaAdminApprove(request,env){
+  if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
+  try{
+    const user=await verifyMediaAdmin(request,env);
+    const body=await request.json().catch(()=>({})),key=String(body.key||'');
+    if(!validPendingKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
+    const object=await env.MEDIA_BUCKET.get(key);
+    if(!object)throw Object.assign(new Error('Medium wurde nicht gefunden.'),{status:404});
+    const target=approvedKeyFor(key),meta={...(object.customMetadata||{}),status:'approved',approvedAt:new Date().toISOString(),approvedBy:user.email};
+    await env.MEDIA_BUCKET.put(target,object.body,{httpMetadata:object.httpMetadata,customMetadata:meta});
+    await env.MEDIA_BUCKET.delete(key);
+    return json({ok:true,key:target,status:'approved'});
+  }catch(error){return mediaError(error)}
+}
+
+async function handleMediaAdminDelete(request,env){
+  if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
+  try{
+    await verifyMediaAdmin(request,env);
+    const body=await request.json().catch(()=>({})),key=String(body.key||'');
+    if(!validPendingKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
+    const head=await env.MEDIA_BUCKET.head(key);
+    if(!head)throw Object.assign(new Error('Medium wurde nicht gefunden.'),{status:404});
+    await env.MEDIA_BUCKET.delete(key);
+    return json({ok:true,deleted:key,freedBytes:Number(head.size||0)});
+  }catch(error){return mediaError(error)}
+}
+// --- Ende DEV.10 Admin-Medienfreigabe ---
+
+
 export default {async fetch(request,env){
   const url=new URL(request.url);
   if(url.pathname==='/auth')return handleAuth(url,env);
@@ -429,6 +505,10 @@ export default {async fetch(request,env){
   if(url.pathname==='/api/media/config'&&request.method==='GET')return handleMediaConfig(url,env);
   if(url.pathname==='/api/media/status'&&request.method==='GET')return handleMediaStatus(request,env);
   if(url.pathname==='/api/media/upload'&&request.method==='POST')return handleMediaUpload(request,env);
+  if(url.pathname==='/api/media/admin/list'&&request.method==='GET')return handleMediaAdminList(request,env);
+  if(url.pathname==='/api/media/admin/file'&&request.method==='GET')return handleMediaAdminFile(request,env,url);
+  if(url.pathname==='/api/media/admin/approve'&&request.method==='POST')return handleMediaAdminApprove(request,env);
+  if(url.pathname==='/api/media/admin/delete'&&request.method==='POST')return handleMediaAdminDelete(request,env);
   if(url.pathname==='/api/microsoft/public-config'&&request.method==='GET'){
     const tenantId=String(env.MS_TENANT_ID||'').trim();
     const clientId=String(env.MS_CLIENT_ID||'').trim();
