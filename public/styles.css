@@ -1325,3 +1325,6 @@ img{content-visibility:auto}
   .group-info{grid-column:1}
   .group-main .student-actions .button{width:100%;min-width:0}
 }
+
+/* DEV.11 – freigegebene R2-Videos in der Galerie */
+.gallery-image-wrap video{width:100%;height:100%;object-fit:cover;display:block;background:#0b1220}.gallery-video{cursor:default}

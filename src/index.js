@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '12.1.0-dev.10.1';
+const VERSION = '12.1.0-dev.11';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -497,6 +497,39 @@ async function handleMediaAdminDelete(request,env){
 }
 // --- Ende DEV.10 Admin-Medienfreigabe ---
 
+// --- DEV.11: öffentliche Galerie aus freigegebenen R2-Medien ---
+function approvedPrefix(){return `${MEDIA_PROJECT}/approved/`}
+function validApprovedKey(key){return String(key||'').startsWith(approvedPrefix()) && !String(key).includes('..')}
+async function handleMediaGallery(env,url){
+  if(!env.MEDIA_BUCKET)return json({ok:false,message:'Galerie-Speicher ist derzeit nicht verfügbar.'},503);
+  let cursor=undefined,items=[];
+  do{
+    const page=await env.MEDIA_BUCKET.list({prefix:approvedPrefix(),limit:1000,cursor,include:['httpMetadata','customMetadata']});
+    for(const o of page.objects||[]){
+      const m=o.customMetadata||{},type=m.mediaType==='video'||String(o.httpMetadata?.contentType||'').startsWith('video/')?'video':'image';
+      items.push({
+        id:o.key,mediaType:type,
+        image:`${url.origin}/api/media/gallery/file?key=${encodeURIComponent(o.key)}`,
+        title:m.program||m.day||'Reiseerinnerung',day:m.day||'Reise',program:m.program||'',description:m.description||'',
+        alt:type==='image'?`${m.program||m.day||'Reisefoto'} – Erasmus+ BS Rohrbach`:'',uploadedAt:m.uploadedAt||'',approvedAt:m.approvedAt||''
+      });
+    }
+    cursor=page.truncated?page.cursor:undefined;
+  }while(cursor);
+  items.sort((a,b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
+  return json({ok:true,project:MEDIA_PROJECT,items},{headers:{'cache-control':'public, max-age=60'}});
+}
+async function handleMediaGalleryFile(env,url){
+  if(!env.MEDIA_BUCKET)return new Response('Nicht verfügbar',{status:503});
+  const key=url.searchParams.get('key')||'';
+  if(!validApprovedKey(key))return new Response('Ungültiger Medienpfad',{status:400});
+  const object=await env.MEDIA_BUCKET.get(key);if(!object)return new Response('Nicht gefunden',{status:404});
+  const headers=new Headers();object.writeHttpMetadata(headers);headers.set('etag',object.httpEtag||'');headers.set('cache-control','public, max-age=3600');headers.set('x-content-type-options','nosniff');
+  return new Response(object.body,{headers});
+}
+// --- Ende DEV.11 R2-Galerie ---
+
+
 
 export default {async fetch(request,env){
   const url=new URL(request.url);
@@ -509,6 +542,8 @@ export default {async fetch(request,env){
   if(url.pathname==='/api/media/admin/file'&&request.method==='GET')return handleMediaAdminFile(request,env,url);
   if(url.pathname==='/api/media/admin/approve'&&request.method==='POST')return handleMediaAdminApprove(request,env);
   if(url.pathname==='/api/media/admin/delete'&&request.method==='POST')return handleMediaAdminDelete(request,env);
+  if(url.pathname==='/api/media/gallery'&&request.method==='GET')return handleMediaGallery(env,url);
+  if(url.pathname==='/api/media/gallery/file'&&request.method==='GET')return handleMediaGalleryFile(env,url);
   if(url.pathname==='/api/microsoft/public-config'&&request.method==='GET'){
     const tenantId=String(env.MS_TENANT_ID||'').trim();
     const clientId=String(env.MS_CLIENT_ID||'').trim();

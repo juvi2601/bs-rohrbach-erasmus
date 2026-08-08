@@ -1,0 +1,1 @@
+fetch('/version.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(v=>{if(!v?.version)return;document.querySelectorAll('[data-current-version]').forEach(el=>el.textContent=v.version)}).catch(()=>{});

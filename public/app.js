@@ -14,6 +14,7 @@ async function init(){
   if(program.status==="fulfilled"){programData=program.value;renderProgram(program.value.days||[]);renderToday(program.value.days||[],journeyData);applySmartJourney(site.status==="fulfilled"?site.value:{},program.value.days||[],journeyData)}
   if(places.status==="fulfilled")renderMap(places.value.places||[]);
   if(gallery.status==="fulfilled"){galleryData=gallery.value.photos||[];renderGallery(galleryData)}
+  fetchJson("/api/media/gallery").then(r=>{const approved=Array.isArray(r?.items)?r.items:[];if(approved.length){galleryData=[...approved,...galleryData];renderGallery(galleryData)}}).catch(()=>{});
   if(downloads.status==="fulfilled")renderDownloads(downloads.value.downloads||[]);
   if(faq.status==="fulfilled")renderFaq(faq.value.items||[]);
   renderNews(news.status==="fulfilled"?news.value.news||[]:[]);
@@ -478,8 +479,8 @@ function renderGallery(items){
     grid.classList.add("is-updating");
     activeGallery=filter==="Alle"?items:items.filter(x=>x.day===filter);
     window.setTimeout(()=>{
-      grid.innerHTML=activeGallery.map((p,i)=>`<figure class="gallery-item" data-index="${i}" tabindex="0" style="--gallery-order:${i}"><div class="gallery-image-wrap"><img src="${esc(p.image)}" alt="${esc(p.alt||p.title)}" loading="lazy" decoding="async"></div><figcaption><b>${esc(p.title)}</b><span class="gallery-category">${esc(p.day)}</span>${p.description?`<p>${esc(p.description)}</p>`:""}${p.imageCredit?`<small>${esc(p.imageCredit)}</small>`:""}</figcaption></figure>`).join("");
-      qsa(".gallery-item",grid).forEach(el=>{const open=()=>openLightbox(Number(el.dataset.index));el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})});
+      grid.innerHTML=activeGallery.map((p,i)=>{const video=p.mediaType==="video";return `<figure class="gallery-item ${video?'gallery-video':''}" data-index="${i}" tabindex="${video?-1:0}" style="--gallery-order:${i}"><div class="gallery-image-wrap">${video?`<video src="${esc(p.image)}" controls playsinline preload="metadata"></video>`:`<img src="${esc(p.image)}" alt="${esc(p.alt||p.title)}" loading="lazy" decoding="async">`}</div><figcaption><b>${esc(p.title)}</b><span class="gallery-category">${esc(p.day)}</span>${p.description?`<p>${esc(p.description)}</p>`:""}${p.imageCredit?`<small>${esc(p.imageCredit)}</small>`:""}</figcaption></figure>`}).join("");
+      qsa(".gallery-item:not(.gallery-video)",grid).forEach(el=>{const open=()=>openLightbox(Number(el.dataset.index));el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})});
       requestAnimationFrame(()=>grid.classList.remove("is-updating"));
     },120);
   };
