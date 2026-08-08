@@ -14,7 +14,7 @@ async function init(){
   if(program.status==="fulfilled"){programData=program.value;renderProgram(program.value.days||[]);renderToday(program.value.days||[],journeyData);applySmartJourney(site.status==="fulfilled"?site.value:{},program.value.days||[],journeyData)}
   if(places.status==="fulfilled")renderMap(places.value.places||[]);
   if(gallery.status==="fulfilled"){galleryData=gallery.value.photos||[];renderGallery(galleryData)}
-  fetchJson("/api/media/gallery").then(r=>{const approved=Array.isArray(r?.items)?r.items:[];if(approved.length){galleryData=[...approved,...galleryData];renderGallery(galleryData)}}).catch(()=>{});
+  fetchJson("/api/media/gallery").then(r=>{const approved=Array.isArray(r?.items)?r.items.map(x=>({...x,_studentPhoto:true})):[];if(approved.length){galleryData=[...approved,...galleryData];renderGallery(galleryData)}}).catch(()=>{});
   if(downloads.status==="fulfilled")renderDownloads(downloads.value.downloads||[]);
   if(faq.status==="fulfilled")renderFaq(faq.value.items||[]);
   renderNews(news.status==="fulfilled"?news.value.news||[]:[]);
@@ -472,20 +472,52 @@ function weatherTip({temperature=0,wind=0,precipitation=0,code=0}={}){
 
 function weatherInfo(code=0){if(code===0)return{icon:"☀️",text:"Klar"};if([1,2].includes(code))return{icon:"🌤️",text:"Leicht bewölkt"};if(code===3)return{icon:"☁️",text:"Bewölkt"};if([45,48].includes(code))return{icon:"🌫️",text:"Nebel"};if(code>=51&&code<=67)return{icon:"🌧️",text:"Regen"};if(code>=71&&code<=77)return{icon:"🌨️",text:"Schnee"};if(code>=80&&code<=82)return{icon:"🌦️",text:"Regenschauer"};if(code>=95)return{icon:"⛈️",text:"Gewitter"};return{icon:"🌥️",text:"Wechselhaft"}}
 
+function galleryDaySortKey(value=""){
+  const text=String(value||"").trim(),m=text.match(/^(\d{1,2})\.(\d{1,2})/);
+  if(m)return Number(m[2])*100+Number(m[1]);
+  return 9999;
+}
+function galleryCard(p,i){
+  const video=p.mediaType==="video";
+  return `<figure class="gallery-item ${video?'gallery-video':''}" data-index="${i}" tabindex="${video?-1:0}" style="--gallery-order:${i}"><div class="gallery-image-wrap">${video?`<video src="${esc(p.image)}" controls playsinline preload="metadata"></video>`:`<img src="${esc(p.image)}" alt="${esc(p.alt||p.title)}" loading="lazy" decoding="async">`}</div><figcaption><b>${esc(p.title)}</b><span class="gallery-category">${esc(p.day)}</span>${p.description?`<p>${esc(p.description)}</p>`:""}${p.imageCredit?`<small>${esc(p.imageCredit)}</small>`:""}</figcaption></figure>`;
+}
 function renderGallery(items){
-  const cats=["Alle",...new Set(items.map(x=>x.day).filter(Boolean))],grid=qs("#galleryGrid");
-  qs("#galleryFilters").innerHTML=cats.map((c,i)=>`<button class="filter-button ${i===0?'active':''}" data-filter="${esc(c)}" aria-pressed="${i===0}">${esc(c)}</button>`).join("");
+  const grid=qs("#galleryGrid"),filters=qs("#galleryFilters");
+  if(!grid||!filters)return;
+  const studentLabel="Schüler*innenfotos";
+  const publicItems=items.filter(x=>!x._studentPhoto),studentItems=items.filter(x=>x._studentPhoto);
+  const publicCats=[...new Set(publicItems.map(x=>x.day).filter(Boolean))];
+  const cats=["Alle",...publicCats,studentLabel];
+  filters.innerHTML=cats.map((c,i)=>`<button class="filter-button ${i===0?'active':''} ${c===studentLabel?'student-photo-filter':''}" data-filter="${esc(c)}" aria-pressed="${i===0}">${c===studentLabel?'📷 ':''}${esc(c)}</button>`).join("");
+
+  const bindGalleryCards=()=>qsa(".gallery-item:not(.gallery-video)",grid).forEach(el=>{const open=()=>openLightbox(Number(el.dataset.index));el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})});
   const draw=filter=>{
     grid.classList.add("is-updating");
-    activeGallery=filter==="Alle"?items:items.filter(x=>x.day===filter);
     window.setTimeout(()=>{
-      grid.innerHTML=activeGallery.map((p,i)=>{const video=p.mediaType==="video";return `<figure class="gallery-item ${video?'gallery-video':''}" data-index="${i}" tabindex="${video?-1:0}" style="--gallery-order:${i}"><div class="gallery-image-wrap">${video?`<video src="${esc(p.image)}" controls playsinline preload="metadata"></video>`:`<img src="${esc(p.image)}" alt="${esc(p.alt||p.title)}" loading="lazy" decoding="async">`}</div><figcaption><b>${esc(p.title)}</b><span class="gallery-category">${esc(p.day)}</span>${p.description?`<p>${esc(p.description)}</p>`:""}${p.imageCredit?`<small>${esc(p.imageCredit)}</small>`:""}</figcaption></figure>`}).join("");
-      qsa(".gallery-item:not(.gallery-video)",grid).forEach(el=>{const open=()=>openLightbox(Number(el.dataset.index));el.addEventListener("click",open);el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}})});
+      grid.classList.toggle("student-photo-view",filter===studentLabel);
+      if(filter===studentLabel){
+        activeGallery=[...studentItems].sort((a,b)=>galleryDaySortKey(a.day)-galleryDaySortKey(b.day)||String(a.day||"").localeCompare(String(b.day||""),"de")||String(a.uploadedAt||"").localeCompare(String(b.uploadedAt||"")));
+        if(!activeGallery.length){
+          grid.innerHTML='<div class="empty-state student-gallery-empty">Noch keine freigegebenen Schüler*innenfotos vorhanden.</div>';
+        }else{
+          let lastDay="";
+          grid.innerHTML=activeGallery.map((p,i)=>{
+            const day=String(p.day||"Reisetag");
+            const heading=day!==lastDay?`<div class="student-day-heading"><span>Reisetag</span><h3>${esc(day)}</h3></div>`:"";
+            lastDay=day;
+            return heading+galleryCard(p,i);
+          }).join("");
+        }
+      }else{
+        activeGallery=filter==="Alle"?publicItems:publicItems.filter(x=>x.day===filter);
+        grid.innerHTML=activeGallery.map((p,i)=>galleryCard(p,i)).join("");
+      }
+      bindGalleryCards();
       requestAnimationFrame(()=>grid.classList.remove("is-updating"));
     },120);
   };
   draw("Alle");
-  qsa(".filter-button").forEach(b=>b.addEventListener("click",()=>{qsa(".filter-button").forEach(x=>{x.classList.remove("active");x.setAttribute("aria-pressed","false")});b.classList.add("active");b.setAttribute("aria-pressed","true");draw(b.dataset.filter)}));
+  qsa(".filter-button",filters).forEach(b=>b.addEventListener("click",()=>{qsa(".filter-button",filters).forEach(x=>{x.classList.remove("active");x.setAttribute("aria-pressed","false")});b.classList.add("active");b.setAttribute("aria-pressed","true");draw(b.dataset.filter)}));
 }
 let lightboxIndex=0,touchStart=0,lightboxReturnFocus=null;function setupLightbox(){qs("#lightboxClose").addEventListener("click",closeLightbox);qs("#lightboxPrev").addEventListener("click",()=>moveLightbox(-1));qs("#lightboxNext").addEventListener("click",()=>moveLightbox(1));qs("#lightbox").addEventListener("click",e=>{if(e.target.id==="lightbox")closeLightbox()});document.addEventListener("keydown",e=>{if(qs("#lightbox").hidden)return;if(e.key==="Escape")closeLightbox();if(e.key==="ArrowLeft")moveLightbox(-1);if(e.key==="ArrowRight")moveLightbox(1)});qs("#lightbox").addEventListener("touchstart",e=>touchStart=e.changedTouches[0].clientX,{passive:true});qs("#lightbox").addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-touchStart;if(Math.abs(dx)>60)moveLightbox(dx>0?-1:1)},{passive:true})}
 function openLightbox(i){lightboxReturnFocus=document.activeElement;lightboxIndex=i;updateLightbox();qs("#lightbox").hidden=false;document.body.style.overflow="hidden";qs("#lightboxClose").focus()}function closeLightbox(){qs("#lightbox").hidden=true;document.body.style.overflow="";if(lightboxReturnFocus&&typeof lightboxReturnFocus.focus==="function")lightboxReturnFocus.focus();lightboxReturnFocus=null}function moveLightbox(d){lightboxIndex=(lightboxIndex+d+activeGallery.length)%activeGallery.length;updateLightbox()}function updateLightbox(){const p=activeGallery[lightboxIndex];if(!p)return;qs("#lightboxImage").src=p.image;qs("#lightboxImage").alt=p.alt||p.title;qs("#lightboxTitle").textContent=p.title;qs("#lightboxCaption").textContent=[p.description||p.day||"",p.imageCredit||""].filter(Boolean).join(" · ")}
