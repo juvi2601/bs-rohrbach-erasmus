@@ -305,16 +305,16 @@ function activateDay(id,scroll=false){
 
 function renderToday(days,journey=journeyData){
   const site=window.__SITE||{},t=site.today||{},state=currentJourneyState(journey,days),total=Math.max(1,days.length||6);
-  const schedule=qs("#todaySchedule"),bar=qs("#progressBar"),value=qs("#progressValue");
-  let pct=0,label=t.beforeLabel||"Vorfreude",dateText=t.dateRange||"21.–26. November 2026";
+  const schedule=qs("#todaySchedule"),bar=qs("#progressBar"),value=qs("#progressValue"),track=qs(".progress-track");
+  let pct=0,label="Reisephase",valueText="Vor der Reise",dateText=t.dateRange||"21.–26. November 2026",showProgress=false;
   if(state?.phase==="during"&&state.day){
     const day=days.find(d=>d.id===state.day.programId)||days[0],index=Math.max(0,days.findIndex(d=>d.id===day.id));
-    pct=Math.round(((index+1)/total)*100);label=`Tag ${index+1} von ${total}`;dateText=`${day.short}, ${day.date}2026`;
+    pct=Math.round(((index+1)/total)*100);label=`Tag ${index+1} von ${total}`;valueText=`${pct} %`;dateText=`${day.short}, ${day.date}2026`;showProgress=true;
     setText("todayEyebrow","Heute auf unserer Reise");setText("todayTitle",`${state.day.emoji||day.icon||"📍"} ${state.day.title||day.title}`);setText("todayText",state.day.status||day.subtitle||"");
     if(schedule)schedule.innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");
     activateDay(day.id);
   }else if(state?.phase==="after"){
-    pct=100;label=t.afterLabel||"Reise abgeschlossen";dateText=journey?.trip?.name||"Brüssel 2026";
+    label="Reisephase";valueText=t.afterLabel||"Abgeschlossen";dateText=journey?.trip?.name||"Brüssel 2026";
     setText("todayEyebrow","Unsere Reise · Rückblick");setText("todayTitle",journey?.after?.title||t.afterTitle||"Unsere Brüsselreise ist abgeschlossen");setText("todayText",journey?.after?.text||t.afterText||"Entdecke unsere Berichte und Erinnerungen im Reisetagebuch und in der Galerie.");
     if(schedule)schedule.innerHTML='<a class="button button-blue" href="#reisetagebuch">Zum Reisetagebuch</a><a class="button button-light" href="#galerie">Zur Galerie</a>';
     if(days.length)activateDay(days[days.length-1].id);
@@ -323,7 +323,10 @@ function renderToday(days,journey=journeyData){
     if(schedule)schedule.innerHTML="";
     if(days.length)activateDay(days[0].id);
   }
-  if(bar)bar.style.width=`${pct}%`;if(value)value.textContent=`${pct} %`;setText("progressLabel",label);setText("progressDate",dateText);
+  if(track)track.hidden=!showProgress;
+  if(bar)bar.style.width=`${pct}%`;
+  if(value)value.textContent=valueText;
+  setText("progressLabel",label);setText("progressDate",dateText);
 }
 
 function renderMap(places){
