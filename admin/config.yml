@@ -542,6 +542,11 @@ collections:
       - label: Untertitel
         name: subtitle
         widget: text
+      - label: Freigegebene Fotos aus der Galerie
+        name: approvedPhotos
+        widget: approved_media_list
+        required: false
+        hint: Wähle hier bereits freigegebene Schüler*innenfotos aus R2 aus. Ein erneuter Upload ist nicht nötig. Das erste ausgewählte Foto wird als Titelbild verwendet, sofern kein eigenes Titelbild gesetzt ist.
       - label: Titelbild
         name: cover
         widget: image
@@ -829,6 +834,11 @@ collections:
         name: text
         widget: text
         hint: Kurzer redaktioneller Bericht; Zeilenumbrüche werden übernommen.
+      - label: Freigegebene Fotos aus der Galerie
+        name: approvedPhotos
+        widget: approved_media_list
+        required: false
+        hint: Wähle hier bereits freigegebene Schüler*innenfotos aus R2 aus. Ein erneuter Upload ist nicht nötig. Das erste ausgewählte Foto wird als Titelbild verwendet, sofern kein eigenes Titelbild gesetzt ist.
       - label: Titelbild
         name: cover
         widget: image
