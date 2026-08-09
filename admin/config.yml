@@ -433,7 +433,8 @@ collections:
       add_to_top: true
       collapsed: true
       minimize_collapsed: true
-      hint: Mit „Meldung hinzufügen“ legst du einen neuen Beitrag an. Über den Griff links kannst du Beiträge verschieben; über das Papierkorb-Symbol löschst du sie.
+      hint: Mit „Meldung hinzufügen“ legst du einen neuen Beitrag an. Über den Griff links kannst du Beiträge verschieben;
+        über das Papierkorb-Symbol löschst du sie.
       summary: '{{fields.date}} – {{fields.title}}'
       fields:
       - label: Überschrift
@@ -480,35 +481,71 @@ collections:
       name: trip
       widget: object
       fields:
-      - {label: Name, name: name, widget: string}
-      - {label: Beginn, name: start, widget: datetime}
-      - {label: Ende, name: end, widget: datetime}
+      - label: Name
+        name: name
+        widget: string
+      - label: Beginn
+        name: start
+        widget: datetime
+      - label: Ende
+        name: end
+        widget: datetime
     - label: Anzeige vor der Reise
       name: before
       widget: object
       fields:
-      - {label: Emoji, name: emoji, widget: string}
-      - {label: Überschrift, name: title, widget: string}
-      - {label: Text, name: text, widget: text}
+      - label: Emoji
+        name: emoji
+        widget: string
+      - label: Überschrift
+        name: title
+        widget: string
+      - label: Text
+        name: text
+        widget: text
     - label: Anzeige nach der Reise
       name: after
       widget: object
       fields:
-      - {label: Emoji, name: emoji, widget: string}
-      - {label: Überschrift, name: title, widget: string}
-      - {label: Text, name: text, widget: text}
+      - label: Emoji
+        name: emoji
+        widget: string
+      - label: Überschrift
+        name: title
+        widget: string
+      - label: Text
+        name: text
+        widget: text
     - label: Reisetage
       name: days
       widget: list
       summary: '{{fields.date}} · {{fields.title}}'
       fields:
-      - {label: Datum, name: date, widget: datetime, time_format: false}
-      - {label: Programm-ID, name: programId, widget: string, hint: sa, so, mo, di, mi oder do}
-      - {label: Emoji, name: emoji, widget: string}
-      - {label: Überschrift, name: title, widget: string}
-      - {label: Automatischer Status, name: status, widget: text}
-      - {label: Ort, name: place, widget: string, required: false}
-
+      - label: Datum
+        name: date
+        widget: datetime
+        time_format: false
+      - label: Programm-ID
+        name: programId
+        widget: string
+        hint: sa
+        so: null
+        mo: null
+        di: null
+        mi oder do: null
+      - label: Emoji
+        name: emoji
+        widget: string
+      - label: Überschrift
+        name: title
+        widget: string
+      - label: Automatischer Status
+        name: status
+        widget: text
+      - label: Ort
+        name: place
+        widget: string
+        required: false
 - name: program
   label: Tagesprogramm
   files:
@@ -575,26 +612,46 @@ collections:
           default: automatic
           hint: Wähle ein passendes Symbol. „Automatisch“ verwendet weiterhin Titel und Beschreibung.
           options:
-          - { label: "✨ Automatisch erkennen", value: automatic }
-          - { label: "🚌 Bus / Fahrt", value: bus }
-          - { label: "🚆 Zug / Bahnhof / Metro", value: train }
-          - { label: "🚢 Schiff / Hafen", value: ship }
-          - { label: "🍽️ Restaurant / Essen", value: restaurant }
-          - { label: "☕ Frühstück / Café / Pause", value: breakfast }
-          - { label: "🏨 Hotel / Zimmer", value: hotel }
-          - { label: "🇪🇺 Europäische Union", value: eu }
-          - { label: "🏛️ Parlament", value: parliament }
-          - { label: "🏢 EU-Institution / Gebäude", value: institution }
-          - { label: "💎 Diamanten", value: diamond }
-          - { label: "🖼️ Museum", value: museum }
-          - { label: "📸 Foto / Fotostopp", value: photo }
-          - { label: "👥 Gruppe", value: group }
-          - { label: "🚶 Freizeit / Shopping / Rundgang", value: leisure }
-          - { label: "📍 Treffpunkt / Information", value: meeting }
-          - { label: "🛡️ Sicherheit / Kontrolle", value: security }
-          - { label: "🎤 Vortrag / Präsentation", value: presentation }
-          - { label: "🎟️ Ticket / Eintritt", value: ticket }
-          - { label: "⭐ Besonderer Höhepunkt", value: highlight }
+          - label: ✨ Automatisch erkennen
+            value: automatic
+          - label: 🚌 Bus / Fahrt
+            value: bus
+          - label: 🚆 Zug / Bahnhof / Metro
+            value: train
+          - label: 🚢 Schiff / Hafen
+            value: ship
+          - label: 🍽️ Restaurant / Essen
+            value: restaurant
+          - label: ☕ Frühstück / Café / Pause
+            value: breakfast
+          - label: 🏨 Hotel / Zimmer
+            value: hotel
+          - label: 🇪🇺 Europäische Union
+            value: eu
+          - label: 🏛️ Parlament
+            value: parliament
+          - label: 🏢 EU-Institution / Gebäude
+            value: institution
+          - label: 💎 Diamanten
+            value: diamond
+          - label: 🖼️ Museum
+            value: museum
+          - label: 📸 Foto / Fotostopp
+            value: photo
+          - label: 👥 Gruppe
+            value: group
+          - label: 🚶 Freizeit / Shopping / Rundgang
+            value: leisure
+          - label: 📍 Treffpunkt / Information
+            value: meeting
+          - label: 🛡️ Sicherheit / Kontrolle
+            value: security
+          - label: 🎤 Vortrag / Präsentation
+            value: presentation
+          - label: 🎟️ Ticket / Eintritt
+            value: ticket
+          - label: ⭐ Besonderer Höhepunkt
+            value: highlight
         - label: Status
           name: status
           widget: select
@@ -628,7 +685,8 @@ collections:
       - label: Bild
         name: image
         widget: image
-        hint: Bild aus der Mediathek auswählen oder eine neue Datei hochladen. Empfohlen sind JPG oder WebP mit mindestens 1200 px Breite.
+        hint: Bild aus der Mediathek auswählen oder eine neue Datei hochladen. Empfohlen sind JPG oder WebP mit mindestens
+          1200 px Breite.
       - label: Alternativtext
         name: alt
         widget: string
@@ -642,7 +700,7 @@ collections:
         name: imageCredit
         widget: string
         required: false
-        hint: "Bei eigenen Fotos z. B. Foto BS Rohrbach, bei fremden Bildern Quelle und Urheber angeben."
+        hint: Bei eigenen Fotos z. B. Foto BS Rohrbach, bei fremden Bildern Quelle und Urheber angeben.
 - name: places
   label: Karte & Orte
   files:
@@ -668,27 +726,27 @@ collections:
         name: category
         widget: select
         options:
-        - label: "🏨 Hotel"
+        - label: 🏨 Hotel
           value: Hotel
-        - label: "🏛️ Sehenswürdigkeit"
+        - label: 🏛️ Sehenswürdigkeit
           value: Sehenswürdigkeit
-        - label: "🇪🇺 EU-Institution"
+        - label: 🇪🇺 EU-Institution
           value: EU
-        - label: "💎 Antwerpen"
+        - label: 💎 Antwerpen
           value: Antwerpen
-        - label: "⚔️ Waterloo"
+        - label: ⚔️ Waterloo
           value: Waterloo
-        - label: "🚇 Metro"
+        - label: 🚇 Metro
           value: Metro
-        - label: "🍽️ Essen"
+        - label: 🍽️ Essen
           value: Essen
-        - label: "📌 Treffpunkt"
+        - label: 📌 Treffpunkt
           value: Treffpunkt
-        - label: "🚉 Bahnhof"
+        - label: 🚉 Bahnhof
           value: Bahnhof
-        - label: "🛍️ Einkauf"
+        - label: 🛍️ Einkauf
           value: Einkauf
-        - label: "🆘 Notfall"
+        - label: 🆘 Notfall
           value: Notfall
         hint: Die Kategorie bestimmt Farbe und Symbol des Markers auf der Website.
       - label: Position auf der Karte
@@ -714,7 +772,7 @@ collections:
         name: imageCredit
         widget: string
         required: false
-        hint: "z. B. Foto: © ÖV Brüssel / BMEIA"
+        hint: 'z. B. Foto: © ÖV Brüssel / BMEIA'
 - name: downloads
   label: Downloads
   files:
@@ -730,7 +788,8 @@ collections:
       allow_add: true
       collapsed: true
       minimize_collapsed: true
-      hint: Neue Dokumente kannst du mit „Dokument hinzufügen“ anlegen. Die Reihenfolge lässt sich per Ziehen verändern. Ein Dokument erscheint erst, wenn „Öffentlich anzeigen“ aktiviert ist.
+      hint: Neue Dokumente kannst du mit „Dokument hinzufügen“ anlegen. Die Reihenfolge lässt sich per Ziehen verändern. Ein
+        Dokument erscheint erst, wenn „Öffentlich anzeigen“ aktiviert ist.
       summary: '{{fields.title}}'
       fields:
       - label: Titel
@@ -767,7 +826,8 @@ collections:
       allow_add: true
       collapsed: true
       minimize_collapsed: true
-      hint: Mit „Frage hinzufügen“ legst du einen neuen Eintrag an. Die Reihenfolge entspricht der Anzeige auf der Website und kann per Ziehen geändert werden.
+      hint: Mit „Frage hinzufügen“ legst du einen neuen Eintrag an. Die Reihenfolge entspricht der Anzeige auf der Website
+        und kann per Ziehen geändert werden.
       summary: '{{fields.question}}'
       fields:
       - label: Frage
@@ -778,8 +838,6 @@ collections:
         name: answer
         widget: text
         hint: Die Antwort darf ausführlicher sein und wird im aufgeklappten FAQ-Bereich angezeigt.
-
-
 - name: diary
   label: Reisetagebuch
   files:
@@ -796,7 +854,8 @@ collections:
       collapsed: false
       minimize_collapsed: false
       summary: '{{fields.emoji}} {{fields.date}} – {{fields.title}}'
-      hint: Schülerfotos zuerst sichten und nur freigegebene Bilder auswählen. Entwürfe bleiben auf der öffentlichen Website unsichtbar.
+      hint: Schülerfotos zuerst sichten und nur freigegebene Bilder auswählen. Entwürfe bleiben auf der öffentlichen Website
+        unsichtbar.
       fields:
       - label: Veröffentlichen
         name: published
@@ -833,33 +892,8 @@ collections:
         name: approvedPhotos
         widget: approved_media_list
         required: false
-        hint: Wähle hier bereits freigegebene Schüler*innenfotos aus R2 aus. Ein erneuter Upload ist nicht nötig. Das erste ausgewählte Foto wird als Titelbild verwendet, sofern kein eigenes Titelbild gesetzt ist.
-      - label: Titelbild
-        name: cover
-        widget: image
-        required: false
-      - label: Alternativtext zum Titelbild
-        name: alt
-        widget: string
-        required: false
-      - label: Weitere Fotos
-        name: images
-        widget: list
-        required: false
-        label_singular: Foto
-        summary: '{{fields.alt}}'
-        fields:
-        - label: Foto
-          name: image
-          widget: image
-        - label: Alternativtext
-          name: alt
-          widget: string
-          required: false
-        - label: Bildnachweis
-          name: credit
-          widget: string
-          required: false
+        hint: Wähle hier bereits freigegebene Schüler*innenfotos aus R2 aus. Das erste ausgewählte Foto wird als Titelbild
+          verwendet; weitere ausgewählte Fotos erscheinen zusätzlich im Beitrag.
       - label: Schlagwörter
         name: tags
         widget: list
@@ -873,7 +907,6 @@ collections:
         widget: string
         required: false
         default: BS Rohrbach
-
 - name: legal
   label: Rechtliches & Kontakt
   files:
@@ -905,7 +938,7 @@ collections:
     - label: Impressum
       name: impressum
       widget: object
-      fields: &legal_page_fields
+      fields: &id001
       - label: Kleine Überschrift
         name: eyebrow
         widget: string
@@ -944,13 +977,12 @@ collections:
     - label: Datenschutz
       name: datenschutz
       widget: object
-      fields: *legal_page_fields
+      fields: *id001
     - label: Kontakt
       name: kontakt
       widget: object
-      fields: *legal_page_fields
+      fields: *id001
     - label: Bildnachweise
       name: bildnachweise
       widget: object
-      fields: *legal_page_fields
-
+      fields: *id001
