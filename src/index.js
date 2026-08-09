@@ -47,6 +47,34 @@ async function handleCallback(url, env) {
   try{tokenResponse=await fetch('https://github.com/login/oauth/access_token',{method:'POST',headers:{accept:'application/json','content-type':'application/json','user-agent':'BS-Rohrbach-Erasmus-CMS'},body:JSON.stringify({client_id:clientId,client_secret:clientSecret,code,redirect_uri:`${url.origin}/callback`,grant_type:'authorization_code'})})}catch(error){return oauthCallbackPage('error',{message:`GitHub ist nicht erreichbar: ${String(error)}`})}
   let result;try{result=await tokenResponse.json()}catch{return oauthCallbackPage('error',{message:'GitHub hat eine ungültige Antwort geliefert.'})}
   if(!tokenResponse.ok||!result.access_token)return oauthCallbackPage('error',{message:result.error_description||result.error||'GitHub konnte kein Zugriffstoken erstellen.'});
+
+  // DEV.14.7: CMS-Zugriff serverseitig auf explizit freigegebene GitHub-Konten begrenzen.
+  // Standardmäßig ist nur juvi2601 zugelassen. Optional kann GITHUB_ADMIN_USERS
+  // als kommagetrennte Liste in Cloudflare gesetzt werden (für spätere Erweiterungen).
+  const allowedUsers=String(env.GITHUB_ADMIN_USERS||'juvi2601')
+    .split(',').map(value=>value.trim().toLowerCase()).filter(Boolean);
+  let githubUserResponse;
+  try{
+    githubUserResponse=await fetch('https://api.github.com/user',{
+      headers:{
+        authorization:`Bearer ${result.access_token}`,
+        accept:'application/vnd.github+json',
+        'user-agent':'BS-Rohrbach-Erasmus-CMS'
+      }
+    });
+  }catch(error){
+    return oauthCallbackPage('error',{message:`GitHub-Benutzerprüfung ist fehlgeschlagen: ${String(error)}`});
+  }
+  let githubUser={};
+  try{githubUser=await githubUserResponse.json()}catch{}
+  const login=String(githubUser.login||'').trim().toLowerCase();
+  if(!githubUserResponse.ok||!login){
+    return oauthCallbackPage('error',{message:'Das angemeldete GitHub-Konto konnte nicht geprüft werden.'});
+  }
+  if(!allowedUsers.includes(login)){
+    return oauthCallbackPage('error',{message:'Kein Zugriff auf die Redaktion. Dieses GitHub-Konto ist nicht als Administrator freigeschaltet.'});
+  }
+
   return oauthCallbackPage('success',{token:result.access_token});
 }
 
