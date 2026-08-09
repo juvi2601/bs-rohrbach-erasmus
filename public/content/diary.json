@@ -5,7 +5,7 @@
       "alt": "Testbild",
       "author": "BS Rohrbach",
       "text": "Testbericht",
-      "published": false,
+      "published": true,
       "date": "2026-07-26",
       "location": "Testort",
       "cover": "/images/uploads/packliste.png",
