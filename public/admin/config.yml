@@ -793,8 +793,8 @@ collections:
       widget: list
       label_singular: Tagebucheintrag
       allow_add: true
-      collapsed: true
-      minimize_collapsed: true
+      collapsed: false
+      minimize_collapsed: false
       summary: '{{fields.emoji}} {{fields.date}} – {{fields.title}}'
       hint: Schülerfotos zuerst sichten und nur freigegebene Bilder auswählen. Entwürfe bleiben auf der öffentlichen Website unsichtbar.
       fields:
