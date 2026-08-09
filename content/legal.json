@@ -54,7 +54,7 @@
       {
         "heading": "Zweck der Website",
         "paragraphs": [
-          "Diese Website begleitet das Erasmus+-Projekt „Brüsselreise 2026“ der Berufsschule Rohrbach. Sie dient der Information der teilnehmenden Schülerinnen und Schüler sowie der Dokumentation der Reise."
+          "Diese Website begleitet das Erasmus+-Projekt „Brüsselreise 2026“ der Berufsschule Rohrbach. Sie dient der Information der teilnehmenden Schüler*innen sowie der Dokumentation der Reise."
         ]
       },
       {
@@ -123,14 +123,16 @@
       {
         "heading": "Microsoft 365 und externe Links",
         "paragraphs": [
-          "Der geschützte Reisegruppenbereich, Foto-Uploads und die interne Galerie werden über Microsoft 365, Microsoft Forms beziehungsweise SharePoint aufgerufen. Erst beim Anklicken dieser Links gelten die Datenschutz- und Anmeldebedingungen von Microsoft und der schulischen Microsoft-365-Umgebung.",
+          "Der geschützte Foto- und Video-Upload wird über die schulische Microsoft-365-Anmeldung abgesichert. Hochgeladene Medien werden zunächst privat im für das Projekt vorgesehenen Cloudflare-R2-Speicher gespeichert und sind nach dem Upload nicht automatisch öffentlich.",
+          "Erst nach einer manuellen Prüfung und Freigabe durch die Redaktion können ausgewählte Fotos oder Videos öffentlich verwendet werden, beispielsweise in der Reisegalerie oder im Reisetagebuch.",
           "Auch bei Links zu Google Maps, Schul- oder Informationsseiten werden Daten erst an den jeweiligen Anbieter übertragen, wenn der Link geöffnet wird."
         ]
       },
       {
         "heading": "Öffentliche Inhalte und Fotos",
         "paragraphs": [
-          "Die öffentliche Website soll keine sensiblen Reisedaten oder personenbezogenen Schülerdaten enthalten. Allgemeine Reisemotive werden nur mit entsprechender Berechtigung veröffentlicht. Personenbezogene Reisebilder sind für den geschützten Bereich vorgesehen."
+          "Die öffentliche Website soll keine sensiblen Reisedaten oder unnötigen personenbezogenen Schüler*innendaten enthalten. Allgemeine Reisemotive werden nur mit entsprechender Berechtigung veröffentlicht.",
+          "Hochgeladene Medien bleiben bis zur manuellen Freigabe privat. Nur bewusst ausgewählte und geprüfte Medien werden öffentlich veröffentlicht, beispielsweise in der Reisegalerie oder im Reisetagebuch."
         ]
       },
       {
@@ -142,7 +144,7 @@
       {
         "heading": "Aktualisierung dieser Hinweise",
         "paragraphs": [
-          "Diese Datenschutzerklärung wird angepasst, wenn sich Funktionen, externe Dienste oder rechtliche Anforderungen ändern. Stand: Juli 2026."
+          "Diese Datenschutzerklärung wird angepasst, wenn sich Funktionen, externe Dienste oder rechtliche Anforderungen ändern. Stand: August 2026."
         ]
       }
     ]

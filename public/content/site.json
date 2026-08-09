@@ -17,7 +17,7 @@
   "studentArea": {
     "galleryButton": "",
     "eyebrow": "Sicherer Foto- & Video-Upload",
-    "text": "Lade ausgewählte Fotos und kurze Videos direkt über unsere Reisewebsite hoch. Nach der Prüfung durch die Lehrkraft können freigegebene Medien in der Reisegalerie erscheinen.",
+    "text": "Lade ausgewählte Fotos und kurze Videos direkt über unsere Reisewebsite hoch. Nach der Prüfung durch die Redaktion können freigegebene Medien in der Galerie und im Reisetagebuch erscheinen.",
     "uploadUrl": "/upload.html",
     "note": "Anmeldung mit dem Microsoft-365-Schulkonto der BS Rohrbach erforderlich.",
     "uploadButton": "🔐 Zum Foto- & Video-Upload",

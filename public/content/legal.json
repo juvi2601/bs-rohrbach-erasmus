@@ -54,7 +54,7 @@
       {
         "heading": "Zweck der Website",
         "paragraphs": [
-          "Diese Website begleitet das Erasmus+-Projekt „Brüsselreise 2026“ der Berufsschule Rohrbach. Sie dient der Information der teilnehmenden Schülerinnen und Schüler sowie der Dokumentation der Reise."
+          "Diese Website begleitet das Erasmus+-Projekt „Brüsselreise 2026“ der Berufsschule Rohrbach. Sie dient der Information der teilnehmenden Schüler*innen sowie der Dokumentation der Reise."
         ]
       },
       {
@@ -121,17 +121,18 @@
         ]
       },
       {
-        "heading": "Microsoft-Anmeldung und geschützter Medien-Upload",
+        "heading": "Microsoft 365 und externe Links",
         "paragraphs": [
-          "Für den Foto- und Video-Upload ist eine Anmeldung mit dem Microsoft-365-Schulkonto der BS Rohrbach erforderlich. Die Anmeldung erfolgt über Microsoft; die Reisewebsite erhält dabei nur die für die Anmeldung und serverseitige Prüfung benötigten Kontoinformationen.",
-          "Hochgeladene Medien werden zunächst nicht öffentlich im privaten Cloudflare-R2-Speicher der Reisewebsite abgelegt. Erst nach einer manuellen Prüfung und Freigabe durch die Lehrkraft können ausgewählte Fotos oder Videos über die öffentliche Reisegalerie ausgeliefert werden.",
-          "Bei externen Links, etwa zu Google Maps, Schul- oder Informationsseiten, werden Daten erst an den jeweiligen Anbieter übertragen, wenn der Link geöffnet wird."
+          "Der geschützte Foto- und Video-Upload wird über die schulische Microsoft-365-Anmeldung abgesichert. Hochgeladene Medien werden zunächst privat im für das Projekt vorgesehenen Cloudflare-R2-Speicher gespeichert und sind nach dem Upload nicht automatisch öffentlich.",
+          "Erst nach einer manuellen Prüfung und Freigabe durch die Redaktion können ausgewählte Fotos oder Videos öffentlich verwendet werden, beispielsweise in der Reisegalerie oder im Reisetagebuch.",
+          "Auch bei Links zu Google Maps, Schul- oder Informationsseiten werden Daten erst an den jeweiligen Anbieter übertragen, wenn der Link geöffnet wird."
         ]
       },
       {
         "heading": "Öffentliche Inhalte und Fotos",
         "paragraphs": [
-          "Die öffentliche Website soll keine sensiblen Reisedaten oder nicht freigegebenen personenbezogenen Schülerdaten enthalten. Hochgeladene Medien bleiben bis zur manuellen Freigabe privat. Nur bewusst ausgewählte und geprüfte Medien werden in der öffentlichen Reisegalerie veröffentlicht."
+          "Die öffentliche Website soll keine sensiblen Reisedaten oder unnötigen personenbezogenen Schüler*innendaten enthalten. Allgemeine Reisemotive werden nur mit entsprechender Berechtigung veröffentlicht.",
+          "Hochgeladene Medien bleiben bis zur manuellen Freigabe privat. Nur bewusst ausgewählte und geprüfte Medien werden öffentlich veröffentlicht, beispielsweise in der Reisegalerie oder im Reisetagebuch."
         ]
       },
       {

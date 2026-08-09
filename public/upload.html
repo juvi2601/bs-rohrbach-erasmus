@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Foto- & Video-Upload · Brüssel 2026</title>
   <link rel="icon" href="/images/bs-rohrbach-logo.png">
-  <link rel="stylesheet" href="/upload/upload.css?v=12.1.0-dev.12">
+  <link rel="stylesheet" href="/upload/upload.css?v=13.0">
   <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 </head>
 <body>
@@ -26,7 +26,7 @@
       <p class="eyebrow">Geschützter Medien-Upload</p>
       <div class="camera-mark" aria-hidden="true">📷</div>
       <h1>Teile deine schönsten<br><span>Erinnerungen.</span></h1>
-      <p class="lead">Fotos und kurze Videos unserer Brüsselreise sicher hochladen. Erst nach Freigabe durch die Lehrkraft erscheinen Medien in der Galerie.</p>
+      <p class="lead">Fotos und kurze Videos unserer Brüsselreise sicher hochladen. Erst nach Prüfung und Freigabe durch die Redaktion können Medien in der Galerie oder im Reisetagebuch erscheinen.</p>
       <button id="loginButton" class="login-button" type="button"><span aria-hidden="true">🔐</span> Mit Microsoft-Schulkonto anmelden</button>
       <p class="login-hint">Nur Microsoft-365-Konten der BS Rohrbach können hochladen.</p>
       <p id="loginMessage" class="login-hint" role="status"></p>
@@ -48,7 +48,6 @@
     <form id="uploadForm" class="upload-card" novalidate>
       <div class="form-heading">
         <div><p class="eyebrow">Foto- & Video-Upload</p><h1>Erinnerungen teilen</h1><p>Bitte nur ausgewählte, passende Medien hochladen.</p></div>
-        <span class="dev-badge">DEV.12 · R2</span>
       </div>
 
       <div id="storageBox" class="storage-box" hidden>
@@ -89,7 +88,7 @@
       </section>
 
       <div id="formMessage" class="form-message" hidden></div>
-      <div class="privacy-box"><span>🛡️</span><p>Die Medien werden privat gespeichert. Sie sind nach dem Upload <strong>nicht öffentlich</strong> und erscheinen erst nach Freigabe durch die Lehrkraft in der Galerie.</p></div>
+      <div class="privacy-box"><span>🛡️</span><p>Die Medien werden privat gespeichert. Sie sind nach dem Upload <strong>nicht öffentlich</strong>. Erst nach Prüfung und Freigabe durch die Redaktion können sie veröffentlicht werden.</p></div>
       <button class="submit-button" id="submitButton" type="submit" disabled>☁️ Sicher hochladen</button>
       <p class="submit-hint" id="submitHint">Bitte Reisetag, Programmpunkt und mindestens eine Datei auswählen.</p>
     </form>
@@ -98,6 +97,6 @@
 
 <div id="uploadDialog" class="dialog" hidden><div class="dialog-card upload-dialog-card" role="dialog" aria-modal="true" aria-labelledby="uploadTitle"><span class="dialog-icon">☁️</span><h2 id="uploadTitle">Medien werden hochgeladen</h2><p id="uploadStatus">Die Dateien werden geprüft …</p><div class="progress-track"><div id="progressBar"></div></div><strong id="progressPercent">0 %</strong><small id="progressFiles">0 von 0 Medien</small></div></div>
 <div id="successDialog" class="dialog" hidden><div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="successTitle"><span>✅</span><h2 id="successTitle">Upload erfolgreich</h2><p><strong id="successCount"></strong> wurden sicher übertragen und warten auf die Freigabe.</p><p class="success-note">Noch nichts davon ist öffentlich sichtbar.</p><div class="success-actions"><button id="newUploadButton" type="button">Weitere Medien auswählen</button><a class="secondary-button" href="/">Zurück zur Website</a></div></div></div>
-<script src="/upload/upload.js?v=12.1.0-dev.12" defer></script>
+<script src="/upload/upload.js?v=13.0" defer></script>
 </body>
 </html>

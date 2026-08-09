@@ -85,7 +85,8 @@ async function loadDashboard() {
   setCount('count-news', itemCount(news, 'items', 'news'));
   setCount('count-program', itemCount(program, 'days', 'program'));
   setCount('count-gallery', itemCount(gallery, 'photos'));
-  setCount('count-downloads', itemCount(downloads, 'downloads'));
+  const publishedDownloadRows = (downloads?.downloads || []).filter(item => item.published && item.file);
+  setCount('count-downloads', publishedDownloadRows.length);
   setCount('count-places', itemCount(places, 'places'));
   setCount('count-faq', itemCount(faq, 'items'));
   const diaryRows = Array.isArray(diary?.entries) ? diary.entries : [];
