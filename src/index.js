@@ -461,25 +461,32 @@ async function verifyMediaAdmin(request,env){
   return user;
 }
 function pendingPrefix(){return `${MEDIA_PROJECT}/pending/`}
+function approvedPrefix(){return `${MEDIA_PROJECT}/approved/`}
 function approvedKeyFor(key){return String(key).replace(`/${'pending'}/`,`/approved/`)}
 function validPendingKey(key){return String(key||'').startsWith(pendingPrefix()) && !String(key).includes('..')}
+function validApprovedKey(key){return String(key||'').startsWith(approvedPrefix()) && !String(key).includes('..')}
+function validAdminMediaKey(key){return validPendingKey(key)||validApprovedKey(key)}
 
 async function handleMediaAdminList(request,env){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
   try{
     const user=await verifyMediaAdmin(request,env);
-    let cursor=undefined,items=[];
-    do{
-      const page=await env.MEDIA_BUCKET.list({prefix:pendingPrefix(),limit:1000,cursor,include:['httpMetadata','customMetadata']});
-      for(const o of page.objects||[]){
-        const m=o.customMetadata||{};
-        items.push({key:o.key,size:Number(o.size||0),uploaded:o.uploaded||m.uploadedAt||'',etag:o.etag||'',contentType:o.httpMetadata?.contentType||'',metadata:m});
-      }
-      cursor=page.truncated?page.cursor:undefined;
-    }while(cursor);
-    items.sort((a,b)=>String(b.metadata?.uploadedAt||b.uploaded).localeCompare(String(a.metadata?.uploadedAt||a.uploaded)));
+    async function collect(prefix){
+      let cursor=undefined,rows=[];
+      do{
+        const page=await env.MEDIA_BUCKET.list({prefix,limit:1000,cursor,include:['httpMetadata','customMetadata']});
+        for(const o of page.objects||[]){
+          const m=o.customMetadata||{};
+          rows.push({key:o.key,size:Number(o.size||0),uploaded:o.uploaded||m.uploadedAt||'',etag:o.etag||'',contentType:o.httpMetadata?.contentType||'',metadata:m});
+        }
+        cursor=page.truncated?page.cursor:undefined;
+      }while(cursor);
+      rows.sort((a,b)=>String(b.metadata?.uploadedAt||b.uploaded).localeCompare(String(a.metadata?.uploadedAt||a.uploaded)));
+      return rows;
+    }
+    const [items,approvedItems]=await Promise.all([collect(pendingPrefix()),collect(approvedPrefix())]);
     const usage=await r2Usage(env.MEDIA_BUCKET);
-    return json({ok:true,user,items,usage,limitBytes:MEDIA_STORAGE_LIMIT_BYTES,project:MEDIA_PROJECT});
+    return json({ok:true,user,items,approvedItems,usage,limitBytes:MEDIA_STORAGE_LIMIT_BYTES,project:MEDIA_PROJECT});
   }catch(error){return mediaError(error)}
 }
 
@@ -488,7 +495,7 @@ async function handleMediaAdminFile(request,env,url){
   try{
     await verifyMediaAdmin(request,env);
     const key=url.searchParams.get('key')||'';
-    if(!validPendingKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
+    if(!validAdminMediaKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
     const object=await env.MEDIA_BUCKET.get(key);
     if(!object)throw Object.assign(new Error('Medium wurde nicht gefunden.'),{status:404});
     const headers=new Headers(); object.writeHttpMetadata(headers); headers.set('etag',object.httpEtag||''); headers.set('cache-control','private, no-store'); headers.set('x-content-type-options','nosniff');
@@ -516,7 +523,7 @@ async function handleMediaAdminDelete(request,env){
   try{
     await verifyMediaAdmin(request,env);
     const body=await request.json().catch(()=>({})),key=String(body.key||'');
-    if(!validPendingKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
+    if(!validAdminMediaKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
     const head=await env.MEDIA_BUCKET.head(key);
     if(!head)throw Object.assign(new Error('Medium wurde nicht gefunden.'),{status:404});
     await env.MEDIA_BUCKET.delete(key);
@@ -526,8 +533,6 @@ async function handleMediaAdminDelete(request,env){
 // --- Ende DEV.10 Admin-Medienfreigabe ---
 
 // --- DEV.11: öffentliche Galerie aus freigegebenen R2-Medien ---
-function approvedPrefix(){return `${MEDIA_PROJECT}/approved/`}
-function validApprovedKey(key){return String(key||'').startsWith(approvedPrefix()) && !String(key).includes('..')}
 async function handleMediaGallery(env,url){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'Galerie-Speicher ist derzeit nicht verfügbar.'},503);
   let cursor=undefined,items=[];
