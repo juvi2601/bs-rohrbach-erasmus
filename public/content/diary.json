@@ -13,6 +13,22 @@
       "tags": [
         "Schau Schau test"
       ]
+    },
+    {
+      "emoji": "📖",
+      "author": "BS Rohrbach",
+      "text": "Testbericht",
+      "time": "",
+      "published": true,
+      "date": "2026-08-09",
+      "location": "Testort",
+      "approvedPhotos": [
+        "https://erasmus-bsrohrbach.eu/api/media/gallery/file?key=bruessel-2026%2Fapproved%2Fimages%2Ffb9a83f2-0adf-437a-a2a1-9f229d013022%2F1786185620307-af6ca3b6-4c97-453d-b7cc-73ca3ee80219.jpg"
+      ],
+      "title": "Testeintrag NEU 2026-08-09",
+      "tags": [
+        "Test"
+      ]
     }
   ]
 }
