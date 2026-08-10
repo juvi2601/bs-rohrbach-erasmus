@@ -90,3 +90,235 @@ html[data-theme="dark"] .theme-toggle{background:#152a43!important;color:#ffd43b
 .theme-toggle{width:42px;height:42px;border-radius:14px;border:1px solid transparent;background:#edf3fb;color:#071d49;display:inline-grid;place-items:center;cursor:pointer;font-size:19px;line-height:1;flex:0 0 auto}
 .theme-toggle:hover{transform:translateY(-1px)}
 .theme-toggle:focus-visible{outline:3px solid rgba(8,126,232,.35);outline-offset:2px}
+
+
+/* Version 13.4.1 – flächendeckender Dark-Mode-Fix
+   Bestehende dunkelblaue Bereiche bleiben dunkel; ursprünglich helle Sektionen
+   und Zwischenräume erhalten eine konsistente Navy-Darstellung. */
+
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] main{
+  background:#081426!important;
+}
+
+/* Ursprünglich helle Hauptsektionen */
+html[data-theme="dark"] .section,
+html[data-theme="dark"] .today-section,
+html[data-theme="dark"] .news-section,
+html[data-theme="dark"] .diary-section,
+html[data-theme="dark"] .program-section,
+html[data-theme="dark"] .map-section,
+html[data-theme="dark"] .gallery-section,
+html[data-theme="dark"] .culinary,
+html[data-theme="dark"] .hotel-section,
+html[data-theme="dark"] .downloads-section,
+html[data-theme="dark"] .faq-section,
+html[data-theme="dark"] .admin-teaser,
+html[data-theme="dark"] .emergency-section{
+  background:#081426!important;
+}
+
+/* Bewusst dunkel gestaltete Bereiche dürfen einen eigenen, etwas kräftigeren Ton behalten */
+html[data-theme="dark"] .weather-section,
+html[data-theme="dark"] .group-section{
+  background:linear-gradient(135deg,#06152b,#0b315c)!important;
+}
+
+/* Überschriften und Standardtexte in ehemals hellen Sektionen */
+html[data-theme="dark"] .section-title h2,
+html[data-theme="dark"] .section-title h3,
+html[data-theme="dark"] .hotel-copy h2,
+html[data-theme="dark"] .hotel-copy h3,
+html[data-theme="dark"] .diary-section h2,
+html[data-theme="dark"] .program-section h2,
+html[data-theme="dark"] .map-section h2,
+html[data-theme="dark"] .gallery-section h2,
+html[data-theme="dark"] .culinary h2,
+html[data-theme="dark"] .downloads-section h2,
+html[data-theme="dark"] .faq-section h2,
+html[data-theme="dark"] .emergency-section h2{
+  color:#eef5ff!important;
+}
+
+html[data-theme="dark"] .section-title p:not(.eyebrow),
+html[data-theme="dark"] .diary-text,
+html[data-theme="dark"] .hotel-copy address,
+html[data-theme="dark"] .culinary p,
+html[data-theme="dark"] .faq-answer,
+html[data-theme="dark"] .empty-state{
+  color:#aebbd0!important;
+}
+
+/* Kacheln / Karten / Listen */
+html[data-theme="dark"] .quick-grid a,
+html[data-theme="dark"] .news-card,
+html[data-theme="dark"] .diary-card,
+html[data-theme="dark"] .program-overview,
+html[data-theme="dark"] .day-tabs,
+html[data-theme="dark"] .timeline-content,
+html[data-theme="dark"] .place-card,
+html[data-theme="dark"] .weather-now,
+html[data-theme="dark"] .weather-card,
+html[data-theme="dark"] .gallery-item,
+html[data-theme="dark"] .culinary article,
+html[data-theme="dark"] .hotel-details div,
+html[data-theme="dark"] .download-card,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .faq-item,
+html[data-theme="dark"] .faq-item button,
+html[data-theme="dark"] .group-card,
+html[data-theme="dark"] .emergency-card,
+html[data-theme="dark"] .emergency-item,
+html[data-theme="dark"] .admin-card{
+  background:#101f34!important;
+  color:#eef5ff!important;
+  border-color:#263a53!important;
+}
+
+/* Programm speziell */
+html[data-theme="dark"] .program-section{
+  background:linear-gradient(180deg,#081426 0%,#0a1829 45%,#081426 100%)!important;
+}
+html[data-theme="dark"] .day-tabs{
+  box-shadow:inset 0 0 0 1px #263a53!important;
+}
+html[data-theme="dark"] .day-tab{
+  color:#dce7f7!important;
+}
+html[data-theme="dark"] .day-tab:hover{
+  background:#132942!important;
+}
+html[data-theme="dark"] .day-tab.active{
+  background:linear-gradient(135deg,#0b2b55,#0a5aa7)!important;
+  color:#fff!important;
+}
+html[data-theme="dark"] .day-tab-date,
+html[data-theme="dark"] .day-tab-title,
+html[data-theme="dark"] .timeline-marker small{
+  color:#aebbd0!important;
+}
+html[data-theme="dark"] .timeline-marker{
+  background:linear-gradient(145deg,#132942,#0f2137)!important;
+  border-color:#2d4865!important;
+}
+html[data-theme="dark"] .timeline-row.pending .timeline-marker{
+  background:linear-gradient(145deg,#3a3018,#2a2415)!important;
+}
+html[data-theme="dark"] .timeline-row time{
+  color:#75beff!important;
+}
+html[data-theme="dark"] .timeline::before{
+  background:linear-gradient(180deg,#319cf5 0%,#416b91 60%,#263a53 100%)!important;
+}
+
+/* Galerie / Filter */
+html[data-theme="dark"] .filter-button,
+html[data-theme="dark"] .student-photo-filter,
+html[data-theme="dark"] .map-filter,
+html[data-theme="dark"] .map-reset{
+  background:#132942!important;
+  color:#dce7f7!important;
+  border-color:#36506d!important;
+}
+html[data-theme="dark"] .filter-button.active,
+html[data-theme="dark"] .student-photo-filter.active{
+  background:#0b69bd!important;
+  color:#fff!important;
+}
+html[data-theme="dark"] .gallery-item{
+  box-shadow:0 12px 30px rgba(0,0,0,.28)!important;
+}
+
+/* Hotel */
+html[data-theme="dark"] .hotel-section{
+  background:linear-gradient(135deg,#0a1829,#081426)!important;
+}
+
+/* FAQ */
+html[data-theme="dark"] .faq-item button{
+  color:#eef5ff!important;
+}
+html[data-theme="dark"] .faq-item.open{
+  box-shadow:0 10px 28px rgba(0,0,0,.22)!important;
+}
+
+/* Notfall / Wetter-Tipps */
+html[data-theme="dark"] .weather-tip{
+  background:#102844!important;
+  border-color:#2a496a!important;
+}
+html[data-theme="dark"] .weather-tip span{
+  color:#dce7f7!important;
+}
+html[data-theme="dark"] .emergency-item:hover{
+  background:#152a43!important;
+  box-shadow:0 10px 26px rgba(0,0,0,.28)!important;
+}
+
+/* Mobile Navigation */
+@media(max-width:980px){
+  html[data-theme="dark"] nav{
+    background:#101f34!important;
+    border:1px solid #263a53!important;
+  }
+  html[data-theme="dark"] nav a{
+    color:#eef5ff!important;
+  }
+}
+
+/* Rechtliches / Fehlermeldungen / sonstige helle Restflächen */
+html[data-theme="dark"] .error-page,
+html[data-theme="dark"] .error-page>div,
+html[data-theme="dark"] .legal-content,
+html[data-theme="dark"] .legal-modal{
+  background:#081426!important;
+  color:#eef5ff!important;
+}
+
+/* Upload: flächendeckend dunkel nach Login */
+html[data-theme="dark"] .upload-section{
+  background:#081426!important;
+}
+html[data-theme="dark"] .upload-card,
+html[data-theme="dark"] .storage-box,
+html[data-theme="dark"] .file-item,
+html[data-theme="dark"] .privacy-box,
+html[data-theme="dark"] .dialog-card{
+  background:#101f34!important;
+  color:#eef5ff!important;
+  border-color:#263a53!important;
+}
+html[data-theme="dark"] .upload-progress li{
+  background:#0f2137!important;
+  border-color:#263a53!important;
+}
+html[data-theme="dark"] .upload-progress li.active{
+  background:#132f4d!important;
+  border-color:#3a77ad!important;
+}
+html[data-theme="dark"] .submit-hint,
+html[data-theme="dark"] .form-heading>div>p:last-child,
+html[data-theme="dark"] .file-meta{
+  color:#aebbd0!important;
+}
+
+/* Admin: helle Restflächen und Panels */
+html[data-theme="dark"] .shell,
+html[data-theme="dark"] .control-center,
+html[data-theme="dark"] .journey-simulator,
+html[data-theme="dark"] .integrations-panel{
+  background:#081426!important;
+}
+html[data-theme="dark"] .system-strip,
+html[data-theme="dark"] .journey-overview,
+html[data-theme="dark"] .quick-actions{
+  background:#263a53!important;
+}
+html[data-theme="dark"] .preflight-item,
+html[data-theme="dark"] .integration-card,
+html[data-theme="dark"] .quick-actions a{
+  background:#101f34!important;
+  border-color:#263a53!important;
+  color:#eef5ff!important;
+}

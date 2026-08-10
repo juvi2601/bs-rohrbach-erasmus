@@ -15,7 +15,7 @@
   </style>
   <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js" crossorigin="anonymous"></script>
 <script>(function(){try{var t=localStorage.getItem('bsr-theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)t='dark';document.documentElement.dataset.theme=t||'light';document.documentElement.style.colorScheme=t||'light'}catch(e){}})();</script>
-<link rel="stylesheet" href="/dark-mode.css?v=13.4">
+<link rel="stylesheet" href="/dark-mode.css?v=13.4.1">
 </head>
 <body>
 <header class="topbar">
@@ -137,6 +137,6 @@ async function loadAppOnly(runExplicitTest=false){
 document.getElementById('delegated-test').onclick=delegatedTest;document.getElementById('delegated-logout').onclick=delegatedLogout;document.getElementById('refresh').onclick=()=>loadAppOnly(true);
 loadPublicConfig().catch(e=>{text('ms-title','Konfiguration nicht erreichbar');text('ms-text',String(e));text('delegated-result',String(e))});loadAppOnly(false);
 </script>
-<script src="/version-display.js?v=12.1.0-dev.12"></script><script src="/dark-mode.js?v=13.4" defer></script>
+<script src="/version-display.js?v=12.1.0-dev.12"></script><script src="/dark-mode.js?v=13.4.1" defer></script>
 </body>
 </html>
