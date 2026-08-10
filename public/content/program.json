@@ -184,13 +184,15 @@
       "short": "Di"
     },
     {
-      "id": "mi",
-      "short": "Mi",
-      "date": "25.11.",
       "dayNumber": 4,
-      "title": "Brüssel & Europa",
-      "subtitle": "Einblicke in die Arbeit in Brüssel.",
+      "date": "25.11.",
+      "gallery": [
+        "/images/uploads/hausdereuropäischengeschichte.jpg",
+        "/images/uploads/andigahleitner.jpg"
+      ],
       "cover": "/images/uploads/hausdereuropäischengeschichte.jpg",
+      "subtitle": "Einblicke in die Arbeit in Brüssel.",
+      "title": "Brüssel & Europa",
       "events": [
         {
           "icon": "museum",
@@ -202,7 +204,7 @@
         {
           "time": "10:00-12:00",
           "title": "Vortrag und Einblicke mit Andreas Gahleitner",
-          "text": "Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel. Eventuell zuvor Besuch des \"Haus der Europäischen Geschichte\".",
+          "text": "Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel. ",
           "icon": "highlight",
           "status": "pending"
         },
@@ -226,7 +228,9 @@
           "text": "gemeinsames Abendessen in der Stadt",
           "status": null
         }
-      ]
+      ],
+      "id": "mi",
+      "short": "Mi"
     },
     {
       "dayNumber": 5,
