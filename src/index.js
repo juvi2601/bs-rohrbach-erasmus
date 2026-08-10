@@ -451,15 +451,52 @@ async function handleMediaUpload(request,env){
 // --- Ende DEV.9 R2-Medieneingang ---
 
 // --- DEV.10: Admin-Medienfreigabe ---
-const MEDIA_ADMIN_EMAILS = new Set(['j.vierlinger@bs-rohrbach.ac.at']);
-
-async function verifyMediaAdmin(request,env){
-  const user=await verifySchoolUser(request,env);
-  if(!MEDIA_ADMIN_EMAILS.has(String(user.email||'').toLowerCase())){
-    throw Object.assign(new Error('Für die Medienfreigabe ist ein Admin-Konto erforderlich.'),{status:403});
-  }
-  return user;
+// --- Version 13.5: reisebezogene Rollenbasis ---
+const TRIP_ACCESS = Object.freeze({
+  'bruessel-2026': Object.freeze({
+    'j.vierlinger@bs-rohrbach.ac.at': {role:'admin', name:'Jürgen Vierlinger'},
+    'd.lummerstorfer@bs-rohrbach.ac.at': {role:'teacher', name:'Dominik Lummerstorfer'},
+    'd.gabriel@bs-rohrbach.ac.at': {role:'teacher', name:'Daniela Gabriel'}
+  })
+});
+const ROLE_PERMISSIONS = Object.freeze({
+  admin:['media.moderate','diary.manage','live.manage','gallery.manage','users.manage','technical.manage'],
+  teacher:['media.moderate','diary.manage','live.manage','gallery.manage'],
+  student:['media.upload']
+});
+function tripAccessFor(email,project=MEDIA_PROJECT){
+  const normalized=String(email||'').trim().toLowerCase();
+  const entry=TRIP_ACCESS[project]?.[normalized]||null;
+  return entry?{project,email:normalized,role:entry.role,name:entry.name,permissions:ROLE_PERMISSIONS[entry.role]||[]}:null;
 }
+async function verifyTripRole(request,env,allowedRoles=[]){
+  const user=await verifySchoolUser(request,env);
+  const access=tripAccessFor(user.email);
+  if(!access||!allowedRoles.includes(access.role)){
+    throw Object.assign(new Error('Für diesen Bereich fehlt die erforderliche Reiseberechtigung.'),{status:403});
+  }
+  return {...user,access};
+}
+async function verifyMediaAdmin(request,env){
+  return verifyTripRole(request,env,['admin','teacher']);
+}
+async function handleAccessMe(request,env){
+  try{
+    const user=await verifySchoolUser(request,env);
+    const access=tripAccessFor(user.email);
+    return json({ok:true,user,access,project:MEDIA_PROJECT});
+  }catch(error){return mediaError(error)}
+}
+async function handleAccessUsers(request,env){
+  try{
+    const user=await verifyTripRole(request,env,['admin']);
+    const users=Object.entries(TRIP_ACCESS[MEDIA_PROJECT]||{}).map(([email,x])=>({
+      email,name:x.name,role:x.role,permissions:ROLE_PERMISSIONS[x.role]||[]
+    }));
+    return json({ok:true,user,project:MEDIA_PROJECT,users});
+  }catch(error){return mediaError(error)}
+}
+// --- Ende Version 13.5 Rollenbasis ---
 function pendingPrefix(){return `${MEDIA_PROJECT}/pending/`}
 function approvedPrefix(){return `${MEDIA_PROJECT}/approved/`}
 function approvedKeyFor(key){return String(key).replace(`/${'pending'}/`,`/approved/`)}
@@ -568,7 +605,9 @@ export default {async fetch(request,env){
   const url=new URL(request.url);
   if(url.pathname==='/auth')return handleAuth(url,env);
   if(url.pathname==='/callback')return handleCallback(url,env);
-  if(url.pathname==='/api/media/config'&&request.method==='GET')return handleMediaConfig(url,env);
+  if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
+    if(url.pathname==='/api/access/users'&&request.method==='GET')return handleAccessUsers(request,env);
+    if(url.pathname==='/api/media/config'&&request.method==='GET')return handleMediaConfig(url,env);
   if(url.pathname==='/api/media/status'&&request.method==='GET')return handleMediaStatus(request,env);
   if(url.pathname==='/api/media/upload'&&request.method==='POST')return handleMediaUpload(request,env);
   if(url.pathname==='/api/media/admin/list'&&request.method==='GET')return handleMediaAdminList(request,env);
