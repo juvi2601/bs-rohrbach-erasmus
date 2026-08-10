@@ -1,0 +1,92 @@
+
+/* Version 13.4 – Dark Mode */
+:root{color-scheme:light}
+html[data-theme="dark"]{color-scheme:dark;
+  --ink:#eef5ff;--navy:#dcecff;--blue:#64aef4;--blue2:#5bb4ff;--yellow:#ffd43b;
+  --paper:#081426;--white:#101f34;--muted:#aebbd0;--line:#263a53;--sky:#132b46;
+  --shadow:0 24px 70px rgba(0,0,0,.34);--green:#52d39b
+}
+html[data-theme="dark"] body{background:#081426!important;color:#eef5ff!important}
+html[data-theme="dark"] .site-header,
+html[data-theme="dark"] .upload-header,
+html[data-theme="dark"] .topbar{background:rgba(9,22,39,.94)!important;border-color:#263a53!important}
+html[data-theme="dark"] .site-header.scrolled{box-shadow:0 10px 35px rgba(0,0,0,.32)!important}
+html[data-theme="dark"] .brand small,
+html[data-theme="dark"] .section-title p:not(.eyebrow),
+html[data-theme="dark"] .hotel-copy p,
+html[data-theme="dark"] .group-card p,
+html[data-theme="dark"] .admin-card p,
+html[data-theme="dark"] .quick-grid small,
+html[data-theme="dark"] .tile p,
+html[data-theme="dark"] .stats span,
+html[data-theme="dark"] .stats small,
+html[data-theme="dark"] .status-card small,
+html[data-theme="dark"] label small,
+html[data-theme="dark"] .optional{color:#aebbd0!important}
+html[data-theme="dark"] .quick-grid a,
+html[data-theme="dark"] .today-card,
+html[data-theme="dark"] .news-card,
+html[data-theme="dark"] .program-card,
+html[data-theme="dark"] .day-panel,
+html[data-theme="dark"] .diary-card,
+html[data-theme="dark"] .map-wrap,
+html[data-theme="dark"] .weather-card,
+html[data-theme="dark"] .gallery-card,
+html[data-theme="dark"] .hotel-details>div,
+html[data-theme="dark"] .download-card,
+html[data-theme="dark"] .faq-item,
+html[data-theme="dark"] .group-card,
+html[data-theme="dark"] .emergency-card,
+html[data-theme="dark"] .admin-card,
+html[data-theme="dark"] .legal-dialog,
+html[data-theme="dark"] .upload-card,
+html[data-theme="dark"] .status-card,
+html[data-theme="dark"] .stats article,
+html[data-theme="dark"] .tile,
+html[data-theme="dark"] .system-strip>div,
+html[data-theme="dark"] .welcome,
+html[data-theme="dark"] .integration-card,
+html[data-theme="dark"] .journey-overview article,
+html[data-theme="dark"] .quick-actions a,
+html[data-theme="dark"] .simulator-panel,
+html[data-theme="dark"] .preflight-panel,
+html[data-theme="dark"] .moderation-card,
+html[data-theme="dark"] .approved-section{background:#101f34!important;color:#eef5ff!important;border-color:#263a53!important}
+html[data-theme="dark"] .today-card,
+html[data-theme="dark"] .welcome,
+html[data-theme="dark"] .tile.featured{background:linear-gradient(135deg,#101f34,#132b46)!important}
+html[data-theme="dark"] .progress-card{background:#061327!important}
+html[data-theme="dark"] .icon-button{background:#152a43!important;color:#eef5ff!important}
+html[data-theme="dark"] .nav-upload,
+html[data-theme="dark"] .button-dark{background:#eaf2ff!important;color:#071d49!important}
+html[data-theme="dark"] .button.ghost{background:#101f34!important;color:#dcecff!important;border-color:#36506d!important}
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] input{background:#0c1a2e!important;color:#eef5ff!important;border-color:#36506d!important}
+html[data-theme="dark"] .drop-zone{background:#0c1a2e!important;border-color:#41658a!important}
+html[data-theme="dark"] .drop-zone:hover,
+html[data-theme="dark"] .drop-zone:focus,
+html[data-theme="dark"] .drop-zone.dragging{background:#122942!important}
+html[data-theme="dark"] .signed-in-bar{background:#112943!important;border-color:#29496b!important}
+html[data-theme="dark"] .legal-tabs,
+html[data-theme="dark"] .legal-dialog-head{background:#0c1a2e!important;border-color:#263a53!important}
+html[data-theme="dark"] .legal-block{border-color:#263a53!important}
+html[data-theme="dark"] .legal-block p{color:#bac6d8!important}
+html[data-theme="dark"] .legal-actions a{background:#152f4d!important;color:#83c7ff!important}
+html[data-theme="dark"] .eu-funding{background:#0c1a2e!important;border-color:#263a53!important}
+html[data-theme="dark"] .eu-funding h2{color:#eef5ff!important}
+html[data-theme="dark"] .eu-funding-disclaimer{color:#aebbd0!important;border-color:#263a53!important}
+html[data-theme="dark"] footer{background:#06101f!important;color:#dce7f7!important}
+html[data-theme="dark"] .map-toolbar,
+html[data-theme="dark"] .place-sidebar,
+html[data-theme="dark"] .map-legend{background:#101f34!important;color:#eef5ff!important;border-color:#263a53!important}
+html[data-theme="dark"] .place-item{border-color:#263a53!important}
+html[data-theme="dark"] .leaflet-control-zoom a,
+html[data-theme="dark"] .leaflet-control-attribution{background:#101f34!important;color:#dcecff!important}
+html[data-theme="dark"] .notice{background:#342b12!important;border-color:#685923!important}
+html[data-theme="dark"] .notice p{color:#f0d98b!important}
+html[data-theme="dark"] .badge{background:#243449!important;color:#cad6e6!important}
+html[data-theme="dark"] .theme-toggle{background:#152a43!important;color:#ffd43b!important;border-color:#36506d!important}
+.theme-toggle{width:42px;height:42px;border-radius:14px;border:1px solid transparent;background:#edf3fb;color:#071d49;display:inline-grid;place-items:center;cursor:pointer;font-size:19px;line-height:1;flex:0 0 auto}
+.theme-toggle:hover{transform:translateY(-1px)}
+.theme-toggle:focus-visible{outline:3px solid rgba(8,126,232,.35);outline-offset:2px}
