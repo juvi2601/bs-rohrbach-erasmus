@@ -55,10 +55,16 @@
           "icon": "meeting"
         },
         {
-          "time": "15:30–16:00",
+          "time": "15:30–17:00",
           "title": "Check-in und Zimmerbezug",
-          "text": "Der Abend steht anschließend zur freien Verfügung.",
+          "text": "Zimmer beziehen und das Hotel kennenlernen.",
           "icon": "hotel"
+        },
+        {
+          "icon": "restaurant",
+          "time": "20:00",
+          "title": "Abendessen",
+          "text": "gemeinsames Abendessen in der Stadt"
         }
       ]
     },
@@ -110,6 +116,12 @@
           "title": "Rückfahrt nach Brüssel",
           "text": "Voraussichtliche Ankunft zwischen 17:45 und 18:00 Uhr.",
           "icon": "bus"
+        },
+        {
+          "icon": "restaurant",
+          "time": "20:00",
+          "title": "Abendessen",
+          "text": "gemeinsames Abendessen in der Stadt"
         }
       ],
       "id": "mo",
@@ -121,7 +133,8 @@
       "gallery": [
         "/images/parlamentarium.jpg",
         "/images/europaeisches-parlament.webp",
-        "/images/europaeischer-rat.jpg"
+        "/images/europaeischer-rat.jpg",
+        "/images/uploads/atomium_by_night_2018.jpg"
       ],
       "cover": "/images/europaeisches-parlament.webp",
       "subtitle": "Parlamentarium, Parlament und Europäischer Rat.",
@@ -159,6 +172,12 @@
           "text": "Einblicke in die Arbeit der Staats- und Regierungschefs.",
           "status": "confirmed",
           "icon": "institution"
+        },
+        {
+          "icon": "highlight",
+          "time": "Abendprogramm",
+          "title": "Besuch Atomium u. Abendessen",
+          "text": "Besuch des Atomiums und gemeinsames Abendessen."
         }
       ],
       "id": "di",
@@ -171,33 +190,53 @@
       "dayNumber": 4,
       "title": "Brüssel & Europa",
       "subtitle": "Einblicke in die Arbeit in Brüssel.",
-      "cover": "/images/europaeischer-rat.jpg",
+      "cover": "/images/uploads/hausdereuropäischengeschichte.jpg",
       "events": [
         {
-          "time": "Vormittag",
-          "title": "Vortrag und Einblicke mit Andreas Gahleitner",
-          "text": "Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel. Eventuell zuvor Besuch des \"Haus der Europäischen Geschichte\".",
-          "icon": "presentation"
+          "icon": "museum",
+          "time": "09:00-10:00",
+          "title": "Haus der europäischen Geschichte",
+          "text": "Besichtigung des Haus der europäischen Geschichte (gemeinsam mit BSZ Waldkirchen)",
+          "status": "pending"
         },
         {
-          "time": "Nachmittag",
-          "title": "Stadtprogramm und Freizeit",
-          "text": "Zeit für weitere Eindrücke, Einkäufe und gemeinsames Abendessen.",
-          "icon": "leisure"
+          "time": "10:00-12:00",
+          "title": "Vortrag und Einblicke mit Andreas Gahleitner",
+          "text": "Gemeinsamer Programmpunkt beider Schulen über die Arbeit in Brüssel. Eventuell zuvor Besuch des \"Haus der Europäischen Geschichte\".",
+          "icon": "highlight",
+          "status": "pending"
+        },
+        {
+          "icon": "restaurant",
+          "time": "12:00-14:00",
+          "title": "Mittagessen",
+          "text": "Mittagessen bzw. Freizeit"
+        },
+        {
+          "icon": "presentation",
+          "time": "14:00-16:00",
+          "title": "Ständige Vertretung Österreichs in Brüssel",
+          "text": "Besuch der ständigen Vertretung Österreichs in Brüssel.",
+          "status": "pending"
+        },
+        {
+          "icon": "restaurant",
+          "time": "Abendprogramm",
+          "title": "Abendessen",
+          "text": "gemeinsames Abendessen in der Stadt",
+          "status": null
         }
       ]
     },
     {
-      "id": "do",
-      "short": "Do",
-      "date": "26.11.",
       "dayNumber": 5,
-      "title": "Luxemburg & Heimreise",
-      "subtitle": "Zwischenstopp in Luxemburg-Stadt und Heimreise nach Rohrbach.",
-      "cover": "/images/luxemburg-stadt.webp",
+      "date": "26.11.",
       "gallery": [
         "/images/luxemburg-stadt.webp"
       ],
+      "cover": "/images/luxemburg-stadt.webp",
+      "subtitle": "Zwischenstopp in Luxemburg-Stadt und Heimreise nach Rohrbach.",
+      "title": "Luxemburg & Heimreise",
       "events": [
         {
           "time": "10:00",
@@ -229,7 +268,9 @@
           "text": "Voraussichtliche Ankunft in Rohrbach und Ende unserer Brüsselreise.",
           "icon": "arrival"
         }
-      ]
+      ],
+      "id": "do",
+      "short": "Do"
     }
   ]
 }
