@@ -1245,3 +1245,6 @@ img{content-visibility:auto}
 .gallery-item figcaption small{margin-top:12px;color:var(--muted);opacity:.8}
 @media(max-width:900px){.gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.gallery-image-wrap{height:250px}}
 @media(max-width:620px){.gallery-grid{grid-template-columns:1fr;gap:18px}.gallery-image-wrap{height:240px}.gallery-item figcaption{padding:19px 19px 22px}}
+
+/* Version 13.2 – Erasmus+ Förderhinweis */
+.eu-funding{background:#fff;padding:42px clamp(18px,5vw,80px);border-top:1px solid var(--line)}.eu-funding-inner{max-width:1180px;margin:0 auto}.eu-funding-head{display:flex;align-items:center;justify-content:space-between;gap:36px}.eu-funding-kicker{margin:0 0 6px;color:var(--blue2);font-size:11px;font-weight:900;letter-spacing:.16em}.eu-funding h2{margin:0;color:var(--ink);font-size:clamp(25px,3vw,38px);letter-spacing:-.035em}.eu-funding-logo{width:min(390px,42vw);height:auto}.eu-funding-disclaimer{margin:25px 0 0;padding-top:20px;border-top:1px solid var(--line);color:#52617a;font-size:13px;line-height:1.65;max-width:1080px}@media(max-width:700px){.eu-funding{padding-top:32px;padding-bottom:32px}.eu-funding-head{flex-direction:column;align-items:flex-start;gap:20px}.eu-funding-logo{width:min(100%,360px)}.eu-funding-disclaimer{font-size:12px}}
