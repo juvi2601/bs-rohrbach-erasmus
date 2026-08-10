@@ -43,10 +43,13 @@
       "description": "Antwerpen gilt seit Jahrhunderten als internationales Zentrum des Diamantenhandels und der Schmuckindustrie."
     },
     {
-      "title": "Waterloo",
-      "day": "Waterloo",
-      "image": "/images/waterloo.jpg",
-      "description": "Am historischen Schauplatz der Schlacht von 1815 wird europäische Geschichte besonders anschaulich."
+      "title": "Luxemburg-Stadt",
+      "day": "Luxemburg",
+      "image": "/images/luxemburg-stadt.webp",
+      "description": "Am historischen Schauplatz der Schlacht von 1815 wird europäische Geschichte besonders anschaulich.",
+      "text": "Historische Altstadt, Festungsanlagen und europäische Institutionen prägen Luxemburgs Hauptstadt.",
+      "alt": "Panoramablick auf Luxemburg-Stadt",
+      "credit": "Foto: Wikimedia Commons · CC BY-SA"
     },
     {
       "title": "Belgische Pommes",

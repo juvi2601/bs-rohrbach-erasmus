@@ -318,7 +318,7 @@ function renderMap(places){
     "Hotel":{color:"#e63946",icon:"H"},"EU":{color:"#1557b0",icon:"EU"},
     "Sehenswürdigkeit":{color:"#7b2cbf",icon:"★"},"Metro":{color:"#f59e0b",icon:"M"},
     "Essen":{color:"#16a34a",icon:"✦"},"Notfall":{color:"#dc2626",icon:"!"},
-    "Antwerpen":{color:"#0f766e",icon:"A"},"Waterloo":{color:"#64748b",icon:"W"}
+    "Antwerpen":{color:"#0f766e",icon:"A"},"Luxemburg":{color:"#2563eb",icon:"L"}
   };
   const styleFor=cat=>categories[cat]||{color:"#334155",icon:"•"};
   const validPlaces=places.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)));
@@ -357,7 +357,7 @@ function renderMap(places){
     if(category==='Hotel'||category==='Sehenswürdigkeit'||category==='Essen')return 18;
     if(category==='EU'||category==='Metro'||category==='Notfall')return 17;
     if(category==='Antwerpen')return 16;
-    if(category==='Waterloo')return 15;
+    if(category==='Luxemburg')return 15;
     return 17;
   };
 

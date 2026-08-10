@@ -91,19 +91,20 @@
       "lat": 51.2172
     },
     {
-      "lng": 4.4047,
-      "walk": "Ausflug mit Bus",
-      "address": "Rte du Lion 1815, 1420 Braine-l'Alleud",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Waterloo+Memorial+1815",
-      "title": "Waterloo Memorial",
-      "image": "/images/waterloo.jpg",
+      "title": "Luxemburg-Stadt",
+      "category": "Luxemburg",
+      "lat": 49.6116,
+      "lng": 6.1319,
       "coordinates": {
-        "lat": 50.684672,
-        "lng": 4.383309
+        "lat": 49.6116,
+        "lng": 6.1319
       },
-      "description": "Historischer Schauplatz der Schlacht von Waterloo.",
-      "category": "Waterloo",
-      "lat": 50.6785
+      "address": "Ville Haute, Luxembourg",
+      "maps": "https://www.google.com/maps/search/?api=1&query=Luxembourg+City+Old+Town",
+      "image": "/images/luxemburg-stadt.webp",
+      "description": "Zwischenstopp auf der Heimreise: Altstadt, Europaviertel und Zeit für eine Pause.",
+      "walk": "Zwischenstopp auf der Heimreise",
+      "imageCredit": "Foto: Wikimedia Commons · CC BY-SA"
     },
     {
       "lng": 4.352,

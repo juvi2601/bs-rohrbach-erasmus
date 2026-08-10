@@ -79,17 +79,20 @@
       }
     },
     {
-      "title": "Waterloo Memorial",
-      "category": "Waterloo",
-      "address": "Rte du Lion 1815, 1420 Braine-l'Alleud",
-      "walk": "Ausflug mit Bus",
-      "image": "/images/waterloo.jpg",
-      "description": "Historischer Schauplatz der Schlacht von Waterloo.",
-      "maps": "https://www.google.com/maps/search/?api=1&query=Waterloo+Memorial+1815",
+      "title": "Luxemburg-Stadt",
+      "category": "Luxemburg",
+      "lat": 49.6116,
+      "lng": 6.1319,
       "coordinates": {
-        "lat": 50.6785,
-        "lng": 4.4047
-      }
+        "lat": 49.6116,
+        "lng": 6.1319
+      },
+      "address": "Ville Haute, Luxembourg",
+      "maps": "https://www.google.com/maps/search/?api=1&query=Luxembourg+City+Old+Town",
+      "image": "/images/luxemburg-stadt.webp",
+      "description": "Zwischenstopp auf der Heimreise: Altstadt, Europaviertel und Zeit für eine Pause.",
+      "walk": "Zwischenstopp auf der Heimreise",
+      "imageCredit": "Foto: Wikimedia Commons · CC BY-SA"
     },
     {
       "title": "Metro De Brouckère",

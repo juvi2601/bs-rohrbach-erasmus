@@ -192,22 +192,42 @@
       "short": "Do",
       "date": "26.11.",
       "dayNumber": 5,
-      "title": "Abschluss & Heimreise",
-      "subtitle": "Ständige Österreichische Vertretung, Waterloo, Rückreise nach Rohrbach",
-      "cover": "/images/waterloo.jpg",
+      "title": "Luxemburg & Heimreise",
+      "subtitle": "Zwischenstopp in Luxemburg-Stadt und Heimreise nach Rohrbach.",
+      "cover": "/images/luxemburg-stadt.webp",
+      "gallery": [
+        "/images/luxemburg-stadt.webp"
+      ],
       "events": [
         {
-          "time": "Vormittag",
-          "title": "Ständige Vertretung Österreichs",
-          "text": "Aus dem Hotel auschecken. Besuch der Ständigen österreichischen Vertretung in Brüssel.",
-          "status": "pending",
+          "time": "10:00",
+          "title": "Abreise vom Hotel",
+          "text": "Nach dem Auschecken Abfahrt aus Brüssel.",
+          "icon": "bus"
+        },
+        {
+          "time": "ca. 13:30–14:00",
+          "title": "Ankunft in Luxemburg-Stadt",
+          "text": "Zwischenstopp in der Hauptstadt des Großherzogtums Luxemburg.",
+          "icon": "location"
+        },
+        {
+          "time": "ca. 3 Stunden",
+          "title": "Luxemburg-Stadt entdecken",
+          "text": "Zeit für Altstadt, europäische Institutionen und eine Pause, um sich vor der langen Heimfahrt die Füße zu vertreten.",
           "icon": "institution"
         },
         {
-          "time": "Mittag",
-          "title": "Beginn der Heimreise",
-          "text": "Rückfahrt via Waterloo nach Rohrbach.",
+          "time": "ca. 17:00",
+          "title": "Weiterreise nach Rohrbach",
+          "text": "Abfahrt Richtung Österreich und Heimreise zur Berufsschule Rohrbach.",
           "icon": "bus"
+        },
+        {
+          "time": "ca. 24:00",
+          "title": "Ankunft bei der BS Rohrbach",
+          "text": "Voraussichtliche Ankunft in Rohrbach und Ende unserer Brüsselreise.",
+          "icon": "arrival"
         }
       ]
     }

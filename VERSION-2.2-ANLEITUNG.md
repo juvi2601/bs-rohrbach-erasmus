@@ -3,7 +3,7 @@
 ## Neu
 - automatische Tagesanzeige und Reisefortschritt
 - interaktive Karte mit Pins und Google-Maps-Links
-- Live-Wetter für Brüssel, Antwerpen und Waterloo
+- Live-Wetter für Brüssel, Antwerpen und Luxemburg
 - CMS für Startseite, News, Tagesprogramm, Galerie, Orte, Downloads und FAQ
 - öffentliche Galerie mit Filtern, Vollbild, Tastatur- und Wischsteuerung
 - installierbare PWA
