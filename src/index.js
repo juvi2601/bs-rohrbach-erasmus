@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.7.2';
+const VERSION = '14.0-dev.7.2.1';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -931,6 +931,7 @@ export default {async fetch(request,env){
         const object=await env.MEDIA_BUCKET.get(key);
         if(!object)return new Response('Nicht gefunden',{status:404});
         const headers=new Headers();object.writeHttpMetadata(headers);headers.set('cache-control','private, max-age=300');headers.set('x-content-type-options','nosniff');
+        if(object.customMetadata?.originalName)headers.set('x-original-filename',encodeURIComponent(object.customMetadata.originalName));
         return new Response(object.body,{headers});
       }catch(error){return mediaError(error)}
     }
@@ -949,7 +950,7 @@ export default {async fetch(request,env){
         if(declaredSize>12*1024*1024)throw Object.assign(new Error('Das Bild darf maximal 12 MB groß sein.'),{status:413});
         const ext=contentType==='image/png'?'png':contentType==='image/webp'?'webp':'jpg';
         const key=`__system/trips/assets/${id}/${slot}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
-        await env.MEDIA_BUCKET.put(key,request.body,{httpMetadata:{contentType},customMetadata:{tripId:id,slot,uploadedBy:user.email,uploadedAt:new Date().toISOString()}});
+        await env.MEDIA_BUCKET.put(key,request.body,{httpMetadata:{contentType},customMetadata:{tripId:id,slot,originalName:decodeURIComponent(String(request.headers.get('x-file-name')||'')).slice(0,180),uploadedBy:user.email,uploadedAt:new Date().toISOString()}});
         return json({ok:true,key,slot});
       }catch(error){return mediaError(error)}
     }
