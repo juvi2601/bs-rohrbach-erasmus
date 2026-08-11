@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.5.2">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.6">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -21,7 +21,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 5.2</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 6</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -33,7 +33,8 @@
 <button type="button" class="wizard-step" data-step="2">2 · Reiseinfos<small>Texte, An-/Abreise</small></button>
 <button type="button" class="wizard-step" data-step="3">3 · Unterkunft<small>Hotel & Kontaktdaten</small></button>
 <button type="button" class="wizard-step" data-step="4">4 · Personen<small>Lehrkräfte & Notfall</small></button>
-<button type="button" class="wizard-step" data-step="5">5 · Abschluss<small>Dokumente & Funktionen</small></button>
+<button type="button" class="wizard-step" data-step="5">5 · Dokumente<small>Links & Funktionen</small></button>
+<button type="button" class="wizard-step" data-step="6">6 · Bilder<small>Titel, Hotel, Programm</small></button>
 </div>
 <form id="tripForm">
 <div class="wizard-panel" data-panel="1">
@@ -96,7 +97,14 @@
 <label><input id="featMap" type="checkbox" checked> Karte</label>&nbsp;&nbsp;
 <label><input id="featJourney" type="checkbox" checked> Smart Journey</label>&nbsp;&nbsp;
 <label><input id="featDownloads" type="checkbox" checked> Downloads</label></div></div>
-<div class="field full"><h3>Bilder & Programm</h3><div class="notice" style="margin:0"><strong>Folgt in den nächsten Modulen:</strong> Titelbild, Hotelbild, Programmbilder sowie Reisetage und Programmpunkte.</div></div>
+</div>
+<div class="wizard-panel" data-panel="6" hidden>
+<div class="field full"><p class="eyebrow">Schritt 6</p><h2 style="margin:0">Bilder</h2><small>Die Bilder werden direkt dem Reise-Entwurf zugeordnet. JPG, PNG oder WebP; maximal 12 MB je Bild.</small></div>
+<div class="field full"><div class="image-slots">
+ <div class="image-slot"><strong>Titelbild *</strong><p>Das große Hauptbild der Reisewebsite.</p><input id="heroImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="hero">Titelbild hochladen</button><div id="heroImageStatus" class="image-status">Noch kein Bild zugeordnet.</div></div>
+ <div class="image-slot"><strong>Hotelbild</strong><p>Bild der Unterkunft bzw. des Hotels.</p><input id="hotelImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="hotel">Hotelbild hochladen</button><div id="hotelImageStatus" class="image-status">Noch kein Bild zugeordnet.</div></div>
+ <div class="image-slot program"><strong>Programmbilder</strong><p>Mehrere Bilder für Programmpunkte. Die genaue Zuordnung erfolgt mit dem Tagesprogramm in Modul 7.</p><input id="programImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="program">Programmbild hinzufügen</button><div id="programImageStatus" class="image-status">Noch keine Programmbilder zugeordnet.</div></div>
+</div></div>
 <div class="field full"><h3>Vollständigkeitsprüfung</h3><div id="wizardSummary" class="wizard-summary"></div></div><div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
 <div class="actions"><button class="button primary" type="submit" id="saveBtn">Entwurf speichern</button><a class="button ghost" href="/admin/reisen.html">Abbrechen</a></div>
 <p id="message"></p>
@@ -135,7 +143,7 @@ async function loadDraft(){
   $('title').value=x.title||'';$('tripId').value=x.id||'';$('tripId').readOnly=true;$('tripId').dataset.edited='1';
   $('destination').value=x.destination||'';$('country').value=x.country||'';$('startDate').value=x.startDate||'';$('endDate').value=x.endDate||'';
   $('subtitle').value=x.subtitle||'';$('primary').value=x.theme?.primary||'#0b4f8a';$('accent').value=x.theme?.accent||'#f2c94c';
-  const w=x.website||{},tr=x.transport||{},ac=x.accommodation||{},tm=x.team||{},em=x.emergency||{},dc=x.documents||{},ft=x.features||{};
+  const w=x.website||{},tr=x.transport||{},ac=x.accommodation||{},tm=x.team||{},em=x.emergency||{},dc=x.documents||{},ft=x.features||{},im=x.images||{};
   $('intro').value=w.intro||x.subtitle||'';
   $('outboundMode').value=tr.outboundMode||'';$('meetingPoint').value=tr.meetingPoint||'';$('arrivalInfo').value=tr.arrivalInfo||'';$('returnMode').value=tr.returnMode||'';$('returnInfo').value=tr.returnInfo||'';$('transportNotes').value=tr.notes||'';
   $('hotelName').value=ac.name||w.hotelName||'';$('hotelAddress').value=ac.address||w.hotelAddress||'';$('hotelWebsite').value=ac.website||'';$('hotelPhone').value=ac.phone||'';$('checkIn').value=ac.checkIn||'';$('checkOut').value=ac.checkOut||'';$('hotelNotes').value=ac.notes||'';
@@ -143,6 +151,7 @@ async function loadDraft(){
   $('contactName').value=em.contactName||w.contactName||'';$('contactPhone').value=em.contactPhone||w.contactPhone||'';$('schoolPhone').value=em.schoolPhone||'';$('insurance').value=em.insurance||'';$('emergencyNotes').value=em.notes||'';
   $('docProgram').value=dc.program||'';$('docPacking').value=dc.packingList||'';$('docParent').value=dc.parentInfo||'';$('docInsurance').value=dc.insuranceInfo||'';$('docOther').value=dc.other||'';
   $('featDiary').checked=ft.diary!==false;$('featGallery').checked=ft.gallery!==false;$('featUpload').checked=ft.upload!==false;$('featMap').checked=ft.map!==false;$('featJourney').checked=ft.smartJourney!==false;$('featDownloads').checked=ft.downloads!==false;
+  window.tripImages={hero:im.hero||'',hotel:im.hotel||'',program:Array.isArray(im.program)?im.program:[]}; updateImageStatuses();
   $('pageTitle').textContent='Reise-Entwurf bearbeiten';$('saveBtn').textContent='Änderungen speichern';$('state').textContent='Entwurf geladen';preview();
  }catch(e){$('message').className='notice';$('message').textContent=e.message}
 }
@@ -163,7 +172,8 @@ $('tripForm').addEventListener('submit',async e=>{
     team:{teachers:lines('teachers'),editors:lines('editors'),studentListNote:$('studentListNote').value},
     emergency:{contactName:$('contactName').value,contactPhone:$('contactPhone').value,schoolPhone:$('schoolPhone').value,insurance:$('insurance').value,notes:$('emergencyNotes').value},
     documents:{program:$('docProgram').value,packingList:$('docPacking').value,parentInfo:$('docParent').value,insuranceInfo:$('docInsurance').value,other:$('docOther').value},
-    features:{diary:$('featDiary').checked,gallery:$('featGallery').checked,upload:$('featUpload').checked,map:$('featMap').checked,smartJourney:$('featJourney').checked,downloads:$('featDownloads').checked}
+    features:{diary:$('featDiary').checked,gallery:$('featGallery').checked,upload:$('featUpload').checked,map:$('featMap').checked,smartJourney:$('featJourney').checked,downloads:$('featDownloads').checked},
+    images:window.tripImages||{hero:'',hotel:'',program:[]}
   };
   const endpoint=editId?'/api/trips/drafts/'+encodeURIComponent(editId):'/api/trips/drafts';
   const r=await fetch(endpoint,{method:editId?'PUT':'POST',headers:{authorization:'Bearer '+await token(),'content-type':'application/json'},body:JSON.stringify(body)});
@@ -173,30 +183,54 @@ $('tripForm').addEventListener('submit',async e=>{
 });
 init().catch(e=>$('message').textContent=e.message);
 
+
+window.tripImages=window.tripImages||{hero:'',hotel:'',program:[]};
+function updateImageStatuses(){
+ const im=window.tripImages||{};
+ const hs=$('heroImageStatus'),ts=$('hotelImageStatus'),ps=$('programImageStatus');
+ if(hs){hs.textContent=im.hero?'✓ Titelbild zugeordnet':'Noch kein Bild zugeordnet.';hs.classList.toggle('ok',!!im.hero);}
+ if(ts){ts.textContent=im.hotel?'✓ Hotelbild zugeordnet':'Noch kein Bild zugeordnet.';ts.classList.toggle('ok',!!im.hotel);}
+ if(ps){const n=(im.program||[]).length;ps.textContent=n?`✓ ${n} Programmbild${n===1?'':'er'} zugeordnet`:'Noch keine Programmbilder zugeordnet.';ps.classList.toggle('ok',n>0);}
+}
+async function uploadTripImage(slot){
+ if(!editingId){setStatus('Bitte den Entwurf zuerst speichern, bevor Bilder hochgeladen werden.','error');return;}
+ const map={hero:'heroImageFile',hotel:'hotelImageFile',program:'programImageFile'},file=$(map[slot])?.files?.[0];
+ if(!file){setStatus('Bitte zuerst ein Bild auswählen.','error');return;}
+ setStatus('Bild wird hochgeladen…','');
+ try{
+   const token=await getToken();
+   const r=await fetch(`/api/trips/draft-image?id=${encodeURIComponent(editingId)}&slot=${encodeURIComponent(slot)}`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':file.type},body:file});
+   const data=await r.json(); if(!r.ok)throw new Error(data.message||'Upload fehlgeschlagen.');
+   if(slot==='program')window.tripImages.program=[...(window.tripImages.program||[]),data.key]; else window.tripImages[slot]=data.key;
+   updateImageStatuses(); setStatus('Bild hochgeladen. Bitte anschließend Änderungen speichern.','ok');
+ }catch(e){setStatus(e.message||'Upload fehlgeschlagen.','error');}
+}
+document.querySelectorAll('[data-upload-slot]').forEach(b=>b.addEventListener('click',()=>uploadTripImage(b.dataset.uploadSlot)));
+updateImageStatuses();
 let wizardStep=1;
 function wizardRequired(step){
  const ids={1:['title','tripId','destination','country','startDate','endDate'],
  2:['intro','outboundMode','meetingPoint','returnInfo'],
- 3:['hotelName','hotelAddress'],4:['teachers'],5:[]}[step]||[];
+ 3:['hotelName','hotelAddress'],4:['teachers'],5:[],6:[]}[step]||[];
  return ids.filter(id=>!($(id)?.value||'').trim());
 }
 function showWizardStep(n){
- wizardStep=Math.max(1,Math.min(5,n));
+ wizardStep=Math.max(1,Math.min(6,n));
  document.querySelectorAll('.wizard-panel').forEach(p=>p.hidden=Number(p.dataset.panel)!==wizardStep);
  document.querySelectorAll('.wizard-step').forEach(b=>{
    const s=Number(b.dataset.step); b.classList.toggle('active',s===wizardStep);
    b.classList.toggle('done',s<wizardStep && wizardRequired(s).length===0);
  });
  $('wizardBack').style.display=wizardStep===1?'none':'inline-flex';
- $('wizardNext').style.display=wizardStep===5?'none':'inline-flex';
- if(wizardStep===5)renderWizardSummary();
+ $('wizardNext').style.display=wizardStep===6?'none':'inline-flex';
+ if(wizardStep===6)renderWizardSummary();
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderWizardSummary(){
  const checks=[
  ['Grunddaten',wizardRequired(1).length===0],['Website & An-/Abreise',wizardRequired(2).length===0],
  ['Unterkunft',wizardRequired(3).length===0],['Lehrkräfte',wizardRequired(4).length===0],
- ['Bilder','future'],['Tagesprogramm','future']
+ ['Bilder',!!(window.tripImages&&window.tripImages.hero)],['Tagesprogramm','future']
  ];
  $('wizardSummary').innerHTML=checks.map(([label,state])=>{
   if(state==='future')return `<div class="check-row warn">⏳ <strong>${label}</strong><br><small>folgt im nächsten Modul</small></div>`;

@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.5.1';
+const VERSION = '14.0-dev.6';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -341,6 +341,7 @@ function cleanTripDraft(input={}){
   const emergency=(input.emergency&&typeof input.emergency==='object')?input.emergency:{};
   const documents=(input.documents&&typeof input.documents==='object')?input.documents:{};
   const features=(input.features&&typeof input.features==='object')?input.features:{};
+  const images=(input.images&&typeof input.images==='object')?input.images:{};
   const arr=v=>Array.isArray(v)?v.map(x=>cleanText(x,180)).filter(Boolean):[];
   const bool=(v,d=true)=>typeof v==='boolean'?v:d;
   return {
@@ -351,7 +352,8 @@ function cleanTripDraft(input={}){
     team:{editors:arr(team.editors),teachers:arr(team.teachers),studentListNote:cleanText(team.studentListNote,220)},
     emergency:{contactName:cleanText(emergency.contactName||contactName,140),contactPhone:cleanText(emergency.contactPhone||contactPhone,80),schoolPhone:cleanText(emergency.schoolPhone,80),insurance:cleanText(emergency.insurance,300),notes:cleanText(emergency.notes,400)},
     documents:{program:cleanText(documents.program,220),packingList:cleanText(documents.packingList,220),parentInfo:cleanText(documents.parentInfo,220),insuranceInfo:cleanText(documents.insuranceInfo,220),other:cleanText(documents.other,400)},
-    features:{diary:bool(features.diary),gallery:bool(features.gallery),upload:bool(features.upload),map:bool(features.map),smartJourney:bool(features.smartJourney),downloads:bool(features.downloads)}
+    features:{diary:bool(features.diary),gallery:bool(features.gallery),upload:bool(features.upload),map:bool(features.map),smartJourney:bool(features.smartJourney),downloads:bool(features.downloads)},
+    images:{hero:cleanText(images.hero,300),hotel:cleanText(images.hotel,300),program:arr(images.program).slice(0,30)}
   };
 }
 async function listTripDrafts(env){
@@ -910,6 +912,25 @@ export default {async fetch(request,env){
         draft.createdAt=new Date().toISOString();draft.updatedAt=draft.createdAt;draft.createdBy=user.email;draft.updatedBy=user.email;
         await env.MEDIA_BUCKET.put(tripDraftKey(draft.id),JSON.stringify(draft,null,2),{httpMetadata:{contentType:'application/json'}});
         return json({ok:true,draft,message:'Entwurf gespeichert. Die Reise ist noch nicht veröffentlicht.'});
+      }catch(error){return mediaError(error)}
+    }
+    if(url.pathname==='/api/trips/draft-image'&&request.method==='POST'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+        const id=normalizeTripId(url.searchParams.get('id'));
+        const slot=String(url.searchParams.get('slot')||'');
+        if(!id||!['hero','hotel','program'].includes(slot))throw Object.assign(new Error('Ungültige Reise oder Bildkategorie.'),{status:400});
+        const draft=await getTripDraft(env,id);
+        if(!draft)throw Object.assign(new Error('Bitte den Entwurf zuerst speichern.'),{status:404});
+        const contentType=String(request.headers.get('content-type')||'').toLowerCase();
+        if(!['image/jpeg','image/png','image/webp'].includes(contentType))throw Object.assign(new Error('Nur JPG, PNG oder WebP sind erlaubt.'),{status:400});
+        const declaredSize=Number(request.headers.get('content-length')||0);
+        if(declaredSize>12*1024*1024)throw Object.assign(new Error('Das Bild darf maximal 12 MB groß sein.'),{status:413});
+        const ext=contentType==='image/png'?'png':contentType==='image/webp'?'webp':'jpg';
+        const key=`__system/trips/assets/${id}/${slot}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+        await env.MEDIA_BUCKET.put(key,request.body,{httpMetadata:{contentType},customMetadata:{tripId:id,slot,uploadedBy:user.email,uploadedAt:new Date().toISOString()}});
+        return json({ok:true,key,slot});
       }catch(error){return mediaError(error)}
     }
     if(url.pathname.startsWith('/api/trips/drafts/')&&request.method==='GET'){
