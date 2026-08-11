@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Neue Reise – BS Rohrbach Erasmus+</title>
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.3">
+<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<style>
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.field{display:grid;gap:7px}.field.full{grid-column:1/-1}.field label{font-weight:800}
+.field input,.field textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;background:#fff}
+.field textarea{min-height:90px;resize:vertical}.required{color:#b42318}
+.colors{display:grid;grid-template-columns:1fr 1fr;gap:14px}.color-row{display:flex;align-items:center;gap:10px}
+.color-row input[type=color]{width:52px;height:42px;padding:3px}
+.preview{border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:22px;background:#fff}
+.preview-band{height:9px;border-radius:99px;margin-bottom:16px}.preview h3{font-size:26px;margin:0 0 5px}.preview p{color:var(--muted);margin:4px 0}
+.notice{padding:14px 16px;border-radius:14px;background:#fff8df;border:1px solid #f2d36b;margin:18px 0}
+.success{background:#edf9f3;border-color:#a8dfc2}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+@media(max-width:720px){.form-grid,.colors{grid-template-columns:1fr}.field.full{grid-column:auto}}
+</style></head><body>
+<header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
+<div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
+<main class="shell">
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 3</p><h1>Neue Reise erstellen</h1>
+<p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
+<div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
+
+<section class="preflight">
+<div class="section-heading"><div><p class="eyebrow">Schritt 1</p><h2>Grunddaten</h2></div></div>
+<div class="notice"><strong>Noch kein Livegang:</strong> „Entwurf speichern“ erstellt bewusst noch keine öffentliche Website und verändert Brüssel 2026 nicht.</div>
+<form id="tripForm">
+<div class="form-grid">
+<div class="field"><label>Reisename <span class="required">*</span></label><input id="title" required placeholder="z. B. Luxemburg 2027"></div>
+<div class="field"><label>Reise-ID <span class="required">*</span></label><input id="tripId" required placeholder="luxemburg-2027"><small>Wird automatisch vorgeschlagen.</small></div>
+<div class="field"><label>Reiseziel <span class="required">*</span></label><input id="destination" required placeholder="z. B. Luxemburg-Stadt"></div>
+<div class="field"><label>Land <span class="required">*</span></label><input id="country" required placeholder="z. B. Luxemburg"></div>
+<div class="field"><label>Abreise <span class="required">*</span></label><input id="startDate" type="date" required></div>
+<div class="field"><label>Rückkehr <span class="required">*</span></label><input id="endDate" type="date" required></div>
+<div class="field full"><label>Untertitel</label><input id="subtitle" placeholder="z. B. Europa hautnah erleben"></div>
+<div class="field full"><label>Reisefarben</label><div class="colors">
+<div class="color-row"><input id="primary" type="color" value="#0b4f8a"><span>Hauptfarbe</span></div>
+<div class="color-row"><input id="accent" type="color" value="#f2c94c"><span>Akzentfarbe</span></div>
+</div></div>
+</div>
+<div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
+<div class="actions"><button class="button primary" type="submit">Entwurf speichern</button><a class="button ghost" href="/admin/reisen.html">Abbrechen</a></div>
+<p id="message"></p>
+</form></section></main>
+<script>
+let cfg,app,account,tokenValue;
+const $=id=>document.getElementById(id);
+function slug(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+function fmt(d){if(!d)return '';try{return new Intl.DateTimeFormat('de-AT').format(new Date(d+'T12:00:00'))}catch{return d}}
+function preview(){
+ $('band').style.background=`linear-gradient(90deg,${$('primary').value},${$('accent').value})`;
+ $('previewTitle').textContent=$('title').value||'Neue Erasmus+-Reise';
+ const loc=[$('destination').value,$('country').value].filter(Boolean).join(', ');
+ const dates=[$('startDate').value,$('endDate').value].filter(Boolean).map(fmt).join(' – ');
+ $('previewMeta').textContent=[loc,dates].filter(Boolean).join(' · ')||'Reiseziel und Zeitraum erscheinen hier.';
+ $('previewSub').textContent=$('subtitle').value||'';
+}
+$('title').addEventListener('input',()=>{if(!$('tripId').dataset.edited)$('tripId').value=slug($('title').value);preview()});
+$('tripId').addEventListener('input',()=>{$('tripId').dataset.edited='1'});
+['destination','country','startDate','endDate','subtitle','primary','accent'].forEach(x=>$(x).addEventListener('input',preview));
+async function init(){
+ cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
+ app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage'}});
+ await app.initialize();account=app.getAllAccounts()[0]||null;preview();
+}
+async function token(){
+ if(tokenValue)return tokenValue;
+ if(!account){const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});account=x.account||app.getAllAccounts()[0]}
+ try{tokenValue=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}catch{tokenValue=(await app.acquireTokenPopup({scopes:['User.Read'],account})).accessToken}
+ return tokenValue;
+}
+$('tripForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('message').textContent='Entwurf wird gespeichert …';$('state').textContent='Speichern …';
+ try{
+  const body={title:$('title').value,id:$('tripId').value,destination:$('destination').value,country:$('country').value,startDate:$('startDate').value,endDate:$('endDate').value,subtitle:$('subtitle').value,primary:$('primary').value,accent:$('accent').value};
+  const r=await fetch('/api/trips/drafts',{method:'POST',headers:{authorization:'Bearer '+await token(),'content-type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json();if(!r.ok)throw new Error(d.message||'Speichern fehlgeschlagen.');
+  $('state').textContent='Entwurf gespeichert';$('message').className='notice success';$('message').textContent='✓ '+d.message+' Reise-ID: '+d.draft.id;
+ }catch(err){$('state').textContent='Fehler';$('message').className='notice';$('message').textContent=err.message}
+});
+init().catch(e=>$('message').textContent=e.message);
+</script></body></html>

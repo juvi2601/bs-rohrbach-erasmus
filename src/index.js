@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.2';
+const VERSION = '14.0-dev.3';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -307,6 +307,23 @@ function resolveTripId(request,url){
   return TRIP_REGISTRY[candidate]?candidate:DEFAULT_TRIP_ID;
 }
 function tripConfig(id=DEFAULT_TRIP_ID){return TRIP_REGISTRY[id]||TRIP_REGISTRY[DEFAULT_TRIP_ID]}
+function tripDraftKey(id){return `__system/trips/drafts/${id}.json`}
+function cleanTripDraft(input={}){
+  const id=normalizeTripId(input.id);
+  const title=cleanText(input.title,100);
+  const destination=cleanText(input.destination,100);
+  const country=cleanText(input.country,100);
+  const startDate=/^\d{4}-\d{2}-\d{2}$/.test(String(input.startDate||''))?String(input.startDate):'';
+  const endDate=/^\d{4}-\d{2}-\d{2}$/.test(String(input.endDate||''))?String(input.endDate):'';
+  const subtitle=cleanText(input.subtitle,180);
+  const primary=/^#[0-9a-fA-F]{6}$/.test(String(input.primary||''))?String(input.primary):'#0b4f8a';
+  const accent=/^#[0-9a-fA-F]{6}$/.test(String(input.accent||''))?String(input.accent):'#f2c94c';
+  if(!id||!title||!destination||!country||!startDate||!endDate)throw Object.assign(new Error('Bitte alle Pflichtfelder ausfüllen.'),{status:400});
+  if(endDate<startDate)throw Object.assign(new Error('Das Rückreisedatum darf nicht vor der Abreise liegen.'),{status:400});
+  if(TRIP_REGISTRY[id])throw Object.assign(new Error('Diese Reise-ID wird bereits verwendet.'),{status:409});
+  return {id,title,destination,country,startDate,endDate,subtitle,theme:{primary,accent},status:'draft'};
+}
+
 // --- Ende DEV 14.0 Modul 1 ---
 
 const MEDIA_ALLOWED_DOMAIN = 'bs-rohrbach.ac.at';
@@ -817,6 +834,17 @@ export default {async fetch(request,env){
     if(url.pathname==='/api/trips/current'&&request.method==='GET'){
       const id=resolveTripId(request,url);
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
+    }
+    if(url.pathname==='/api/trips/drafts'&&request.method==='POST'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+        const draft=cleanTripDraft(await request.json());
+        draft.createdAt=new Date().toISOString();
+        draft.createdBy=user.email;
+        await env.MEDIA_BUCKET.put(tripDraftKey(draft.id),JSON.stringify(draft,null,2),{httpMetadata:{contentType:'application/json'}});
+        return json({ok:true,draft,message:'Entwurf gespeichert. Die Reise ist noch nicht veröffentlicht.'});
+      }catch(error){return mediaError(error)}
     }
     if(url.pathname==='/api/trips/admin'&&request.method==='GET'){
       try{
