@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.6">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.6.1">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -21,7 +21,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 6</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 6.1</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -116,6 +116,16 @@
 <script>
 let cfg,app,account,tokenValue;const params=new URLSearchParams(location.search),editId=params.get('id')||'';
 const $=id=>document.getElementById(id);
+function setStatus(text,type=''){
+ const msg=$('message');
+ if(msg){
+   msg.textContent=text;
+   msg.className=type==='ok'?'notice success':type==='error'?'notice':'';
+ }
+ const state=$('state');
+ if(state)state.textContent=type==='error'?'Fehler':type==='ok'?'Gespeichert':text;
+}
+
 function slug(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
 function fmt(d){if(!d)return '';try{return new Intl.DateTimeFormat('de-AT').format(new Date(d+'T12:00:00'))}catch{return d}}
 function preview(){
@@ -193,13 +203,13 @@ function updateImageStatuses(){
  if(ps){const n=(im.program||[]).length;ps.textContent=n?`✓ ${n} Programmbild${n===1?'':'er'} zugeordnet`:'Noch keine Programmbilder zugeordnet.';ps.classList.toggle('ok',n>0);}
 }
 async function uploadTripImage(slot){
- if(!editingId){setStatus('Bitte den Entwurf zuerst speichern, bevor Bilder hochgeladen werden.','error');return;}
+ if(!editId){setStatus('Bitte den Entwurf zuerst speichern, bevor Bilder hochgeladen werden.','error');return;}
  const map={hero:'heroImageFile',hotel:'hotelImageFile',program:'programImageFile'},file=$(map[slot])?.files?.[0];
  if(!file){setStatus('Bitte zuerst ein Bild auswählen.','error');return;}
  setStatus('Bild wird hochgeladen…','');
  try{
-   const token=await getToken();
-   const r=await fetch(`/api/trips/draft-image?id=${encodeURIComponent(editingId)}&slot=${encodeURIComponent(slot)}`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':file.type},body:file});
+   const token=await token();
+   const r=await fetch(`/api/trips/draft-image?id=${encodeURIComponent(editId)}&slot=${encodeURIComponent(slot)}`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':file.type},body:file});
    const data=await r.json(); if(!r.ok)throw new Error(data.message||'Upload fehlgeschlagen.');
    if(slot==='program')window.tripImages.program=[...(window.tripImages.program||[]),data.key]; else window.tripImages[slot]=data.key;
    updateImageStatuses(); setStatus('Bild hochgeladen. Bitte anschließend Änderungen speichern.','ok');
