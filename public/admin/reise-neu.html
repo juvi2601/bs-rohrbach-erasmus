@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.7">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.7.1">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -259,8 +259,8 @@ function renderProgramDays(){
 function programEventHtml(di,ei,e={}){return `<div class="program-event" data-event="${ei}"><div class="program-event-number">${ei+1}</div><div class="program-event-fields"><div class="field"><label>Zeit *</label><input data-event-field="time" value="${escHtml(e.time||'')}" placeholder="z. B. 09:30–11:00"></div><div class="field"><label>Programmpunkt *</label><input data-event-field="title" value="${escHtml(e.title||'')}" placeholder="z. B. Hafenrundfahrt"></div><div class="field full"><label>Beschreibung</label><textarea data-event-field="text" placeholder="Details, Treffpunkt, Hinweise …">${escHtml(e.text||'')}</textarea></div></div><button type="button" class="danger-link remove-program-event" title="Programmpunkt löschen">Löschen</button></div>`}
 function bindProgramControls(){
  document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day);card.querySelectorAll('[data-day-field]').forEach(el=>el.addEventListener('input',()=>{window.tripProgram.days[di][el.dataset.dayField]=el.value}));});
- document.querySelectorAll('.add-program-event').forEach(btn=>btn.onclick=()=>{const di=Number(btn.dataset.day);window.tripProgram.days[di].events.push({time:'',title:'',text:''});renderProgramDays()});
- document.querySelectorAll('.remove-program-event').forEach(btn=>btn.onclick=()=>{const card=btn.closest('.program-day'),event=btn.closest('.program-event'),di=Number(card.dataset.day),ei=Number(event.dataset.event);window.tripProgram.days[di].events.splice(ei,1);renderProgramDays()});
+ document.querySelectorAll('.add-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const di=Number(btn.dataset.day);window.tripProgram.days[di].events.push({time:'',title:'',text:''});renderProgramDays()});
+ document.querySelectorAll('.remove-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const card=btn.closest('.program-day'),event=btn.closest('.program-event'),di=Number(card.dataset.day),ei=Number(event.dataset.event);window.tripProgram.days[di].events.splice(ei,1);renderProgramDays()});
 }
 function collectProgramDays(){
  document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day),day=window.tripProgram.days[di];card.querySelectorAll('[data-day-field]').forEach(el=>day[el.dataset.dayField]=el.value);day.events=[...card.querySelectorAll('.program-event')].map(ev=>{const obj={};ev.querySelectorAll('[data-event-field]').forEach(el=>obj[el.dataset.eventField]=el.value);return obj})});
