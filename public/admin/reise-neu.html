@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.5.1">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.5.2">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -21,14 +21,22 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 5.1</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 5.2</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
 <section class="preflight">
 <div class="section-heading"><div><p class="eyebrow">Schritt 1</p><h2>Grunddaten</h2></div></div>
 <div class="notice"><strong>Noch kein Livegang:</strong> „Entwurf speichern“ erstellt bewusst noch keine öffentliche Website und verändert Brüssel 2026 nicht.</div>
+<div class="wizard-steps" id="wizardSteps">
+<button type="button" class="wizard-step active" data-step="1">1 · Grunddaten<small>Ziel, Datum, Farben</small></button>
+<button type="button" class="wizard-step" data-step="2">2 · Reiseinfos<small>Texte, An-/Abreise</small></button>
+<button type="button" class="wizard-step" data-step="3">3 · Unterkunft<small>Hotel & Kontaktdaten</small></button>
+<button type="button" class="wizard-step" data-step="4">4 · Personen<small>Lehrkräfte & Notfall</small></button>
+<button type="button" class="wizard-step" data-step="5">5 · Abschluss<small>Dokumente & Funktionen</small></button>
+</div>
 <form id="tripForm">
+<div class="wizard-panel" data-panel="1">
 <div class="form-grid">
 <div class="field"><label>Reisename <span class="required">*</span></label><input id="title" required placeholder="z. B. Luxemburg 2027"></div>
 <div class="field"><label>Reise-ID <span class="required">*</span></label><input id="tripId" required placeholder="luxemburg-2027"><small>Wird automatisch vorgeschlagen.</small></div>
@@ -43,7 +51,8 @@
 </div></div>
 </div>
 
-<div class="field full" style="margin-top:26px"><p class="eyebrow">Schritt 2 · Datenblatt</p><h2 style="margin:0">Website & Reiseinformationen</h2><small>Entspricht dem Datenblatt für Kolleg*innen. * = für die fertige Reise erforderlich.</small></div>
+</div>
+<div class="wizard-panel" data-panel="2" hidden><div class="field full" style="margin-top:26px"><p class="eyebrow">Schritt 2 · Datenblatt</p><h2 style="margin:0">Website & Reiseinformationen</h2><small>Entspricht dem Datenblatt für Kolleg*innen. * = für die fertige Reise erforderlich.</small></div>
 <div class="field full"><h3>Website-Texte</h3></div>
 <div class="field full"><label>Einleitung / Kurzbeschreibung *</label><textarea id="intro" placeholder="Kurze Beschreibung der Reise"></textarea></div>
 <div class="field full"><h3>An- & Abreise</h3></div>
@@ -53,7 +62,8 @@
 <div class="field"><label>Verkehrsmittel Rückreise</label><input id="returnMode" placeholder="z. B. Reisebus"></div>
 <div class="field full"><label>Rückreise / geplante Rückkehr *</label><input id="returnInfo" placeholder="Abfahrt und geplante Ankunft"></div>
 <div class="field full"><label>Weitere Hinweise zur Fahrt</label><textarea id="transportNotes" placeholder="Pausen, Zustieg, Gepäck, Besonderheiten …"></textarea></div>
-<div class="field full"><h3>Unterkunft</h3></div>
+</div>
+<div class="wizard-panel" data-panel="3" hidden><div class="field full"><h3>Unterkunft</h3></div>
 <div class="field"><label>Hotel / Unterkunft *</label><input id="hotelName" placeholder="Name"></div>
 <div class="field"><label>Adresse *</label><input id="hotelAddress" placeholder="Straße, PLZ, Ort"></div>
 <div class="field"><label>Website</label><input id="hotelWebsite" placeholder="https://…"></div>
@@ -61,7 +71,8 @@
 <div class="field"><label>Check-in</label><input id="checkIn" placeholder="z. B. ab 16:00"></div>
 <div class="field"><label>Check-out</label><input id="checkOut" placeholder="z. B. bis 11:00"></div>
 <div class="field full"><label>Hinweise zur Unterkunft</label><textarea id="hotelNotes"></textarea></div>
-<div class="field full"><h3>Lehrkräfte & Teilnehmer*innen</h3></div>
+</div>
+<div class="wizard-panel" data-panel="4" hidden><div class="field full"><h3>Lehrkräfte & Teilnehmer*innen</h3></div>
 <div class="field full"><label>Mitreisende Lehrkräfte *</label><textarea id="teachers" placeholder="Eine Person pro Zeile, gerne mit Schul-E-Mail"></textarea></div>
 <div class="field full"><label>Reise-Redaktionsrechte</label><textarea id="editors" placeholder="Eine Schul-E-Mail-Adresse pro Zeile"></textarea></div>
 <div class="field full"><label>Schüler*innenliste</label><input id="studentListNote" placeholder="z. B. CSV wird separat übermittelt"></div>
@@ -71,7 +82,8 @@
 <div class="field"><label>Telefon Schule</label><input id="schoolPhone"></div>
 <div class="field full"><label>Versicherung / wichtige Reiseinfos</label><textarea id="insurance"></textarea></div>
 <div class="field full"><label>Weitere Notfallhinweise</label><textarea id="emergencyNotes"></textarea></div>
-<div class="field full"><h3>Dokumente & Links</h3></div>
+</div>
+<div class="wizard-panel" data-panel="5" hidden><div class="field full"><h3>Dokumente & Links</h3></div>
 <div class="field"><label>Reiseprogramm</label><input id="docProgram" placeholder="Datei/Link folgt oder Bezeichnung"></div>
 <div class="field"><label>Packliste</label><input id="docPacking"></div>
 <div class="field"><label>Elterninformation</label><input id="docParent"></div>
@@ -85,10 +97,14 @@
 <label><input id="featJourney" type="checkbox" checked> Smart Journey</label>&nbsp;&nbsp;
 <label><input id="featDownloads" type="checkbox" checked> Downloads</label></div></div>
 <div class="field full"><h3>Bilder & Programm</h3><div class="notice" style="margin:0"><strong>Folgt in den nächsten Modulen:</strong> Titelbild, Hotelbild, Programmbilder sowie Reisetage und Programmpunkte.</div></div>
-<div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
+<div class="field full"><h3>Vollständigkeitsprüfung</h3><div id="wizardSummary" class="wizard-summary"></div></div><div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
 <div class="actions"><button class="button primary" type="submit" id="saveBtn">Entwurf speichern</button><a class="button ghost" href="/admin/reisen.html">Abbrechen</a></div>
 <p id="message"></p>
-</form></section></main>
+</div>
+<div class="wizard-nav">
+<button type="button" class="button" id="wizardBack" style="display:none">← Zurück</button>
+<div class="right"><button type="button" class="button primary" id="wizardNext">Weiter →</button></div>
+</div></form></section></main>
 <script>
 let cfg,app,account,tokenValue;const params=new URLSearchParams(location.search),editId=params.get('id')||'';
 const $=id=>document.getElementById(id);
@@ -156,4 +172,46 @@ $('tripForm').addEventListener('submit',async e=>{
  }catch(err){$('state').textContent='Fehler';$('message').className='notice';$('message').textContent=err.message}
 });
 init().catch(e=>$('message').textContent=e.message);
+
+let wizardStep=1;
+function wizardRequired(step){
+ const ids={1:['title','tripId','destination','country','startDate','endDate'],
+ 2:['intro','outboundMode','meetingPoint','returnInfo'],
+ 3:['hotelName','hotelAddress'],4:['teachers'],5:[]}[step]||[];
+ return ids.filter(id=>!($(id)?.value||'').trim());
+}
+function showWizardStep(n){
+ wizardStep=Math.max(1,Math.min(5,n));
+ document.querySelectorAll('.wizard-panel').forEach(p=>p.hidden=Number(p.dataset.panel)!==wizardStep);
+ document.querySelectorAll('.wizard-step').forEach(b=>{
+   const s=Number(b.dataset.step); b.classList.toggle('active',s===wizardStep);
+   b.classList.toggle('done',s<wizardStep && wizardRequired(s).length===0);
+ });
+ $('wizardBack').style.display=wizardStep===1?'none':'inline-flex';
+ $('wizardNext').style.display=wizardStep===5?'none':'inline-flex';
+ if(wizardStep===5)renderWizardSummary();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderWizardSummary(){
+ const checks=[
+ ['Grunddaten',wizardRequired(1).length===0],['Website & An-/Abreise',wizardRequired(2).length===0],
+ ['Unterkunft',wizardRequired(3).length===0],['Lehrkräfte',wizardRequired(4).length===0],
+ ['Bilder','future'],['Tagesprogramm','future']
+ ];
+ $('wizardSummary').innerHTML=checks.map(([label,state])=>{
+  if(state==='future')return `<div class="check-row warn">⏳ <strong>${label}</strong><br><small>folgt im nächsten Modul</small></div>`;
+  return `<div class="check-row ${state?'ok':'warn'}">${state?'✓':'⚠'} <strong>${label}</strong><br><small>${state?'vollständig':'Pflichtangaben fehlen'}</small></div>`;
+ }).join('');
+}
+document.querySelectorAll('.wizard-step').forEach(b=>b.addEventListener('click',()=>showWizardStep(Number(b.dataset.step))));
+$('wizardBack').addEventListener('click',()=>showWizardStep(wizardStep-1));
+$('wizardNext').addEventListener('click',()=>{
+ const missing=wizardRequired(wizardStep);
+ if(missing.length){
+   const first=$(missing[0]); if(first){first.focus(); first.scrollIntoView({behavior:'smooth',block:'center'});}
+   setStatus('Bitte zuerst die mit * markierten Pflichtangaben dieses Schritts ausfüllen.','error'); return;
+ }
+ showWizardStep(wizardStep+1);
+});
+showWizardStep(1);
 </script></body></html>

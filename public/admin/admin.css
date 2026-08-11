@@ -53,3 +53,18 @@
 .journey-simulator details>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;list-style:none}.journey-simulator details>summary::-webkit-details-marker{display:none}.journey-simulator details>summary span,.journey-simulator details>summary small,.journey-simulator details>summary strong{display:block}.journey-simulator details>summary small{color:var(--blue);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.journey-simulator details>summary strong{margin-top:5px;color:var(--navy);font-size:24px}.journey-simulator details>summary b{padding:9px 13px;border:1px solid var(--line);border-radius:10px;color:var(--navy);font-size:13px}.journey-simulator details[open]>summary{margin-bottom:18px}.journey-simulator details[open]>summary b::before{content:"Schließen";font-size:0}.journey-simulator details[open]>summary b{font-size:0}.journey-simulator details[open]>summary b:after{content:"Schließen";font-size:13px}
 
 .integrations-panel{margin:0 0 34px;padding:26px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.integration-grid{display:grid;grid-template-columns:minmax(0,560px);gap:16px}.integration-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:18px;padding:22px;border:1px solid #bfd9ea;border-radius:18px;background:linear-gradient(145deg,#fff,#f3f9fd);color:var(--ink);text-decoration:none;transition:.18s ease}.integration-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(18,58,99,.11)}.integration-icon{width:52px;height:52px;display:grid;place-items:center;border-radius:15px;background:#e9f4fb;font-size:27px}.integration-card h3{margin:0 0 5px}.integration-card p{margin:0;color:var(--muted)}.integration-status{display:inline-flex;align-items:center;gap:7px;margin-top:11px;color:var(--muted);font-size:13px}.integration-status i{width:9px;height:9px;border-radius:50%;background:#e3aa32}.integration-status.ready{color:#126b4b}.integration-status.ready i{background:#2bb673;box-shadow:0 0 0 5px rgba(43,182,115,.13)}.integration-arrow{font-size:25px;color:var(--navy)}.status-ok{color:#126b4b!important}@media(max-width:700px){.integrations-panel{padding:20px 16px}.integration-card{grid-template-columns:auto 1fr}.integration-arrow{display:none}}
+
+/* DEV 14.0 Modul 5.2 – mehrstufiger Reise-Assistent */
+.wizard-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:18px 0 24px}
+.wizard-step{border:1px solid #d5e1ed;background:#f6f9fc;border-radius:14px;padding:12px;text-align:left;font:inherit;font-weight:800;color:#617086;cursor:pointer}
+.wizard-step small{display:block;font-size:11px;font-weight:500;margin-top:3px}
+.wizard-step.active{background:#eaf4ff;border-color:#70b3ff;color:#072a55}
+.wizard-step.done{border-color:#8fd3b8;background:#f1fbf6;color:#155b44}
+.wizard-panel[hidden]{display:none!important}
+.wizard-nav{display:flex;justify-content:space-between;gap:12px;margin:22px 0 8px}
+.wizard-nav .right{display:flex;gap:10px;margin-left:auto}
+.wizard-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.check-row{padding:11px 13px;border:1px solid #d8e3ed;border-radius:12px;background:#f8fafc}
+.check-row.ok{background:#f0faf5;border-color:#b9dfcd}
+.check-row.warn{background:#fff9e8;border-color:#efd88a}
+@media(max-width:760px){.wizard-steps{grid-template-columns:1fr 1fr}.wizard-summary{grid-template-columns:1fr}}
