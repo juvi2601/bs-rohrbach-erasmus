@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Benutzer & Rollen – BS Rohrbach Erasmus+</title>
-<link rel="icon" href="/images/favicon.ico" sizes="any"><link rel="stylesheet" href="/admin/admin.css?v=13.5">
+<link rel="icon" href="/images/favicon.ico" sizes="any"><link rel="stylesheet" href="/admin/admin.css?v=13.5.1">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script></head>
 <body><header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Benutzer & Rollen</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/">Dashboard</a></div></header>
@@ -22,11 +22,23 @@ let cfg,app,account;
 const $=id=>document.getElementById(id);
 async function init(){
   cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
-  app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:location.origin+'/admin/access.html'},cache:{cacheLocation:'sessionStorage'}});
+  app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,postLogoutRedirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});
   await app.initialize(); account=app.getAllAccounts()[0]||null; if(account) load();
 }
-async function token(){if(!account){const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});account=x.account}
- try{return (await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}catch(e){return (await app.acquireTokenPopup({scopes:['User.Read'],account})).accessToken}}
+async function token(){
+  if(!account){
+    const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});
+    account=x.account||app.getAllAccounts()[0]||null;
+  }
+  if(!account) throw new Error('Microsoft-Konto konnte nicht ermittelt werden.');
+  try{
+    return (await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken;
+  }catch(e){
+    const x=await app.acquireTokenPopup({scopes:['User.Read'],account});
+    account=x.account||account;
+    return x.accessToken;
+  }
+}
 async function load(){try{$('message').textContent='Wird geladen …';const tk=await token();const r=await fetch('/api/access/users',{headers:{authorization:'Bearer '+tk},cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.message||'Zugriff nicht möglich.');
  $('users').innerHTML=d.users.map(u=>`<article><span>${u.role==='admin'?'Admin':'Lehrkraft'}</span><strong>${u.name}</strong><small>${u.email}</small></article>`).join('');$('message').textContent='Brüssel 2026 · '+d.users.length+' berechtigte Personen.'}
  catch(e){$('message').textContent=e.message}}
