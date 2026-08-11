@@ -1,46 +1,41 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Benutzer & Rollen – BS Rohrbach Erasmus+</title>
-<link rel="icon" href="/images/favicon.ico" sizes="any"><link rel="stylesheet" href="/admin/admin.css?v=13.5.1">
-<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script></head>
+<link rel="icon" href="/images/favicon.ico" sizes="any"><link rel="stylesheet" href="/admin/admin.css?v=13.9">
+<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<style>
+.student-import{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}.student-import h3{margin:0 0 8px}.student-import p{color:var(--muted)}
+.import-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.import-row input[type=file]{max-width:100%}.students-table{width:100%;border-collapse:collapse;margin-top:18px}
+.students-table th,.students-table td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);font-size:14px}.students-table th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.remove-btn{border:1px solid #efc7c4;background:#fff3f1;color:#9c302a;border-radius:9px;padding:7px 9px;font-weight:700;cursor:pointer}.import-note{margin-top:10px;font-size:13px;color:var(--muted)}
+@media(max-width:700px){.students-table thead{display:none}.students-table,.students-table tbody,.students-table tr,.students-table td{display:block}.students-table tr{padding:12px 0;border-bottom:1px solid var(--line)}.students-table td{border:0;padding:3px 0}}
+</style></head>
 <body><header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Benutzer & Rollen</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/redaktion.html">Reise-Redaktion</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell"><section class="welcome"><div><p class="eyebrow">Brüssel 2026</p><h1>Benutzer & Rollen</h1>
-<p>Reisebezogene Berechtigungen. Änderungen an Benutzerlisten und CSV-Import folgen im nächsten Modul.</p></div></section>
-<section class="preflight"><div class="section-heading"><div><p class="eyebrow">Zugriff</p><h2>Aktuelle Rollen</h2></div>
-<button class="button primary" id="login">Mit Microsoft anmelden</button></div>
-<div id="message" class="preflight-note">Nur der Admin kann diese Liste abrufen.</div>
-<div class="system-dashboard-grid" id="users"></div></section>
-<section class="preflight"><div class="section-heading"><div><p class="eyebrow">Rechtemodell</p><h2>Was dürfen die Rollen?</h2></div></div>
-<div class="system-dashboard-grid">
+<p>Reisebezogene Berechtigungen zentral verwalten. Lehrkräfte sind fest hinterlegt; Schüler*innen werden über eine E-Mail-Liste freigeschaltet.</p></div></section>
+<section class="preflight"><div class="section-heading"><div><p class="eyebrow">Zugriff</p><h2>Aktuelle Rollen</h2></div><button class="button primary" id="login">Mit Microsoft anmelden</button></div>
+<div id="message" class="preflight-note">Nur der Admin kann diese Liste abrufen und ändern.</div><div class="system-dashboard-grid" id="users"></div></section>
+<section class="student-import" id="studentSection" hidden><p class="eyebrow">Teilnehmer*innen</p><h3>Schüler*innen per CSV freischalten</h3>
+<p>Die importierte Liste ersetzt die bisherige Schüler*innenliste für <strong>Brüssel 2026</strong>. Semikolon, Komma und Tabulator werden unterstützt.</p>
+<div class="import-row"><input type="file" id="csv" accept=".csv,text/csv"><button class="button primary" id="importBtn" type="button">CSV importieren</button></div>
+<div class="import-note">Nur Adressen mit <strong>@bs-rohrbach.ac.at</strong> werden übernommen. Doppelte Adressen werden automatisch entfernt.</div>
+<table class="students-table"><thead><tr><th>Name</th><th>E-Mail</th><th>Rolle</th><th></th></tr></thead><tbody id="students"></tbody></table><div class="preflight-note" id="studentMessage">Noch keine Schüler*innenliste geladen.</div></section>
+<section class="preflight"><div class="section-heading"><div><p class="eyebrow">Rechtemodell</p><h2>Was dürfen die Rollen?</h2></div></div><div class="system-dashboard-grid">
 <article><span>Admin</span><strong>Vollzugriff</strong><small>Medien, Tagebuch, Live-Status, Galerie, Benutzer & Technik</small></article>
 <article><span>Lehrkraft</span><strong>Reise-Redaktion</strong><small>Medien, Tagebuch, Live-Status und Galerie</small></article>
-<article><span>Schüler*in</span><strong>Upload</strong><small>Wird im nächsten Modul über CSV-/E-Mail-Liste freigeschaltet</small></article>
+<article><span>Schüler*in</span><strong>Upload</strong><small>Nur wenn die Microsoft-E-Mail in der Teilnehmer*innenliste steht</small></article>
 </div></section></main>
 <script>
-let cfg,app,account;
-const $=id=>document.getElementById(id);
-async function init(){
-  cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
-  app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,postLogoutRedirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});
-  await app.initialize(); account=app.getAllAccounts()[0]||null; if(account) load();
-}
-async function token(){
-  if(!account){
-    const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});
-    account=x.account||app.getAllAccounts()[0]||null;
-  }
-  if(!account) throw new Error('Microsoft-Konto konnte nicht ermittelt werden.');
-  try{
-    return (await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken;
-  }catch(e){
-    const x=await app.acquireTokenPopup({scopes:['User.Read'],account});
-    account=x.account||account;
-    return x.accessToken;
-  }
-}
-async function load(){try{$('message').textContent='Wird geladen …';const tk=await token();const r=await fetch('/api/access/users',{headers:{authorization:'Bearer '+tk},cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.message||'Zugriff nicht möglich.');
- $('users').innerHTML=d.users.map(u=>`<article><span>${u.role==='admin'?'Admin':'Lehrkraft'}</span><strong>${u.name}</strong><small>${u.email}</small></article>`).join('');$('message').textContent='Brüssel 2026 · '+d.users.length+' berechtigte Personen.'}
- catch(e){$('message').textContent=e.message}}
+let cfg,app,account,tokenValue,students=[];const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function init(){cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});await app.initialize();account=app.getAllAccounts()[0]||null;if(account)load()}
+async function token(){if(tokenValue)return tokenValue;if(!account){const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});account=x.account||app.getAllAccounts()[0]}try{tokenValue=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}catch{tokenValue=(await app.acquireTokenPopup({scopes:['User.Read'],account})).accessToken}return tokenValue}
+async function api(url,options={}){const tk=await token();const headers={...(options.headers||{}),authorization:'Bearer '+tk};if(options.body&&!headers['content-type'])headers['content-type']='application/json';const r=await fetch(url,{...options,headers,cache:'no-store'});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'Zugriff nicht möglich.');return d}
+function renderUsers(users){$('users').innerHTML=users.filter(u=>u.role!=='student').map(u=>`<article><span>${u.role==='admin'?'Admin':'Lehrkraft'}</span><strong>${esc(u.name)}</strong><small>${esc(u.email)}</small></article>`).join('')}
+function renderStudents(){const body=$('students');body.innerHTML=students.length?students.map((s,i)=>`<tr><td>${esc(s.name||'–')}</td><td>${esc(s.email)}</td><td>Schüler*in</td><td><button class="remove-btn" data-i="${i}">Entfernen</button></td></tr>`).join(''):`<tr><td colspan="4">Noch keine Schüler*innen freigeschaltet.</td></tr>`;document.querySelectorAll('[data-i]').forEach(b=>b.onclick=async()=>{if(!confirm(`${students[+b.dataset.i].email} wirklich entfernen?`))return;students.splice(+b.dataset.i,1);await saveStudents('Schüler*in entfernt.');renderStudents()})}
+async function load(){try{$('message').textContent='Wird geladen …';const [u,s]=await Promise.all([api('/api/access/users'),api('/api/access/students')]);renderUsers(u.users||[]);students=s.students||[];renderStudents();$('studentSection').hidden=false;$('message').textContent=`Brüssel 2026 · ${u.users.length} berechtigte Personen.`;$('studentMessage').textContent=`${students.length} Schüler*innen freigeschaltet.`}catch(e){$('message').textContent=e.message}}
+function parseCsv(text){const rows=text.replace(/^\uFEFF/,'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean),map=new Map();for(const line of rows){const emails=line.match(/[A-Z0-9._%+-]+@bs-rohrbach\.ac\.at/ig)||[];for(const raw of emails){const email=raw.toLowerCase();let name=line.replace(raw,'').replace(/[;"',\t]+/g,' ').replace(/\s+/g,' ').trim();if(/^(name|vorname|nachname|email|e-mail)$/i.test(name))name='';map.set(email,{email,name:name.slice(0,120)})}}return [...map.values()]}
+async function saveStudents(msg){const d=await api('/api/access/students',{method:'PUT',body:JSON.stringify({students})});students=d.students||[];$('studentMessage').textContent=`${msg} ${students.length} Schüler*innen freigeschaltet.`}
+$('importBtn').onclick=async()=>{try{const file=$('csv').files[0];if(!file)throw new Error('Bitte zuerst eine CSV-Datei auswählen.');const parsed=parseCsv(await file.text());if(!parsed.length)throw new Error('In der CSV wurden keine gültigen BS-Rohrbach-E-Mail-Adressen gefunden.');if(!confirm(`Die aktuelle Schüler*innenliste durch ${parsed.length} Einträge aus der CSV ersetzen?`))return;students=parsed;await saveStudents('CSV erfolgreich importiert.');renderStudents()}catch(e){$('studentMessage').textContent=e.message}}
 $('login').onclick=load;init().catch(e=>$('message').textContent=e.message);
 </script></body></html>

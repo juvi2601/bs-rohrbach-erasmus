@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '13.7';
+const VERSION = '13.9';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -383,7 +383,7 @@ async function handleMediaConfig(url,env){
 async function handleMediaStatus(request,env){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
   try{
-    const user=await verifySchoolUser(request,env);
+    const user=await verifyMediaUploader(request,env);
     const usage=await r2Usage(env.MEDIA_BUCKET);
     return json({ok:true,user,usage,limitBytes:MEDIA_STORAGE_LIMIT_BYTES,remainingBytes:Math.max(0,MEDIA_STORAGE_LIMIT_BYTES-usage.totalBytes),project:MEDIA_PROJECT});
   }catch(error){return mediaError(error)}
@@ -392,7 +392,7 @@ async function handleMediaStatus(request,env){
 async function handleMediaUpload(request,env){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
   try{
-    const user=await verifySchoolUser(request,env);
+    const user=await verifyMediaUploader(request,env);
     if(!user.id)throw Object.assign(new Error('Microsoft-Benutzerkennung fehlt.'),{status:403});
 
     const contentType=String(request.headers.get('content-type')||'').split(';')[0].trim().toLowerCase();
@@ -464,14 +464,51 @@ const ROLE_PERMISSIONS = Object.freeze({
   teacher:['media.moderate','diary.manage','live.manage','gallery.manage'],
   student:['media.upload']
 });
-function tripAccessFor(email,project=MEDIA_PROJECT){
+function staticTripAccessFor(email,project=MEDIA_PROJECT){
   const normalized=String(email||'').trim().toLowerCase();
   const entry=TRIP_ACCESS[project]?.[normalized]||null;
   return entry?{project,email:normalized,role:entry.role,name:entry.name,permissions:ROLE_PERMISSIONS[entry.role]||[]}:null;
 }
+function studentAccessKey(project=MEDIA_PROJECT){return `__system/access/${project}/students.json`}
+async function loadStudentAccess(env,project=MEDIA_PROJECT){
+  if(!env.MEDIA_BUCKET)return [];
+  const object=await env.MEDIA_BUCKET.get(studentAccessKey(project));
+  if(!object)return [];
+  try{
+    const data=JSON.parse(await object.text());
+    const rows=Array.isArray(data?.students)?data.students:[];
+    return rows.map(x=>({email:String(x?.email||'').trim().toLowerCase(),name:cleanText(x?.name,120)}))
+      .filter(x=>x.email.endsWith(`@${MEDIA_ALLOWED_DOMAIN}`));
+  }catch{
+    throw Object.assign(new Error('Die gespeicherte Schüler*innenliste ist beschädigt.'),{status:500});
+  }
+}
+async function saveStudentAccess(env,students,admin){
+  if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+  const unique=new Map();
+  for(const item of Array.isArray(students)?students:[]){
+    const email=String(item?.email||'').trim().toLowerCase();
+    if(!email||!email.endsWith(`@${MEDIA_ALLOWED_DOMAIN}`))continue;
+    unique.set(email,{email,name:cleanText(item?.name,120)});
+    if(unique.size>500)throw Object.assign(new Error('Maximal 500 Schüler*innen pro Reise sind zulässig.'),{status:400});
+  }
+  const payload={project:MEDIA_PROJECT,updatedAt:new Date().toISOString(),updatedBy:String(admin?.email||''),students:[...unique.values()]};
+  await env.MEDIA_BUCKET.put(studentAccessKey(MEDIA_PROJECT),JSON.stringify(payload,null,2),{
+    httpMetadata:{contentType:'application/json; charset=utf-8'},
+    customMetadata:{project:MEDIA_PROJECT,updatedAt:payload.updatedAt,updatedBy:payload.updatedBy}
+  });
+  return payload.students;
+}
+async function tripAccessFor(env,email,project=MEDIA_PROJECT){
+  const normalized=String(email||'').trim().toLowerCase();
+  const fixed=staticTripAccessFor(normalized,project);
+  if(fixed)return fixed;
+  const student=(await loadStudentAccess(env,project)).find(x=>x.email===normalized);
+  return student?{project,email:normalized,role:'student',name:student.name||normalized,permissions:ROLE_PERMISSIONS.student}:null;
+}
 async function verifyTripRole(request,env,allowedRoles=[]){
   const user=await verifySchoolUser(request,env);
-  const access=tripAccessFor(user.email);
+  const access=await tripAccessFor(env,user.email);
   if(!access||!allowedRoles.includes(access.role)){
     throw Object.assign(new Error('Für diesen Bereich fehlt die erforderliche Reiseberechtigung.'),{status:403});
   }
@@ -480,20 +517,41 @@ async function verifyTripRole(request,env,allowedRoles=[]){
 async function verifyMediaAdmin(request,env){
   return verifyTripRole(request,env,['admin','teacher']);
 }
+async function verifyMediaUploader(request,env){
+  return verifyTripRole(request,env,['admin','teacher','student']);
+}
 async function handleAccessMe(request,env){
   try{
     const user=await verifySchoolUser(request,env);
-    const access=tripAccessFor(user.email);
+    const access=await tripAccessFor(env,user.email);
     return json({ok:true,user,access,project:MEDIA_PROJECT});
   }catch(error){return mediaError(error)}
 }
 async function handleAccessUsers(request,env){
   try{
     const user=await verifyTripRole(request,env,['admin']);
-    const users=Object.entries(TRIP_ACCESS[MEDIA_PROJECT]||{}).map(([email,x])=>({
+    const fixed=Object.entries(TRIP_ACCESS[MEDIA_PROJECT]||{}).map(([email,x])=>({
       email,name:x.name,role:x.role,permissions:ROLE_PERMISSIONS[x.role]||[]
     }));
-    return json({ok:true,user,project:MEDIA_PROJECT,users});
+    const students=(await loadStudentAccess(env)).map(x=>({
+      email:x.email,name:x.name||x.email,role:'student',permissions:ROLE_PERMISSIONS.student
+    }));
+    return json({ok:true,user,project:MEDIA_PROJECT,users:[...fixed,...students]});
+  }catch(error){return mediaError(error)}
+}
+async function handleStudentAccessGet(request,env){
+  try{
+    const user=await verifyTripRole(request,env,['admin']);
+    const students=await loadStudentAccess(env);
+    return json({ok:true,user,project:MEDIA_PROJECT,students});
+  }catch(error){return mediaError(error)}
+}
+async function handleStudentAccessPut(request,env){
+  try{
+    const user=await verifyTripRole(request,env,['admin']);
+    const body=await request.json().catch(()=>{throw Object.assign(new Error('Ungültige Importdaten.'),{status:400})});
+    const students=await saveStudentAccess(env,body?.students,user);
+    return json({ok:true,project:MEDIA_PROJECT,students,count:students.length,updatedAt:new Date().toISOString()});
   }catch(error){return mediaError(error)}
 }
 // --- Ende Version 13.5 Rollenbasis ---
@@ -731,6 +789,8 @@ export default {async fetch(request,env){
   if(url.pathname==='/callback')return handleCallback(url,env);
   if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
     if(url.pathname==='/api/access/users'&&request.method==='GET')return handleAccessUsers(request,env);
+    if(url.pathname==='/api/access/students'&&request.method==='GET')return handleStudentAccessGet(request,env);
+    if(url.pathname==='/api/access/students'&&request.method==='PUT')return handleStudentAccessPut(request,env);
     if(url.pathname==='/api/editor/diary'&&request.method==='GET')return handleEditorGet(request,env,url,'diary');
     if(url.pathname==='/api/editor/diary'&&request.method==='PUT')return handleEditorSave(request,env,url,'diary');
     if(url.pathname==='/api/editor/gallery'&&request.method==='GET')return handleEditorGet(request,env,url,'gallery');
