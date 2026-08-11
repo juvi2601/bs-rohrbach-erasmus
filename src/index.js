@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '12.1.0-dev.12';
+const VERSION = '13.7';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -601,12 +601,148 @@ async function handleMediaGalleryFile(env,url){
 
 
 
+// --- Version 13.7: Microsoft-geschützte Reise-Redaktion über R2-Content-Overrides ---
+const EDITOR_CONTENT = Object.freeze({
+  diary:{file:'diary.json',permission:'diary.manage'},
+  gallery:{file:'gallery.json',permission:'gallery.manage'},
+  site:{file:'site.json',permission:'live.manage'}
+});
+function editorKey(name){return `__system/editor/${MEDIA_PROJECT}/${name}`}
+
+async function staticContentJson(env,url,file){
+  const response=await env.ASSETS.fetch(new Request(`${url.origin}/content/${file}`));
+  if(!response.ok)throw Object.assign(new Error(`Inhaltsdatei ${file} konnte nicht geladen werden.`),{status:502});
+  return response.json();
+}
+async function effectiveContentJson(env,url,file){
+  if(env.MEDIA_BUCKET){
+    const object=await env.MEDIA_BUCKET.get(editorKey(file));
+    if(object){
+      try{return JSON.parse(await object.text())}
+      catch{throw Object.assign(new Error(`Redaktionsstand ${file} ist beschädigt.`),{status:500})}
+    }
+  }
+  return staticContentJson(env,url,file);
+}
+async function saveContentOverride(env,file,data,user){
+  if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+  await env.MEDIA_BUCKET.put(editorKey(file),JSON.stringify(data,null,2),{
+    httpMetadata:{contentType:'application/json; charset=utf-8'},
+    customMetadata:{project:MEDIA_PROJECT,updatedAt:new Date().toISOString(),updatedBy:String(user.email||''),role:String(user.access?.role||'')}
+  });
+}
+async function handlePublicContentOverride(env,url,file){
+  if(!env.MEDIA_BUCKET)return null;
+  const object=await env.MEDIA_BUCKET.get(editorKey(file));
+  if(!object)return null;
+  const headers=new Headers({'content-type':'application/json; charset=utf-8','cache-control':'no-store'});
+  headers.set('x-editor-source','r2');
+  return new Response(object.body,{headers});
+}
+function requirePermission(user,permission){
+  if(!user?.access?.permissions?.includes(permission)){
+    throw Object.assign(new Error('Für diese Funktion fehlt die erforderliche Berechtigung.'),{status:403});
+  }
+}
+function cleanDiary(data,user){
+  const entries=Array.isArray(data?.entries)?data.entries.slice(0,100):[];
+  return {entries:entries.map(item=>({
+    published:Boolean(item?.published),
+    date:cleanText(item?.date,20),
+    time:cleanText(item?.time,30),
+    emoji:cleanText(item?.emoji,12)||'📖',
+    title:cleanText(item?.title,140),
+    location:cleanText(item?.location,120),
+    text:cleanText(item?.text,6000),
+    approvedPhotos:Array.isArray(item?.approvedPhotos)?item.approvedPhotos.slice(0,20).map(x=>String(x||'').slice(0,700)).filter(Boolean):[],
+    tags:Array.isArray(item?.tags)?item.tags.slice(0,12).map(x=>cleanText(typeof x==='string'?x:x?.tag,40)).filter(Boolean):[],
+    author:cleanText(item?.author,100)||cleanText(user?.access?.name,100)||'BS Rohrbach'
+  })).filter(x=>x.title&&x.date&&x.text)};
+}
+function cleanGallery(data){
+  const photos=Array.isArray(data?.photos)?data.photos.slice(0,100):[];
+  return {photos:photos.map(item=>({
+    title:cleanText(item?.title,140),
+    day:cleanText(item?.day,80),
+    image:String(item?.image||'').trim().slice(0,700),
+    description:cleanText(item?.description||item?.text,1000),
+    alt:cleanText(item?.alt,240),
+    credit:cleanText(item?.credit,240)
+  })).filter(x=>x.title&&x.image)};
+}
+function cleanLiveStatus(input){
+  const allowedTypes=new Set(['info','success','warning','important']);
+  const mode=input?.mode==='manual'?'manual':'automatic';
+  const type=allowedTypes.has(input?.type)?input.type:'info';
+  return {
+    mode,
+    enabled:Boolean(input?.enabled),
+    type,
+    emoji:cleanText(input?.emoji,12)||'📢',
+    title:cleanText(input?.title,120)||'Aktueller Reisestatus',
+    text:cleanText(input?.text,800),
+    updated:cleanText(input?.updated,80)
+  };
+}
+async function handleEditorGet(request,env,url,kind){
+  try{
+    const def=EDITOR_CONTENT[kind];
+    if(!def)throw Object.assign(new Error('Unbekannter Redaktionsbereich.'),{status:404});
+    const user=await verifyTripRole(request,env,['admin','teacher']);
+    requirePermission(user,def.permission);
+    const data=await effectiveContentJson(env,url,def.file);
+    return json({ok:true,project:MEDIA_PROJECT,user:{email:user.email,name:user.access?.name,role:user.access?.role},data});
+  }catch(error){return mediaError(error)}
+}
+async function handleEditorSave(request,env,url,kind){
+  try{
+    const def=EDITOR_CONTENT[kind];
+    if(!def)throw Object.assign(new Error('Unbekannter Redaktionsbereich.'),{status:404});
+    const user=await verifyTripRole(request,env,['admin','teacher']);
+    requirePermission(user,def.permission);
+    const body=await request.json().catch(()=>{throw Object.assign(new Error('Ungültige JSON-Daten.'),{status:400})});
+    let data;
+    if(kind==='diary')data=cleanDiary(body,user);
+    if(kind==='gallery')data=cleanGallery(body);
+    if(kind==='site'){
+      const current=await effectiveContentJson(env,url,def.file);
+      data={...current,liveStatus:cleanLiveStatus(body?.liveStatus||body)};
+    }
+    await saveContentOverride(env,def.file,data,user);
+    return json({ok:true,project:MEDIA_PROJECT,savedAt:new Date().toISOString(),data});
+  }catch(error){return mediaError(error)}
+}
+async function handleEditorReset(request,env,url,kind){
+  try{
+    const def=EDITOR_CONTENT[kind];
+    if(!def)throw Object.assign(new Error('Unbekannter Redaktionsbereich.'),{status:404});
+    const user=await verifyTripRole(request,env,['admin']);
+    if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+    await env.MEDIA_BUCKET.delete(editorKey(def.file));
+    return json({ok:true,project:MEDIA_PROJECT,message:'Redaktions-Override wurde entfernt.'});
+  }catch(error){return mediaError(error)}
+}
+// --- Ende Version 13.7 Reise-Redaktion ---
+
+
 export default {async fetch(request,env){
   const url=new URL(request.url);
   if(url.pathname==='/auth')return handleAuth(url,env);
   if(url.pathname==='/callback')return handleCallback(url,env);
   if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
     if(url.pathname==='/api/access/users'&&request.method==='GET')return handleAccessUsers(request,env);
+    if(url.pathname==='/api/editor/diary'&&request.method==='GET')return handleEditorGet(request,env,url,'diary');
+    if(url.pathname==='/api/editor/diary'&&request.method==='PUT')return handleEditorSave(request,env,url,'diary');
+    if(url.pathname==='/api/editor/gallery'&&request.method==='GET')return handleEditorGet(request,env,url,'gallery');
+    if(url.pathname==='/api/editor/gallery'&&request.method==='PUT')return handleEditorSave(request,env,url,'gallery');
+    if(url.pathname==='/api/editor/live'&&request.method==='GET')return handleEditorGet(request,env,url,'site');
+    if(url.pathname==='/api/editor/live'&&request.method==='PUT')return handleEditorSave(request,env,url,'site');
+    if(url.pathname.startsWith('/api/editor/reset/')&&request.method==='POST')return handleEditorReset(request,env,url,url.pathname.split('/').pop());
+    if(request.method==='GET'&&['/content/diary.json','/content/gallery.json','/content/site.json'].includes(url.pathname)){
+      const file=url.pathname.split('/').pop();
+      const override=await handlePublicContentOverride(env,url,file);
+      if(override)return override;
+    }
     if(url.pathname==='/api/media/config'&&request.method==='GET')return handleMediaConfig(url,env);
   if(url.pathname==='/api/media/status'&&request.method==='GET')return handleMediaStatus(request,env);
   if(url.pathname==='/api/media/upload'&&request.method==='POST')return handleMediaUpload(request,env);
