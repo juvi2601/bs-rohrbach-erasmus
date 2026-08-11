@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.4';
+const VERSION = '14.0-dev.5';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -321,7 +321,24 @@ function cleanTripDraft(input={}){
   if(!id||!title||!destination||!country||!startDate||!endDate)throw Object.assign(new Error('Bitte alle Pflichtfelder ausfüllen.'),{status:400});
   if(endDate<startDate)throw Object.assign(new Error('Das Rückreisedatum darf nicht vor der Abreise liegen.'),{status:400});
   if(TRIP_REGISTRY[id])throw Object.assign(new Error('Diese Reise-ID wird bereits verwendet.'),{status:409});
-  return {id,title,destination,country,startDate,endDate,subtitle,theme:{primary,accent},status:'draft'};
+  const website=(input.website&&typeof input.website==='object')?input.website:{};
+  const school=cleanText(website.school,100)||'BS Rohrbach Erasmus+';
+  const heroEyebrow=cleanText(website.heroEyebrow,100)||'Berufsschule Rohrbach unterwegs';
+  const heroTitle=cleanText(website.heroTitle,100)||title;
+  const brandSubtitle=cleanText(website.brandSubtitle,140);
+  const intro=cleanText(website.intro,240)||subtitle;
+  const countdownLabel=cleanText(website.countdownLabel,100);
+  const departureTime=/^([01]\d|2[0-3]):[0-5]\d$/.test(String(website.departureTime||''))?String(website.departureTime):'20:00';
+  const returnTime=/^([01]\d|2[0-3]):[0-5]\d$/.test(String(website.returnTime||''))?String(website.returnTime):'23:59';
+  const hotelName=cleanText(website.hotelName,120);
+  const hotelAddress=cleanText(website.hotelAddress,180);
+  const contactName=cleanText(website.contactName,120);
+  const contactPhone=cleanText(website.contactPhone,60);
+  const notice=cleanText(website.notice,220)||'Noch nicht endgültig bestätigte Punkte sind entsprechend markiert.';
+  return {
+    id,title,destination,country,startDate,endDate,subtitle,theme:{primary,accent},status:'draft',
+    website:{school,heroEyebrow,heroTitle,brandSubtitle,intro,countdownLabel,departureTime,returnTime,hotelName,hotelAddress,contactName,contactPhone,notice}
+  };
 }
 async function listTripDrafts(env){
   if(!env.MEDIA_BUCKET)return [];
