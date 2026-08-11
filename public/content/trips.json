@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "defaultTrip": "bruessel-2026",
+  "trips": [
+    {
+      "id": "bruessel-2026",
+      "title": "Brüssel 2026",
+      "destination": "Brüssel",
+      "country": "Belgien",
+      "status": "active",
+      "startDate": "2026-11-21",
+      "endDate": "2026-11-27",
+      "theme": {
+        "preset": "brussels",
+        "primary": "#0b4f8a",
+        "accent": "#f2c94c"
+      },
+      "contentBase": "/content",
+      "features": {
+        "countdown": true,
+        "diary": true,
+        "liveStatus": true,
+        "gallery": true,
+        "mediaUpload": true,
+        "map": true
+      }
+    }
+  ]
+}

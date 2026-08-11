@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '13.9';
+const VERSION = '14.0-dev.1';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -282,7 +282,22 @@ async function buildPhotoRows(url,env,config){
 
 
 // --- DEV.9: geschützter R2-Medieneingang (Fotos + kurze Videos) ---
-const MEDIA_PROJECT = 'bruessel-2026';
+// --- DEV 14.0 Modul 1: Multi-Reise-Grundstruktur ---
+const DEFAULT_TRIP_ID = 'bruessel-2026';
+const TRIP_REGISTRY = Object.freeze({
+  'bruessel-2026': Object.freeze({id:'bruessel-2026',title:'Brüssel 2026',destination:'Brüssel',country:'Belgien',status:'active',contentBase:'/content'})
+});
+const MEDIA_PROJECT = DEFAULT_TRIP_ID; // Kompatibilität zu STABLE 13.9
+function normalizeTripId(value){return String(value||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'')}
+function resolveTripId(request,url){
+  const header=normalizeTripId(request?.headers?.get('x-erasmus-trip'));
+  const query=normalizeTripId(url?.searchParams?.get('trip'));
+  const candidate=header||query||DEFAULT_TRIP_ID;
+  return TRIP_REGISTRY[candidate]?candidate:DEFAULT_TRIP_ID;
+}
+function tripConfig(id=DEFAULT_TRIP_ID){return TRIP_REGISTRY[id]||TRIP_REGISTRY[DEFAULT_TRIP_ID]}
+// --- Ende DEV 14.0 Modul 1 ---
+
 const MEDIA_ALLOWED_DOMAIN = 'bs-rohrbach.ac.at';
 const MEDIA_MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 // Cloudflare Free erlaubt max. 100 MB Request-Body. 90 MB lässt Reserve für den Upload.
@@ -785,6 +800,14 @@ async function handleEditorReset(request,env,url,kind){
 
 export default {async fetch(request,env){
   const url=new URL(request.url);
+    if(url.pathname==='/api/trips'&&request.method==='GET'){
+      return json({ok:true,defaultTrip:DEFAULT_TRIP_ID,trips:Object.values(TRIP_REGISTRY)});
+    }
+    if(url.pathname==='/api/trips/current'&&request.method==='GET'){
+      const id=resolveTripId(request,url);
+      return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
+    }
+
   if(url.pathname==='/auth')return handleAuth(url,env);
   if(url.pathname==='/callback')return handleCallback(url,env);
   if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
