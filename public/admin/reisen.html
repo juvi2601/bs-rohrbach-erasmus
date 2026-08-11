@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Reisen – BS Rohrbach Erasmus+</title>
   <link rel="icon" href="/images/favicon.ico" sizes="any">
-  <link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.3.1">
+  <link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.4">
   <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
   <style>
     .trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:20px}
@@ -22,7 +22,11 @@
     .new-trip p{color:var(--muted);margin:0 0 14px}
     .new-trip .button{cursor:pointer}
     .login-note{margin-top:14px;color:var(--muted);font-size:13px}
-  </style>
+  
+    .draft-section{margin-top:26px}.draft-card{border-style:dashed}.draft-card .trip-accent{opacity:.65}
+    .draft-label{display:inline-flex;padding:5px 9px;border-radius:999px;background:#fff4d6;color:#805b00;font-size:12px;font-weight:800}
+    .danger-link{border:1px solid #efc7c4;background:#fff3f1;color:#9c302a;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}
+    </style>
 </head>
 <body>
 <header class="topbar">
@@ -55,9 +59,10 @@
       <button class="button primary" id="loginBtn" type="button">Mit Microsoft anmelden</button>
     </div>
     <div class="trip-grid" id="tripGrid"></div>
+    <div class="draft-section"><div class="section-heading"><div><p class="eyebrow">Entwürfe</p><h2>Vorbereitete Reisen</h2></div></div><div class="trip-grid" id="draftGrid"><p>Entwürfe werden geladen …</p></div></div>
     <div class="new-trip">
       <h3>＋ Neue Reise erstellen</h3>
-      <p>Grunddaten einer neuen Reise erfassen und zunächst als Entwurf speichern.</p>
+      <p>Grunddaten einer neuen Reise erfassen und zunächst als Entwurf speichern. Entwürfe können jederzeit weiterbearbeitet oder gelöscht werden.</p>
       <a class="button primary" href="/admin/reise-neu.html">Neue Reise erstellen</a>
     </div>
     <p class="login-note" id="message">Nur Admins können die Reiseverwaltung öffnen.</p>
@@ -117,17 +122,36 @@ function render(trips,defaultTrip){
       </div>
     </article>`).join('');
 }
+function renderDrafts(drafts,tk){
+  const grid=$('draftGrid');
+  if(!drafts.length){grid.innerHTML='<article class="trip-card draft-card"><p class="eyebrow">Keine Entwürfe</p><h3>Noch keine Reise vorbereitet</h3><div class="trip-meta"><span>Über „Neue Reise erstellen“ kannst du einen Entwurf anlegen.</span></div></article>';return}
+  grid.innerHTML=drafts.map(t=>`<article class="trip-card draft-card">
+    <div class="trip-accent" style="background:linear-gradient(90deg,${t.theme?.primary||'#0b4f8a'},${t.theme?.accent||'#f2c94c'})"></div>
+    <span class="draft-label">ENTWURF</span><h3>${t.title}</h3>
+    <div class="trip-meta"><span>📍 ${t.destination}, ${t.country}</span><span>📅 ${fmtDate(t.startDate)} – ${fmtDate(t.endDate)}</span><span>🔑 Reise-ID: ${t.id}</span></div>
+    <div class="trip-actions"><a class="button primary" href="/admin/reise-neu.html?id=${encodeURIComponent(t.id)}">Bearbeiten</a><button class="danger-link" data-delete="${t.id}" type="button">Löschen</button><span class="badge">Nicht öffentlich</span></div>
+  </article>`).join('');
+  document.querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=async()=>{
+    const id=btn.dataset.delete;if(!confirm(`Entwurf „${id}“ wirklich löschen?`))return;
+    try{const r=await fetch('/api/trips/drafts/'+encodeURIComponent(id),{method:'DELETE',headers:{authorization:'Bearer '+tk}});const d=await r.json();if(!r.ok)throw new Error(d.message||'Löschen fehlgeschlagen.');await load()}catch(e){alert(e.message)}
+  });
+}
 async function load(){
   try{
     $('state').textContent='Wird geprüft';
     $('message').textContent='Reisedaten werden geladen …';
     const tk=await token();
-    const r=await fetch('/api/trips/admin',{headers:{authorization:'Bearer '+tk},cache:'no-store'});
-    const d=await r.json();
+    const [r,dr]=await Promise.all([
+      fetch('/api/trips/admin',{headers:{authorization:'Bearer '+tk},cache:'no-store'}),
+      fetch('/api/trips/drafts',{headers:{authorization:'Bearer '+tk},cache:'no-store'})
+    ]);
+    const d=await r.json(),dd=await dr.json();
     if(!r.ok)throw new Error(d.message||'Zugriff nicht möglich.');
+    if(!dr.ok)throw new Error(dd.message||'Entwürfe konnten nicht geladen werden.');
     render(d.trips||[],d.defaultTrip);
+    renderDrafts(dd.drafts||[],tk);
     $('state').textContent='Admin freigeschaltet';
-    $('detail').textContent=`${d.trips?.length||0} Reise(n)`;
+    $('detail').textContent=`${d.trips?.length||0} Reise(n) · ${dd.drafts?.length||0} Entwurf/Entwürfe`;
     $('message').textContent='Reiseverwaltung bereit.';
   }catch(e){
     $('state').textContent='Kein Zugriff';

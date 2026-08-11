@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.3.1';
+const VERSION = '14.0-dev.4';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -323,6 +323,34 @@ function cleanTripDraft(input={}){
   if(TRIP_REGISTRY[id])throw Object.assign(new Error('Diese Reise-ID wird bereits verwendet.'),{status:409});
   return {id,title,destination,country,startDate,endDate,subtitle,theme:{primary,accent},status:'draft'};
 }
+async function listTripDrafts(env){
+  if(!env.MEDIA_BUCKET)return [];
+  const prefix='__system/trips/drafts/';
+  let cursor=undefined,rows=[];
+  do{
+    const page=await env.MEDIA_BUCKET.list({prefix,limit:1000,cursor});
+    for(const object of page.objects||[]){
+      try{
+        const stored=await env.MEDIA_BUCKET.get(object.key);
+        if(!stored)continue;
+        const draft=JSON.parse(await stored.text());
+        if(draft?.id)rows.push(draft);
+      }catch{}
+    }
+    cursor=page.truncated?page.cursor:undefined;
+  }while(cursor);
+  rows.sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||'')));
+  return rows;
+}
+async function getTripDraft(env,id){
+  if(!env.MEDIA_BUCKET)return null;
+  const normalized=normalizeTripId(id);
+  if(!normalized)return null;
+  const object=await env.MEDIA_BUCKET.get(tripDraftKey(normalized));
+  if(!object)return null;
+  try{return JSON.parse(await object.text())}catch{return null}
+}
+
 
 // --- Ende DEV 14.0 Modul 1 ---
 
@@ -835,15 +863,56 @@ export default {async fetch(request,env){
       const id=resolveTripId(request,url);
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
+    if(url.pathname==='/api/trips/drafts'&&request.method==='GET'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        return json({ok:true,user,drafts:await listTripDrafts(env)});
+      }catch(error){return mediaError(error)}
+    }
     if(url.pathname==='/api/trips/drafts'&&request.method==='POST'){
       try{
         const user=await verifyTripRole(request,env,['admin']);
         if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
         const draft=cleanTripDraft(await request.json());
-        draft.createdAt=new Date().toISOString();
-        draft.createdBy=user.email;
+        const existing=await getTripDraft(env,draft.id);
+        if(existing)throw Object.assign(new Error('Für diese Reise-ID existiert bereits ein Entwurf.'),{status:409});
+        draft.createdAt=new Date().toISOString();draft.updatedAt=draft.createdAt;draft.createdBy=user.email;draft.updatedBy=user.email;
         await env.MEDIA_BUCKET.put(tripDraftKey(draft.id),JSON.stringify(draft,null,2),{httpMetadata:{contentType:'application/json'}});
         return json({ok:true,draft,message:'Entwurf gespeichert. Die Reise ist noch nicht veröffentlicht.'});
+      }catch(error){return mediaError(error)}
+    }
+    if(url.pathname.startsWith('/api/trips/drafts/')&&request.method==='GET'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        const id=normalizeTripId(url.pathname.split('/').pop());
+        const draft=await getTripDraft(env,id);
+        if(!draft)throw Object.assign(new Error('Entwurf wurde nicht gefunden.'),{status:404});
+        return json({ok:true,user,draft});
+      }catch(error){return mediaError(error)}
+    }
+    if(url.pathname.startsWith('/api/trips/drafts/')&&request.method==='PUT'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+        const id=normalizeTripId(url.pathname.split('/').pop());
+        const existing=await getTripDraft(env,id);
+        if(!existing)throw Object.assign(new Error('Entwurf wurde nicht gefunden.'),{status:404});
+        const draft=cleanTripDraft({...await request.json(),id});
+        draft.createdAt=existing.createdAt||new Date().toISOString();draft.createdBy=existing.createdBy||user.email;
+        draft.updatedAt=new Date().toISOString();draft.updatedBy=user.email;
+        await env.MEDIA_BUCKET.put(tripDraftKey(id),JSON.stringify(draft,null,2),{httpMetadata:{contentType:'application/json'}});
+        return json({ok:true,draft,message:'Entwurf aktualisiert.'});
+      }catch(error){return mediaError(error)}
+    }
+    if(url.pathname.startsWith('/api/trips/drafts/')&&request.method==='DELETE'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+        const id=normalizeTripId(url.pathname.split('/').pop());
+        const existing=await getTripDraft(env,id);
+        if(!existing)throw Object.assign(new Error('Entwurf wurde nicht gefunden.'),{status:404});
+        await env.MEDIA_BUCKET.delete(tripDraftKey(id));
+        return json({ok:true,id,message:'Entwurf gelöscht.'});
       }catch(error){return mediaError(error)}
     }
     if(url.pathname==='/api/trips/admin'&&request.method==='GET'){

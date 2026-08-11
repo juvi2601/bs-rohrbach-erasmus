@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.3">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.4">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -21,7 +21,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 3</p><h1>Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 4</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -43,11 +43,11 @@
 </div></div>
 </div>
 <div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
-<div class="actions"><button class="button primary" type="submit">Entwurf speichern</button><a class="button ghost" href="/admin/reisen.html">Abbrechen</a></div>
+<div class="actions"><button class="button primary" type="submit" id="saveBtn">Entwurf speichern</button><a class="button ghost" href="/admin/reisen.html">Abbrechen</a></div>
 <p id="message"></p>
 </form></section></main>
 <script>
-let cfg,app,account,tokenValue;
+let cfg,app,account,tokenValue;const params=new URLSearchParams(location.search),editId=params.get('id')||'';
 const $=id=>document.getElementById(id);
 function slug(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
 function fmt(d){if(!d)return '';try{return new Intl.DateTimeFormat('de-AT').format(new Date(d+'T12:00:00'))}catch{return d}}
@@ -66,6 +66,18 @@ async function init(){
  cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
  app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage'}});
  await app.initialize();account=app.getAllAccounts()[0]||null;preview();
+ if(editId)await loadDraft();
+}
+async function loadDraft(){
+ try{
+  const r=await fetch('/api/trips/drafts/'+encodeURIComponent(editId),{headers:{authorization:'Bearer '+await token()},cache:'no-store'});
+  const d=await r.json();if(!r.ok)throw new Error(d.message||'Entwurf konnte nicht geladen werden.');
+  const x=d.draft;
+  $('title').value=x.title||'';$('tripId').value=x.id||'';$('tripId').readOnly=true;$('tripId').dataset.edited='1';
+  $('destination').value=x.destination||'';$('country').value=x.country||'';$('startDate').value=x.startDate||'';$('endDate').value=x.endDate||'';
+  $('subtitle').value=x.subtitle||'';$('primary').value=x.theme?.primary||'#0b4f8a';$('accent').value=x.theme?.accent||'#f2c94c';
+  $('pageTitle').textContent='Reise-Entwurf bearbeiten';$('saveBtn').textContent='Änderungen speichern';$('state').textContent='Entwurf geladen';preview();
+ }catch(e){$('message').className='notice';$('message').textContent=e.message}
 }
 async function token(){
  if(tokenValue)return tokenValue;
@@ -77,7 +89,8 @@ $('tripForm').addEventListener('submit',async e=>{
  e.preventDefault();$('message').textContent='Entwurf wird gespeichert …';$('state').textContent='Speichern …';
  try{
   const body={title:$('title').value,id:$('tripId').value,destination:$('destination').value,country:$('country').value,startDate:$('startDate').value,endDate:$('endDate').value,subtitle:$('subtitle').value,primary:$('primary').value,accent:$('accent').value};
-  const r=await fetch('/api/trips/drafts',{method:'POST',headers:{authorization:'Bearer '+await token(),'content-type':'application/json'},body:JSON.stringify(body)});
+  const endpoint=editId?'/api/trips/drafts/'+encodeURIComponent(editId):'/api/trips/drafts';
+  const r=await fetch(endpoint,{method:editId?'PUT':'POST',headers:{authorization:'Bearer '+await token(),'content-type':'application/json'},body:JSON.stringify(body)});
   const d=await r.json();if(!r.ok)throw new Error(d.message||'Speichern fehlgeschlagen.');
   $('state').textContent='Entwurf gespeichert';$('message').className='notice success';$('message').textContent='✓ '+d.message+' Reise-ID: '+d.draft.id;
  }catch(err){$('state').textContent='Fehler';$('message').className='notice';$('message').textContent=err.message}
