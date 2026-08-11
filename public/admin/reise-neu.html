@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.7.1">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.7.2">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -110,7 +110,7 @@
 <div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
 </div>
 <div class="wizard-panel" data-panel="7" hidden>
-<div class="field full"><p class="eyebrow">Schritt 7</p><h2 style="margin:0">Tagesprogramm</h2><small>Die Reisetage werden aus dem Reisezeitraum erzeugt. Pro Tag können beliebig viele Programmpunkte erfasst werden. Bilder werden im nächsten Modul zugeordnet.</small></div>
+<div class="field full"><p class="eyebrow">Schritt 7</p><h2 style="margin:0">Tagesprogramm</h2><small>Die Reisetage werden aus dem Reisezeitraum erzeugt. Pro Tag können beliebig viele Programmpunkte erfasst werden. Bereits hochgeladene Programmbilder können direkt den einzelnen Programmpunkten zugeordnet werden.</small></div>
 <div class="notice"><strong>Automatisch vorbereitet:</strong> Änderungen an Abreise oder Rückkehr aktualisieren die Reisetage. Bereits erfasste Inhalte werden anhand des Datums beibehalten.</div>
 <div id="programDays" class="program-days"></div>
 <div class="field full"><h3>Vollständigkeitsprüfung</h3><div id="wizardSummary" class="wizard-summary"></div></div>
@@ -237,7 +237,7 @@ function isoDates(start,end){
 function programDayId(date,index){const d=new Date(date+'T12:00:00');return `${weekdayShort[d.getDay()].toLowerCase()}-${index+1}`}
 function normalizeProgram(program){
  const days=Array.isArray(program?.days)?program.days:[];
- return {days:days.map((d,i)=>({id:String(d.id||programDayId(d.date||'',i)),date:String(d.date||''),short:String(d.short||''),title:String(d.title||''),subtitle:String(d.subtitle||''),events:Array.isArray(d.events)?d.events.map(e=>({time:String(e.time||''),title:String(e.title||''),text:String(e.text||'')})):[]}))};
+ return {days:days.map((d,i)=>({id:String(d.id||programDayId(d.date||'',i)),date:String(d.date||''),short:String(d.short||''),title:String(d.title||''),subtitle:String(d.subtitle||''),events:Array.isArray(d.events)?d.events.map(e=>({time:String(e.time||''),title:String(e.title||''),text:String(e.text||''),image:String(e.image||'')})):[]}))};
 }
 function syncProgramDays(){
  const dates=isoDates($('startDate').value,$('endDate').value),old=new Map((window.tripProgram?.days||[]).map(d=>[d.date,d]));
@@ -256,15 +256,24 @@ function renderProgramDays(){
  </article>`).join('');
  bindProgramControls();
 }
-function programEventHtml(di,ei,e={}){return `<div class="program-event" data-event="${ei}"><div class="program-event-number">${ei+1}</div><div class="program-event-fields"><div class="field"><label>Zeit *</label><input data-event-field="time" value="${escHtml(e.time||'')}" placeholder="z. B. 09:30–11:00"></div><div class="field"><label>Programmpunkt *</label><input data-event-field="title" value="${escHtml(e.title||'')}" placeholder="z. B. Hafenrundfahrt"></div><div class="field full"><label>Beschreibung</label><textarea data-event-field="text" placeholder="Details, Treffpunkt, Hinweise …">${escHtml(e.text||'')}</textarea></div></div><button type="button" class="danger-link remove-program-event" title="Programmpunkt löschen">Löschen</button></div>`}
+function programEventHtml(di,ei,e={}){return `<div class="program-event" data-event="${ei}"><div class="program-event-number">${ei+1}</div><div class="program-event-fields"><div class="field"><label>Zeit *</label><input data-event-field="time" value="${escHtml(e.time||'')}" placeholder="z. B. 09:30–11:00"></div><div class="field"><label>Programmpunkt *</label><input data-event-field="title" value="${escHtml(e.title||'')}" placeholder="z. B. Hafenrundfahrt"></div><div class="field full"><label>Beschreibung</label><textarea data-event-field="text" placeholder="Details, Treffpunkt, Hinweise …">${escHtml(e.text||'')}</textarea></div><div class="field full"><label>Programmbild</label>${programImagePicker(e.image||'')}</div></div><button type="button" class="danger-link remove-program-event" title="Programmpunkt löschen">Löschen</button></div>`}
+function programImageUrl(key){return `/api/trips/draft-image?key=${encodeURIComponent(key)}`}
+function programImagePicker(selected=''){
+ const images=window.tripImages?.program||[];
+ if(!images.length)return '<div class="program-image-empty">Noch keine Programmbilder in Schritt 6 hochgeladen.</div><input type="hidden" data-event-field="image" value="">';
+ return `<div class="program-image-picker"><select data-event-field="image" class="program-image-select"><option value="">Kein Bild</option>${images.map((key,i)=>`<option value="${escHtml(key)}" ${selected===key?'selected':''}>Programmbild ${i+1}</option>`).join('')}</select><div class="program-image-thumbs">${images.map((key,i)=>`<button type="button" class="program-image-thumb ${selected===key?'selected':''}" data-image-key="${escHtml(key)}" title="Programmbild ${i+1} auswählen"><img src="${programImageUrl(key)}" alt="Programmbild ${i+1}"><span>${i+1}</span></button>`).join('')}</div></div>`;
+}
+
 function bindProgramControls(){
+ document.querySelectorAll('.program-image-thumb').forEach(btn=>btn.onclick=()=>{const picker=btn.closest('.program-image-picker'),sel=picker.querySelector('.program-image-select');sel.value=btn.dataset.imageKey;picker.querySelectorAll('.program-image-thumb').forEach(x=>x.classList.toggle('selected',x===btn));});
+ document.querySelectorAll('.program-image-select').forEach(sel=>sel.addEventListener('change',()=>{const picker=sel.closest('.program-image-picker');picker.querySelectorAll('.program-image-thumb').forEach(x=>x.classList.toggle('selected',x.dataset.imageKey===sel.value));}));
  document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day);card.querySelectorAll('[data-day-field]').forEach(el=>el.addEventListener('input',()=>{window.tripProgram.days[di][el.dataset.dayField]=el.value}));});
- document.querySelectorAll('.add-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const di=Number(btn.dataset.day);window.tripProgram.days[di].events.push({time:'',title:'',text:''});renderProgramDays()});
+ document.querySelectorAll('.add-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const di=Number(btn.dataset.day);window.tripProgram.days[di].events.push({time:'',title:'',text:'',image:''});renderProgramDays()});
  document.querySelectorAll('.remove-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const card=btn.closest('.program-day'),event=btn.closest('.program-event'),di=Number(card.dataset.day),ei=Number(event.dataset.event);window.tripProgram.days[di].events.splice(ei,1);renderProgramDays()});
 }
 function collectProgramDays(){
  document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day),day=window.tripProgram.days[di];card.querySelectorAll('[data-day-field]').forEach(el=>day[el.dataset.dayField]=el.value);day.events=[...card.querySelectorAll('.program-event')].map(ev=>{const obj={};ev.querySelectorAll('[data-event-field]').forEach(el=>obj[el.dataset.eventField]=el.value);return obj})});
- return (window.tripProgram?.days||[]).map((d,i)=>({id:d.id||programDayId(d.date,i),date:d.date,short:d.short,title:d.title,subtitle:d.subtitle,events:(d.events||[]).map(e=>({time:e.time,title:e.title,text:e.text}))}));
+ return (window.tripProgram?.days||[]).map((d,i)=>({id:d.id||programDayId(d.date,i),date:d.date,short:d.short,title:d.title,subtitle:d.subtitle,events:(d.events||[]).map(e=>({time:e.time,title:e.title,text:e.text,image:e.image||''}))}));
 }
 function programComplete(){const days=collectProgramDays();return days.length>0&&days.every(d=>d.title.trim()&&d.events.length>0&&d.events.every(e=>e.time.trim()&&e.title.trim()))}
 ['startDate','endDate'].forEach(id=>$(id).addEventListener('change',syncProgramDays));

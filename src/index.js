@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.7.1';
+const VERSION = '14.0-dev.7.2';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -359,7 +359,7 @@ function cleanTripDraft(input={}){
       const date=/^\d{4}-\d{2}-\d{2}$/.test(String(day?.date||''))?String(day.date):'';
       return {
         id:cleanText(day?.id,40)||`day-${di+1}`,date,short:cleanText(day?.short,12),title:cleanText(day?.title,120),subtitle:cleanText(day?.subtitle,220),
-        events:(Array.isArray(day?.events)?day.events:[]).slice(0,30).map(event=>({time:cleanText(event?.time,60),title:cleanText(event?.title,160),text:cleanText(event?.text,500)}))
+        events:(Array.isArray(day?.events)?day.events:[]).slice(0,30).map(event=>({time:cleanText(event?.time,60),title:cleanText(event?.title,160),text:cleanText(event?.text,500),image:cleanText(event?.image,300)}))
       };
     }).filter(day=>day.date)}
   };
@@ -920,6 +920,18 @@ export default {async fetch(request,env){
         draft.createdAt=new Date().toISOString();draft.updatedAt=draft.createdAt;draft.createdBy=user.email;draft.updatedBy=user.email;
         await env.MEDIA_BUCKET.put(tripDraftKey(draft.id),JSON.stringify(draft,null,2),{httpMetadata:{contentType:'application/json'}});
         return json({ok:true,draft,message:'Entwurf gespeichert. Die Reise ist noch nicht veröffentlicht.'});
+      }catch(error){return mediaError(error)}
+    }
+    if(url.pathname==='/api/trips/draft-image'&&request.method==='GET'){
+      try{
+        await verifyTripRole(request,env,['admin']);
+        if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+        const key=String(url.searchParams.get('key')||'');
+        if(!key.startsWith('__system/trips/assets/'))throw Object.assign(new Error('Ungültiger Bildpfad.'),{status:400});
+        const object=await env.MEDIA_BUCKET.get(key);
+        if(!object)return new Response('Nicht gefunden',{status:404});
+        const headers=new Headers();object.writeHttpMetadata(headers);headers.set('cache-control','private, max-age=300');headers.set('x-content-type-options','nosniff');
+        return new Response(object.body,{headers});
       }catch(error){return mediaError(error)}
     }
     if(url.pathname==='/api/trips/draft-image'&&request.method==='POST'){
