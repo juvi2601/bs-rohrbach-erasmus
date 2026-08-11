@@ -10,6 +10,22 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="stylesheet" href="/admin/admin.css?v=13.1">
+<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<script>
+document.documentElement.style.visibility='hidden';
+(async()=>{
+ try{
+  const cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
+  const app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});
+  await app.initialize();const account=app.getAllAccounts()[0];if(!account){location.replace('/admin/login.html');return}
+  let token;try{token=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}catch{location.replace('/admin/login.html');return}
+  const r=await fetch('/api/access/me',{headers:{authorization:'Bearer '+token},cache:'no-store'});const d=await r.json();
+  if(d.access?.role==='teacher'){location.replace('/admin/redaktion.html?verified=1');return}
+  if(d.access?.role!=='admin'){location.replace('/admin/login.html?denied=1');return}
+  document.documentElement.style.visibility='';
+ }catch(e){location.replace('/admin/login.html')}
+})();
+</script>
 </head>
 <body>
   <header class="topbar">

@@ -533,7 +533,7 @@ function renderFaq(items){qs("#faqList").innerHTML=items.map((x,i)=>`<article cl
 
 function renderLegalLinks(items){
   const wrap=qs("#footerLegalLinks");if(!wrap)return;
-  wrap.innerHTML=items.map(x=>`<button type="button" data-legal="${esc(x.panel)}">${esc(x.label)}</button>`).join("")+`<a class="footer-admin-link" href="/admin/" aria-label="Administratorbereich öffnen">Administrator</a>`;
+  wrap.innerHTML=items.map(x=>`<button type="button" data-legal="${esc(x.panel)}">${esc(x.label)}</button>`).join("")+`<a class="footer-admin-link" href="/admin/login.html" aria-label="Administratorbereich öffnen">Administrator</a>`;
   qsa("[data-legal]",wrap).forEach(btn=>btn.addEventListener("click",()=>openLegal(btn.dataset.legal)));
 }
 function setupLegalModal(){
