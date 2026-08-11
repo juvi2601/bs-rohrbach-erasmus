@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.1';
+const VERSION = '14.0-dev.2';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -285,7 +285,18 @@ async function buildPhotoRows(url,env,config){
 // --- DEV 14.0 Modul 1: Multi-Reise-Grundstruktur ---
 const DEFAULT_TRIP_ID = 'bruessel-2026';
 const TRIP_REGISTRY = Object.freeze({
-  'bruessel-2026': Object.freeze({id:'bruessel-2026',title:'Brüssel 2026',destination:'Brüssel',country:'Belgien',status:'active',contentBase:'/content'})
+  'bruessel-2026': Object.freeze({
+    id:'bruessel-2026',
+    title:'Brüssel 2026',
+    destination:'Brüssel',
+    country:'Belgien',
+    status:'active',
+    startDate:'2026-11-21',
+    endDate:'2026-11-27',
+    contentBase:'/content',
+    theme:{preset:'brussels',primary:'#0b4f8a',accent:'#f2c94c'},
+    features:{countdown:true,diary:true,liveStatus:true,gallery:true,mediaUpload:true,map:true}
+  })
 });
 const MEDIA_PROJECT = DEFAULT_TRIP_ID; // Kompatibilität zu STABLE 13.9
 function normalizeTripId(value){return String(value||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'')}
@@ -806,6 +817,12 @@ export default {async fetch(request,env){
     if(url.pathname==='/api/trips/current'&&request.method==='GET'){
       const id=resolveTripId(request,url);
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
+    }
+    if(url.pathname==='/api/trips/admin'&&request.method==='GET'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        return json({ok:true,user,defaultTrip:DEFAULT_TRIP_ID,trips:Object.values(TRIP_REGISTRY)});
+      }catch(error){return mediaError(error)}
     }
 
   if(url.pathname==='/auth')return handleAuth(url,env);
