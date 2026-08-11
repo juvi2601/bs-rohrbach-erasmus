@@ -134,7 +134,7 @@ function renderDrafts(drafts,tk){
       <span>${t.accommodation?.name&&t.accommodation?.address?'Unterkunft ✓':'Unterkunft offen'}</span>
       <span>${t.transport?.outboundMode&&t.transport?.meetingPoint&&t.transport?.returnInfo?'An-/Abreise ✓':'An-/Abreise offen'}</span>
       <span>${t.team?.teachers?.length?'Lehrkräfte ✓':'Lehrkräfte offen'}</span>
-      <span>Bilder/Programm folgen</span>
+      <span>${t.images?.hero?'Titelbild ✓':'Titelbild offen'}</span><span>${t.program?.days?.length?'Tagesprogramm ✓':'Tagesprogramm offen'}</span>
     </div>
     <div class="trip-actions"><a class="button primary" href="/admin/reise-neu.html?id=${encodeURIComponent(t.id)}">Bearbeiten</a><button class="danger-link" data-delete="${t.id}" type="button">Löschen</button><span class="badge">Nicht öffentlich</span></div>
   </article>`).join('');

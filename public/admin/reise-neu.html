@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.6.2">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.7">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -16,12 +16,13 @@
 .preview-band{height:9px;border-radius:99px;margin-bottom:16px}.preview h3{font-size:26px;margin:0 0 5px}.preview p{color:var(--muted);margin:4px 0}
 .notice{padding:14px 16px;border-radius:14px;background:#fff8df;border:1px solid #f2d36b;margin:18px 0}
 .success{background:#edf9f3;border-color:#a8dfc2}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
-@media(max-width:720px){.form-grid,.colors{grid-template-columns:1fr}.field.full{grid-column:auto}}
+.program-days{display:grid;gap:18px;margin-top:20px}.program-day{border:1px solid var(--line);border-radius:18px;padding:18px;background:#fff}.program-day-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.program-day-head h3{margin:0;font-size:22px}.program-events{display:grid;gap:12px;margin:16px 0}.program-event{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:14px;background:#f8fafc}.program-event-number{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#e8f0f7;font-weight:800}.program-event-fields{display:grid;grid-template-columns:180px 1fr;gap:12px;width:100%}.program-event-fields .field.full{grid-column:1/-1}.program-event textarea{min-height:68px}.program-event .danger-link{align-self:center}.badge{display:inline-flex;padding:5px 9px;border-radius:999px;background:#eef4f8;font-size:12px;font-weight:800}
+@media(max-width:720px){.form-grid,.colors,.program-event-fields{grid-template-columns:1fr}.field.full,.program-event-fields .field.full{grid-column:auto}.program-event{grid-template-columns:32px 1fr}.program-event .danger-link{grid-column:2}}
 </style></head><body>
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 6.2</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 7</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -35,6 +36,7 @@
 <button type="button" class="wizard-step" data-step="4">4 · Personen<small>Lehrkräfte & Notfall</small></button>
 <button type="button" class="wizard-step" data-step="5">5 · Dokumente<small>Links & Funktionen</small></button>
 <button type="button" class="wizard-step" data-step="6">6 · Bilder<small>Titel, Hotel, Programm</small></button>
+<button type="button" class="wizard-step" data-step="7">7 · Tagesprogramm<small>Reisetage & Programmpunkte</small></button>
 </div>
 <form id="tripForm">
 <div class="wizard-panel" data-panel="1">
@@ -103,9 +105,15 @@
 <div class="field full"><div class="image-slots">
  <div class="image-slot"><strong>Titelbild *</strong><p>Das große Hauptbild der Reisewebsite.</p><input id="heroImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="hero">Titelbild hochladen</button><div id="heroImageStatus" class="image-status">Noch kein Bild zugeordnet.</div></div>
  <div class="image-slot"><strong>Hotelbild</strong><p>Bild der Unterkunft bzw. des Hotels.</p><input id="hotelImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="hotel">Hotelbild hochladen</button><div id="hotelImageStatus" class="image-status">Noch kein Bild zugeordnet.</div></div>
- <div class="image-slot program"><strong>Programmbilder</strong><p>Mehrere Bilder für Programmpunkte. Die genaue Zuordnung erfolgt mit dem Tagesprogramm in Modul 7.</p><input id="programImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="program">Programmbild hinzufügen</button><div id="programImageStatus" class="image-status">Noch keine Programmbilder zugeordnet.</div></div>
+ <div class="image-slot program"><strong>Programmbilder</strong><p>Mehrere Bilder für Programmpunkte. Die genaue Bild-Zuordnung zu einzelnen Programmpunkten folgt nach Modul 7.</p><input id="programImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="program">Programmbild hinzufügen</button><div id="programImageStatus" class="image-status">Noch keine Programmbilder zugeordnet.</div></div>
 </div></div>
-<div class="field full"><h3>Vollständigkeitsprüfung</h3><div id="wizardSummary" class="wizard-summary"></div></div><div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
+<div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
+</div>
+<div class="wizard-panel" data-panel="7" hidden>
+<div class="field full"><p class="eyebrow">Schritt 7</p><h2 style="margin:0">Tagesprogramm</h2><small>Die Reisetage werden aus dem Reisezeitraum erzeugt. Pro Tag können beliebig viele Programmpunkte erfasst werden. Bilder werden im nächsten Modul zugeordnet.</small></div>
+<div class="notice"><strong>Automatisch vorbereitet:</strong> Änderungen an Abreise oder Rückkehr aktualisieren die Reisetage. Bereits erfasste Inhalte werden anhand des Datums beibehalten.</div>
+<div id="programDays" class="program-days"></div>
+<div class="field full"><h3>Vollständigkeitsprüfung</h3><div id="wizardSummary" class="wizard-summary"></div></div>
 <div class="actions"><button class="button primary" type="submit" id="saveBtn">Entwurf speichern</button><a class="button ghost" href="/admin/reisen.html">Abbrechen</a></div>
 <p id="message"></p>
 </div>
@@ -143,7 +151,7 @@ async function init(){
  cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
  app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage'}});
  await app.initialize();account=app.getAllAccounts()[0]||null;preview();
- if(editId)await loadDraft();
+ if(editId)await loadDraft(); else syncProgramDays();
 }
 async function loadDraft(){
  try{
@@ -154,6 +162,7 @@ async function loadDraft(){
   $('destination').value=x.destination||'';$('country').value=x.country||'';$('startDate').value=x.startDate||'';$('endDate').value=x.endDate||'';
   $('subtitle').value=x.subtitle||'';$('primary').value=x.theme?.primary||'#0b4f8a';$('accent').value=x.theme?.accent||'#f2c94c';
   const w=x.website||{},tr=x.transport||{},ac=x.accommodation||{},tm=x.team||{},em=x.emergency||{},dc=x.documents||{},ft=x.features||{},im=x.images||{};
+  window.tripProgram=normalizeProgram(x.program); renderProgramDays();
   $('intro').value=w.intro||x.subtitle||'';
   $('outboundMode').value=tr.outboundMode||'';$('meetingPoint').value=tr.meetingPoint||'';$('arrivalInfo').value=tr.arrivalInfo||'';$('returnMode').value=tr.returnMode||'';$('returnInfo').value=tr.returnInfo||'';$('transportNotes').value=tr.notes||'';
   $('hotelName').value=ac.name||w.hotelName||'';$('hotelAddress').value=ac.address||w.hotelAddress||'';$('hotelWebsite').value=ac.website||'';$('hotelPhone').value=ac.phone||'';$('checkIn').value=ac.checkIn||'';$('checkOut').value=ac.checkOut||'';$('hotelNotes').value=ac.notes||'';
@@ -183,7 +192,8 @@ $('tripForm').addEventListener('submit',async e=>{
     emergency:{contactName:$('contactName').value,contactPhone:$('contactPhone').value,schoolPhone:$('schoolPhone').value,insurance:$('insurance').value,notes:$('emergencyNotes').value},
     documents:{program:$('docProgram').value,packingList:$('docPacking').value,parentInfo:$('docParent').value,insuranceInfo:$('docInsurance').value,other:$('docOther').value},
     features:{diary:$('featDiary').checked,gallery:$('featGallery').checked,upload:$('featUpload').checked,map:$('featMap').checked,smartJourney:$('featJourney').checked,downloads:$('featDownloads').checked},
-    images:window.tripImages||{hero:'',hotel:'',program:[]}
+    images:window.tripImages||{hero:'',hotel:'',program:[]},
+    program:{days:collectProgramDays()}
   };
   const endpoint=editId?'/api/trips/drafts/'+encodeURIComponent(editId):'/api/trips/drafts';
   const r=await fetch(endpoint,{method:editId?'PUT':'POST',headers:{authorization:'Bearer '+await token(),'content-type':'application/json'},body:JSON.stringify(body)});
@@ -195,6 +205,7 @@ init().catch(e=>$('message').textContent=e.message);
 
 
 window.tripImages=window.tripImages||{hero:'',hotel:'',program:[]};
+window.tripProgram=window.tripProgram||{days:[]};
 function updateImageStatuses(){
  const im=window.tripImages||{};
  const hs=$('heroImageStatus'),ts=$('hotelImageStatus'),ps=$('programImageStatus');
@@ -217,33 +228,73 @@ async function uploadTripImage(slot){
 }
 document.querySelectorAll('[data-upload-slot]').forEach(b=>b.addEventListener('click',()=>uploadTripImage(b.dataset.uploadSlot)));
 updateImageStatuses();
+const weekdayShort=['So','Mo','Di','Mi','Do','Fr','Sa'];
+function isoDates(start,end){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(start||'')||!/^\d{4}-\d{2}-\d{2}$/.test(end||'')||end<start)return [];
+ const out=[],d=new Date(start+'T12:00:00');const last=new Date(end+'T12:00:00');
+ while(d<=last&&out.length<31){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1)} return out;
+}
+function programDayId(date,index){const d=new Date(date+'T12:00:00');return `${weekdayShort[d.getDay()].toLowerCase()}-${index+1}`}
+function normalizeProgram(program){
+ const days=Array.isArray(program?.days)?program.days:[];
+ return {days:days.map((d,i)=>({id:String(d.id||programDayId(d.date||'',i)),date:String(d.date||''),short:String(d.short||''),title:String(d.title||''),subtitle:String(d.subtitle||''),events:Array.isArray(d.events)?d.events.map(e=>({time:String(e.time||''),title:String(e.title||''),text:String(e.text||'')})):[]}))};
+}
+function syncProgramDays(){
+ const dates=isoDates($('startDate').value,$('endDate').value),old=new Map((window.tripProgram?.days||[]).map(d=>[d.date,d]));
+ window.tripProgram={days:dates.map((date,i)=>{const prev=old.get(date)||{},dd=new Date(date+'T12:00:00');return {id:prev.id||programDayId(date,i),date,short:prev.short||weekdayShort[dd.getDay()],title:prev.title||'',subtitle:prev.subtitle||'',events:Array.isArray(prev.events)?prev.events:[]}})};
+ renderProgramDays();
+}
+function escHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderProgramDays(){
+ const box=$('programDays');if(!box)return;const days=window.tripProgram?.days||[];
+ if(!days.length){box.innerHTML='<div class="notice">Bitte zuerst in Schritt 1 einen gültigen Reisezeitraum festlegen.</div>';return}
+ box.innerHTML=days.map((d,di)=>`<article class="program-day" data-day="${di}">
+  <div class="program-day-head"><div><p class="eyebrow">${escHtml(d.short)} · ${fmt(d.date)}</p><h3>Reisetag ${di+1}</h3></div><span class="badge">${d.events.length} Programmpunkt${d.events.length===1?'':'e'}</span></div>
+  <div class="form-grid"><div class="field"><label>Titel des Tages *</label><input data-day-field="title" value="${escHtml(d.title)}" placeholder="z. B. Antwerpen"></div><div class="field"><label>Kurzname</label><input data-day-field="short" value="${escHtml(d.short)}" maxlength="8"></div><div class="field full"><label>Untertitel / Schwerpunkt</label><input data-day-field="subtitle" value="${escHtml(d.subtitle)}" placeholder="Kurze Zusammenfassung des Tages"></div></div>
+  <div class="program-events">${d.events.map((e,ei)=>programEventHtml(di,ei,e)).join('')}</div>
+  <button type="button" class="button ghost add-program-event" data-day="${di}">＋ Programmpunkt hinzufügen</button>
+ </article>`).join('');
+ bindProgramControls();
+}
+function programEventHtml(di,ei,e={}){return `<div class="program-event" data-event="${ei}"><div class="program-event-number">${ei+1}</div><div class="program-event-fields"><div class="field"><label>Zeit *</label><input data-event-field="time" value="${escHtml(e.time||'')}" placeholder="z. B. 09:30–11:00"></div><div class="field"><label>Programmpunkt *</label><input data-event-field="title" value="${escHtml(e.title||'')}" placeholder="z. B. Hafenrundfahrt"></div><div class="field full"><label>Beschreibung</label><textarea data-event-field="text" placeholder="Details, Treffpunkt, Hinweise …">${escHtml(e.text||'')}</textarea></div></div><button type="button" class="danger-link remove-program-event" title="Programmpunkt löschen">Löschen</button></div>`}
+function bindProgramControls(){
+ document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day);card.querySelectorAll('[data-day-field]').forEach(el=>el.addEventListener('input',()=>{window.tripProgram.days[di][el.dataset.dayField]=el.value}));});
+ document.querySelectorAll('.add-program-event').forEach(btn=>btn.onclick=()=>{const di=Number(btn.dataset.day);window.tripProgram.days[di].events.push({time:'',title:'',text:''});renderProgramDays()});
+ document.querySelectorAll('.remove-program-event').forEach(btn=>btn.onclick=()=>{const card=btn.closest('.program-day'),event=btn.closest('.program-event'),di=Number(card.dataset.day),ei=Number(event.dataset.event);window.tripProgram.days[di].events.splice(ei,1);renderProgramDays()});
+}
+function collectProgramDays(){
+ document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day),day=window.tripProgram.days[di];card.querySelectorAll('[data-day-field]').forEach(el=>day[el.dataset.dayField]=el.value);day.events=[...card.querySelectorAll('.program-event')].map(ev=>{const obj={};ev.querySelectorAll('[data-event-field]').forEach(el=>obj[el.dataset.eventField]=el.value);return obj})});
+ return (window.tripProgram?.days||[]).map((d,i)=>({id:d.id||programDayId(d.date,i),date:d.date,short:d.short,title:d.title,subtitle:d.subtitle,events:(d.events||[]).map(e=>({time:e.time,title:e.title,text:e.text}))}));
+}
+function programComplete(){const days=collectProgramDays();return days.length>0&&days.every(d=>d.title.trim()&&d.events.length>0&&d.events.every(e=>e.time.trim()&&e.title.trim()))}
+['startDate','endDate'].forEach(id=>$(id).addEventListener('change',syncProgramDays));
+
 let wizardStep=1;
 function wizardRequired(step){
  const ids={1:['title','tripId','destination','country','startDate','endDate'],
  2:['intro','outboundMode','meetingPoint','returnInfo'],
- 3:['hotelName','hotelAddress'],4:['teachers'],5:[],6:[]}[step]||[];
+ 3:['hotelName','hotelAddress'],4:['teachers'],5:[],6:[],7:[]}[step]||[];
  return ids.filter(id=>!($(id)?.value||'').trim());
 }
 function showWizardStep(n){
- wizardStep=Math.max(1,Math.min(6,n));
+ wizardStep=Math.max(1,Math.min(7,n));
  document.querySelectorAll('.wizard-panel').forEach(p=>p.hidden=Number(p.dataset.panel)!==wizardStep);
  document.querySelectorAll('.wizard-step').forEach(b=>{
    const s=Number(b.dataset.step); b.classList.toggle('active',s===wizardStep);
    b.classList.toggle('done',s<wizardStep && wizardRequired(s).length===0);
  });
  $('wizardBack').style.display=wizardStep===1?'none':'inline-flex';
- $('wizardNext').style.display=wizardStep===6?'none':'inline-flex';
- if(wizardStep===6)renderWizardSummary();
+ $('wizardNext').style.display=wizardStep===7?'none':'inline-flex';
+ if(wizardStep===7){syncProgramDays();renderWizardSummary();}
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function renderWizardSummary(){
  const checks=[
  ['Grunddaten',wizardRequired(1).length===0],['Website & An-/Abreise',wizardRequired(2).length===0],
  ['Unterkunft',wizardRequired(3).length===0],['Lehrkräfte',wizardRequired(4).length===0],
- ['Bilder',!!(window.tripImages&&window.tripImages.hero)],['Tagesprogramm','future']
+ ['Bilder',!!(window.tripImages&&window.tripImages.hero)],['Tagesprogramm',programComplete()]
  ];
  $('wizardSummary').innerHTML=checks.map(([label,state])=>{
-  if(state==='future')return `<div class="check-row warn">⏳ <strong>${label}</strong><br><small>folgt im nächsten Modul</small></div>`;
   return `<div class="check-row ${state?'ok':'warn'}">${state?'✓':'⚠'} <strong>${label}</strong><br><small>${state?'vollständig':'Pflichtangaben fehlen'}</small></div>`;
  }).join('');
 }

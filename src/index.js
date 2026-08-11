@@ -342,6 +342,7 @@ function cleanTripDraft(input={}){
   const documents=(input.documents&&typeof input.documents==='object')?input.documents:{};
   const features=(input.features&&typeof input.features==='object')?input.features:{};
   const images=(input.images&&typeof input.images==='object')?input.images:{};
+  const program=(input.program&&typeof input.program==='object')?input.program:{};
   const arr=v=>Array.isArray(v)?v.map(x=>cleanText(x,180)).filter(Boolean):[];
   const bool=(v,d=true)=>typeof v==='boolean'?v:d;
   return {
@@ -353,7 +354,14 @@ function cleanTripDraft(input={}){
     emergency:{contactName:cleanText(emergency.contactName||contactName,140),contactPhone:cleanText(emergency.contactPhone||contactPhone,80),schoolPhone:cleanText(emergency.schoolPhone,80),insurance:cleanText(emergency.insurance,300),notes:cleanText(emergency.notes,400)},
     documents:{program:cleanText(documents.program,220),packingList:cleanText(documents.packingList,220),parentInfo:cleanText(documents.parentInfo,220),insuranceInfo:cleanText(documents.insuranceInfo,220),other:cleanText(documents.other,400)},
     features:{diary:bool(features.diary),gallery:bool(features.gallery),upload:bool(features.upload),map:bool(features.map),smartJourney:bool(features.smartJourney),downloads:bool(features.downloads)},
-    images:{hero:cleanText(images.hero,300),hotel:cleanText(images.hotel,300),program:arr(images.program).slice(0,30)}
+    images:{hero:cleanText(images.hero,300),hotel:cleanText(images.hotel,300),program:arr(images.program).slice(0,30)},
+    program:{days:(Array.isArray(program.days)?program.days:[]).slice(0,31).map((day,di)=>{
+      const date=/^\d{4}-\d{2}-\d{2}$/.test(String(day?.date||''))?String(day.date):'';
+      return {
+        id:cleanText(day?.id,40)||`day-${di+1}`,date,short:cleanText(day?.short,12),title:cleanText(day?.title,120),subtitle:cleanText(day?.subtitle,220),
+        events:(Array.isArray(day?.events)?day.events:[]).slice(0,30).map(event=>({time:cleanText(event?.time,60),title:cleanText(event?.title,160),text:cleanText(event?.text,500)}))
+      };
+    }).filter(day=>day.date)}
   };
 }
 async function listTripDrafts(env){
