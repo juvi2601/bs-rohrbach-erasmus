@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Reisen – BS Rohrbach Erasmus+</title>
   <link rel="icon" href="/images/favicon.ico" sizes="any">
-  <link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.5">
+  <link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.5.1">
   <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
   <style>
     .trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:20px}
@@ -130,9 +130,11 @@ function renderDrafts(drafts,tk){
     <span class="draft-label">ENTWURF</span><h3>${t.title}</h3>
     <div class="trip-meta"><span>📍 ${t.destination}, ${t.country}</span><span>📅 ${fmtDate(t.startDate)} – ${fmtDate(t.endDate)}</span><span>🔑 Reise-ID: ${t.id}</span></div>
     <div class="trip-badges">
-      <span>${t.website?.heroTitle?'Website-Texte ✓':'Website-Texte offen'}</span>
-      <span>${t.website?.hotelName?'Unterkunft ✓':'Unterkunft offen'}</span>
-      <span>Bilder folgen</span>
+      <span>${t.website?.intro?'Website-Texte ✓':'Website-Texte offen'}</span>
+      <span>${t.accommodation?.name&&t.accommodation?.address?'Unterkunft ✓':'Unterkunft offen'}</span>
+      <span>${t.transport?.outboundMode&&t.transport?.meetingPoint&&t.transport?.returnInfo?'An-/Abreise ✓':'An-/Abreise offen'}</span>
+      <span>${t.team?.teachers?.length?'Lehrkräfte ✓':'Lehrkräfte offen'}</span>
+      <span>Bilder/Programm folgen</span>
     </div>
     <div class="trip-actions"><a class="button primary" href="/admin/reise-neu.html?id=${encodeURIComponent(t.id)}">Bearbeiten</a><button class="danger-link" data-delete="${t.id}" type="button">Löschen</button><span class="badge">Nicht öffentlich</span></div>
   </article>`).join('');

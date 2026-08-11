@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.5';
+const VERSION = '14.0-dev.5.1';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -335,9 +335,23 @@ function cleanTripDraft(input={}){
   const contactName=cleanText(website.contactName,120);
   const contactPhone=cleanText(website.contactPhone,60);
   const notice=cleanText(website.notice,220)||'Noch nicht endgültig bestätigte Punkte sind entsprechend markiert.';
+  const transport=(input.transport&&typeof input.transport==='object')?input.transport:{};
+  const accommodation=(input.accommodation&&typeof input.accommodation==='object')?input.accommodation:{};
+  const team=(input.team&&typeof input.team==='object')?input.team:{};
+  const emergency=(input.emergency&&typeof input.emergency==='object')?input.emergency:{};
+  const documents=(input.documents&&typeof input.documents==='object')?input.documents:{};
+  const features=(input.features&&typeof input.features==='object')?input.features:{};
+  const arr=v=>Array.isArray(v)?v.map(x=>cleanText(x,180)).filter(Boolean):[];
+  const bool=(v,d=true)=>typeof v==='boolean'?v:d;
   return {
     id,title,destination,country,startDate,endDate,subtitle,theme:{primary,accent},status:'draft',
-    website:{school,heroEyebrow,heroTitle,brandSubtitle,intro,countdownLabel,departureTime,returnTime,hotelName,hotelAddress,contactName,contactPhone,notice}
+    website:{school,heroEyebrow,heroTitle,brandSubtitle,intro,countdownLabel,departureTime,returnTime,hotelName,hotelAddress,contactName,contactPhone,notice},
+    transport:{outboundMode:cleanText(transport.outboundMode,100),meetingPoint:cleanText(transport.meetingPoint,180),arrivalInfo:cleanText(transport.arrivalInfo,180),returnMode:cleanText(transport.returnMode,100),returnInfo:cleanText(transport.returnInfo,180),notes:cleanText(transport.notes,400)},
+    accommodation:{name:cleanText(accommodation.name||hotelName,140),address:cleanText(accommodation.address||hotelAddress,200),website:cleanText(accommodation.website,220),phone:cleanText(accommodation.phone,80),checkIn:cleanText(accommodation.checkIn,80),checkOut:cleanText(accommodation.checkOut,80),notes:cleanText(accommodation.notes,400)},
+    team:{editors:arr(team.editors),teachers:arr(team.teachers),studentListNote:cleanText(team.studentListNote,220)},
+    emergency:{contactName:cleanText(emergency.contactName||contactName,140),contactPhone:cleanText(emergency.contactPhone||contactPhone,80),schoolPhone:cleanText(emergency.schoolPhone,80),insurance:cleanText(emergency.insurance,300),notes:cleanText(emergency.notes,400)},
+    documents:{program:cleanText(documents.program,220),packingList:cleanText(documents.packingList,220),parentInfo:cleanText(documents.parentInfo,220),insuranceInfo:cleanText(documents.insuranceInfo,220),other:cleanText(documents.other,400)},
+    features:{diary:bool(features.diary),gallery:bool(features.gallery),upload:bool(features.upload),map:bool(features.map),smartJourney:bool(features.smartJourney),downloads:bool(features.downloads)}
   };
 }
 async function listTripDrafts(env){

@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.5">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.5.1">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -21,7 +21,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 5</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 5.1</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -43,28 +43,48 @@
 </div></div>
 </div>
 
-<div class="field full" style="margin-top:26px">
-  <p class="eyebrow">Schritt 2</p>
-  <h2 style="margin:0">Website-Inhalte</h2>
-  <small>Diese Angaben werden später automatisch in dieselbe Website-Vorlage wie Brüssel eingesetzt.</small>
-</div>
-<div class="field"><label>Bezeichnung der Schule</label><input id="school" value="BS Rohrbach Erasmus+"></div>
-<div class="field"><label>Kleine Überschrift im Titelbild</label><input id="heroEyebrow" value="Berufsschule Rohrbach unterwegs"></div>
-<div class="field"><label>Große Überschrift im Titelbild</label><input id="heroTitle" placeholder="Wird vom Reisenamen übernommen"></div>
-<div class="field"><label>Kurzzeile im Kopfbereich</label><input id="brandSubtitle" placeholder="z. B. Linz · 22.–25. März 2027"></div>
-<div class="field full"><label>Einleitung / Kurzbeschreibung</label><textarea id="intro" placeholder="Worum geht es bei dieser Reise?"></textarea></div>
-<div class="field"><label>Countdown-Text</label><input id="countdownLabel" placeholder="z. B. 🚌 Abfahrt in Rohrbach"></div>
-<div class="field"><label>Hinweistext</label><input id="notice" value="Noch nicht endgültig bestätigte Punkte sind entsprechend markiert."></div>
-<div class="field"><label>Abfahrtszeit</label><input id="departureTime" type="time" value="20:00"></div>
-<div class="field"><label>Geplante Rückkehrzeit</label><input id="returnTime" type="time" value="23:59"></div>
-<div class="field"><label>Hotel / Unterkunft</label><input id="hotelName" placeholder="Name der Unterkunft"></div>
-<div class="field"><label>Adresse der Unterkunft</label><input id="hotelAddress" placeholder="Straße, PLZ, Ort"></div>
-<div class="field"><label>Ansprechperson vor Ort</label><input id="contactName" placeholder="optional"></div>
-<div class="field"><label>Notfall-Telefonnummer</label><input id="contactPhone" placeholder="optional"></div>
-<div class="field full">
-  <label>Bilder für die neue Website</label>
-  <div class="notice" style="margin:0"><strong>Folgt in Modul 6:</strong> Titelbild, Hotelbild und Programmbilder werden direkt der Reise zugeordnet.</div>
-</div>
+<div class="field full" style="margin-top:26px"><p class="eyebrow">Schritt 2 · Datenblatt</p><h2 style="margin:0">Website & Reiseinformationen</h2><small>Entspricht dem Datenblatt für Kolleg*innen. * = für die fertige Reise erforderlich.</small></div>
+<div class="field full"><h3>Website-Texte</h3></div>
+<div class="field full"><label>Einleitung / Kurzbeschreibung *</label><textarea id="intro" placeholder="Kurze Beschreibung der Reise"></textarea></div>
+<div class="field full"><h3>An- & Abreise</h3></div>
+<div class="field"><label>Verkehrsmittel Anreise *</label><input id="outboundMode" placeholder="z. B. Reisebus, Bahn, Flug"></div>
+<div class="field"><label>Treffpunkt / Abfahrtszeit *</label><input id="meetingPoint" placeholder="z. B. BS Rohrbach, 20:00 Uhr"></div>
+<div class="field"><label>Geplante Ankunft</label><input id="arrivalInfo" placeholder="Ort und Uhrzeit"></div>
+<div class="field"><label>Verkehrsmittel Rückreise</label><input id="returnMode" placeholder="z. B. Reisebus"></div>
+<div class="field full"><label>Rückreise / geplante Rückkehr *</label><input id="returnInfo" placeholder="Abfahrt und geplante Ankunft"></div>
+<div class="field full"><label>Weitere Hinweise zur Fahrt</label><textarea id="transportNotes" placeholder="Pausen, Zustieg, Gepäck, Besonderheiten …"></textarea></div>
+<div class="field full"><h3>Unterkunft</h3></div>
+<div class="field"><label>Hotel / Unterkunft *</label><input id="hotelName" placeholder="Name"></div>
+<div class="field"><label>Adresse *</label><input id="hotelAddress" placeholder="Straße, PLZ, Ort"></div>
+<div class="field"><label>Website</label><input id="hotelWebsite" placeholder="https://…"></div>
+<div class="field"><label>Telefon</label><input id="hotelPhone" placeholder="+…"></div>
+<div class="field"><label>Check-in</label><input id="checkIn" placeholder="z. B. ab 16:00"></div>
+<div class="field"><label>Check-out</label><input id="checkOut" placeholder="z. B. bis 11:00"></div>
+<div class="field full"><label>Hinweise zur Unterkunft</label><textarea id="hotelNotes"></textarea></div>
+<div class="field full"><h3>Lehrkräfte & Teilnehmer*innen</h3></div>
+<div class="field full"><label>Mitreisende Lehrkräfte *</label><textarea id="teachers" placeholder="Eine Person pro Zeile, gerne mit Schul-E-Mail"></textarea></div>
+<div class="field full"><label>Reise-Redaktionsrechte</label><textarea id="editors" placeholder="Eine Schul-E-Mail-Adresse pro Zeile"></textarea></div>
+<div class="field full"><label>Schüler*innenliste</label><input id="studentListNote" placeholder="z. B. CSV wird separat übermittelt"></div>
+<div class="field full"><h3>Notfall- & Reiseinformationen</h3></div>
+<div class="field"><label>Notfall-Ansprechperson</label><input id="contactName"></div>
+<div class="field"><label>Notfall-Telefonnummer</label><input id="contactPhone"></div>
+<div class="field"><label>Telefon Schule</label><input id="schoolPhone"></div>
+<div class="field full"><label>Versicherung / wichtige Reiseinfos</label><textarea id="insurance"></textarea></div>
+<div class="field full"><label>Weitere Notfallhinweise</label><textarea id="emergencyNotes"></textarea></div>
+<div class="field full"><h3>Dokumente & Links</h3></div>
+<div class="field"><label>Reiseprogramm</label><input id="docProgram" placeholder="Datei/Link folgt oder Bezeichnung"></div>
+<div class="field"><label>Packliste</label><input id="docPacking"></div>
+<div class="field"><label>Elterninformation</label><input id="docParent"></div>
+<div class="field"><label>Versicherungsinformationen</label><input id="docInsurance"></div>
+<div class="field full"><label>Weitere Dokumente / Links</label><textarea id="docOther"></textarea></div>
+<div class="field full"><h3>Website-Funktionen</h3><div class="notice" style="margin:0">
+<label><input id="featDiary" type="checkbox" checked> Reisetagebuch</label>&nbsp;&nbsp;
+<label><input id="featGallery" type="checkbox" checked> Galerie</label>&nbsp;&nbsp;
+<label><input id="featUpload" type="checkbox" checked> Schüler*innen-Upload</label>&nbsp;&nbsp;
+<label><input id="featMap" type="checkbox" checked> Karte</label>&nbsp;&nbsp;
+<label><input id="featJourney" type="checkbox" checked> Smart Journey</label>&nbsp;&nbsp;
+<label><input id="featDownloads" type="checkbox" checked> Downloads</label></div></div>
+<div class="field full"><h3>Bilder & Programm</h3><div class="notice" style="margin:0"><strong>Folgt in den nächsten Modulen:</strong> Titelbild, Hotelbild, Programmbilder sowie Reisetage und Programmpunkte.</div></div>
 <div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
 <div class="actions"><button class="button primary" type="submit" id="saveBtn">Entwurf speichern</button><a class="button ghost" href="/admin/reisen.html">Abbrechen</a></div>
 <p id="message"></p>
@@ -76,7 +96,7 @@ function slug(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\
 function fmt(d){if(!d)return '';try{return new Intl.DateTimeFormat('de-AT').format(new Date(d+'T12:00:00'))}catch{return d}}
 function preview(){
  $('band').style.background=`linear-gradient(90deg,${$('primary').value},${$('accent').value})`;
- $('previewTitle').textContent=$('heroTitle').value||$('title').value||'Neue Erasmus+-Reise';
+ $('previewTitle').textContent=$('title').value||'Neue Erasmus+-Reise';
  const loc=[$('destination').value,$('country').value].filter(Boolean).join(', ');
  const dates=[$('startDate').value,$('endDate').value].filter(Boolean).map(fmt).join(' – ');
  $('previewMeta').textContent=[loc,dates].filter(Boolean).join(' · ')||'Reiseziel und Zeitraum erscheinen hier.';
@@ -84,7 +104,7 @@ function preview(){
 }
 $('title').addEventListener('input',()=>{if(!$('tripId').dataset.edited)$('tripId').value=slug($('title').value);preview()});
 $('tripId').addEventListener('input',()=>{$('tripId').dataset.edited='1'});
-['destination','country','startDate','endDate','subtitle','primary','accent','heroTitle','intro'].forEach(x=>$(x).addEventListener('input',preview));
+['destination','country','startDate','endDate','subtitle','primary','accent','intro'].forEach(x=>$(x).addEventListener('input',preview));
 async function init(){
  cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
  app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage'}});
@@ -99,20 +119,14 @@ async function loadDraft(){
   $('title').value=x.title||'';$('tripId').value=x.id||'';$('tripId').readOnly=true;$('tripId').dataset.edited='1';
   $('destination').value=x.destination||'';$('country').value=x.country||'';$('startDate').value=x.startDate||'';$('endDate').value=x.endDate||'';
   $('subtitle').value=x.subtitle||'';$('primary').value=x.theme?.primary||'#0b4f8a';$('accent').value=x.theme?.accent||'#f2c94c';
-  const w=x.website||{};
-  $('school').value=w.school||'BS Rohrbach Erasmus+';
-  $('heroEyebrow').value=w.heroEyebrow||'Berufsschule Rohrbach unterwegs';
-  $('heroTitle').value=w.heroTitle||x.title||'';
-  $('brandSubtitle').value=w.brandSubtitle||'';
+  const w=x.website||{},tr=x.transport||{},ac=x.accommodation||{},tm=x.team||{},em=x.emergency||{},dc=x.documents||{},ft=x.features||{};
   $('intro').value=w.intro||x.subtitle||'';
-  $('countdownLabel').value=w.countdownLabel||'';
-  $('notice').value=w.notice||'Noch nicht endgültig bestätigte Punkte sind entsprechend markiert.';
-  $('departureTime').value=w.departureTime||'20:00';
-  $('returnTime').value=w.returnTime||'23:59';
-  $('hotelName').value=w.hotelName||'';
-  $('hotelAddress').value=w.hotelAddress||'';
-  $('contactName').value=w.contactName||'';
-  $('contactPhone').value=w.contactPhone||'';
+  $('outboundMode').value=tr.outboundMode||'';$('meetingPoint').value=tr.meetingPoint||'';$('arrivalInfo').value=tr.arrivalInfo||'';$('returnMode').value=tr.returnMode||'';$('returnInfo').value=tr.returnInfo||'';$('transportNotes').value=tr.notes||'';
+  $('hotelName').value=ac.name||w.hotelName||'';$('hotelAddress').value=ac.address||w.hotelAddress||'';$('hotelWebsite').value=ac.website||'';$('hotelPhone').value=ac.phone||'';$('checkIn').value=ac.checkIn||'';$('checkOut').value=ac.checkOut||'';$('hotelNotes').value=ac.notes||'';
+  $('teachers').value=(tm.teachers||[]).join('\n');$('editors').value=(tm.editors||[]).join('\n');$('studentListNote').value=tm.studentListNote||'';
+  $('contactName').value=em.contactName||w.contactName||'';$('contactPhone').value=em.contactPhone||w.contactPhone||'';$('schoolPhone').value=em.schoolPhone||'';$('insurance').value=em.insurance||'';$('emergencyNotes').value=em.notes||'';
+  $('docProgram').value=dc.program||'';$('docPacking').value=dc.packingList||'';$('docParent').value=dc.parentInfo||'';$('docInsurance').value=dc.insuranceInfo||'';$('docOther').value=dc.other||'';
+  $('featDiary').checked=ft.diary!==false;$('featGallery').checked=ft.gallery!==false;$('featUpload').checked=ft.upload!==false;$('featMap').checked=ft.map!==false;$('featJourney').checked=ft.smartJourney!==false;$('featDownloads').checked=ft.downloads!==false;
   $('pageTitle').textContent='Reise-Entwurf bearbeiten';$('saveBtn').textContent='Änderungen speichern';$('state').textContent='Entwurf geladen';preview();
  }catch(e){$('message').className='notice';$('message').textContent=e.message}
 }
@@ -125,17 +139,15 @@ async function token(){
 $('tripForm').addEventListener('submit',async e=>{
  e.preventDefault();$('message').textContent='Entwurf wird gespeichert …';$('state').textContent='Speichern …';
  try{
-  const body={
-    title:$('title').value,id:$('tripId').value,destination:$('destination').value,country:$('country').value,
-    startDate:$('startDate').value,endDate:$('endDate').value,subtitle:$('subtitle').value,
-    primary:$('primary').value,accent:$('accent').value,
-    website:{
-      school:$('school').value,heroEyebrow:$('heroEyebrow').value,heroTitle:$('heroTitle').value,
-      brandSubtitle:$('brandSubtitle').value,intro:$('intro').value,countdownLabel:$('countdownLabel').value,
-      notice:$('notice').value,departureTime:$('departureTime').value,returnTime:$('returnTime').value,
-      hotelName:$('hotelName').value,hotelAddress:$('hotelAddress').value,
-      contactName:$('contactName').value,contactPhone:$('contactPhone').value
-    }
+  const lines=id=>$(id).value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
+  const body={title:$('title').value,id:$('tripId').value,destination:$('destination').value,country:$('country').value,startDate:$('startDate').value,endDate:$('endDate').value,subtitle:$('subtitle').value,primary:$('primary').value,accent:$('accent').value,
+    website:{intro:$('intro').value},
+    transport:{outboundMode:$('outboundMode').value,meetingPoint:$('meetingPoint').value,arrivalInfo:$('arrivalInfo').value,returnMode:$('returnMode').value,returnInfo:$('returnInfo').value,notes:$('transportNotes').value},
+    accommodation:{name:$('hotelName').value,address:$('hotelAddress').value,website:$('hotelWebsite').value,phone:$('hotelPhone').value,checkIn:$('checkIn').value,checkOut:$('checkOut').value,notes:$('hotelNotes').value},
+    team:{teachers:lines('teachers'),editors:lines('editors'),studentListNote:$('studentListNote').value},
+    emergency:{contactName:$('contactName').value,contactPhone:$('contactPhone').value,schoolPhone:$('schoolPhone').value,insurance:$('insurance').value,notes:$('emergencyNotes').value},
+    documents:{program:$('docProgram').value,packingList:$('docPacking').value,parentInfo:$('docParent').value,insuranceInfo:$('docInsurance').value,other:$('docOther').value},
+    features:{diary:$('featDiary').checked,gallery:$('featGallery').checked,upload:$('featUpload').checked,map:$('featMap').checked,smartJourney:$('featJourney').checked,downloads:$('featDownloads').checked}
   };
   const endpoint=editId?'/api/trips/drafts/'+encodeURIComponent(editId):'/api/trips/drafts';
   const r=await fetch(endpoint,{method:editId?'PUT':'POST',headers:{authorization:'Bearer '+await token(),'content-type':'application/json'},body:JSON.stringify(body)});
