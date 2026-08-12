@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.7.2.1';
+const VERSION = '14.0-dev.7.2.2';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -359,7 +359,12 @@ function cleanTripDraft(input={}){
       const date=/^\d{4}-\d{2}-\d{2}$/.test(String(day?.date||''))?String(day.date):'';
       return {
         id:cleanText(day?.id,40)||`day-${di+1}`,date,short:cleanText(day?.short,12),title:cleanText(day?.title,120),subtitle:cleanText(day?.subtitle,220),
-        events:(Array.isArray(day?.events)?day.events:[]).slice(0,30).map(event=>({time:cleanText(event?.time,60),title:cleanText(event?.title,160),text:cleanText(event?.text,500),image:cleanText(event?.image,300)}))
+        events:(Array.isArray(day?.events)?day.events:[]).slice(0,30).map(event=>{
+          const eventImages=arr(event?.images).slice(0,10);
+          const legacyImage=cleanText(event?.image,300);
+          const normalizedImages=[...new Set(eventImages.length?eventImages:(legacyImage?[legacyImage]:[]))];
+          return {time:cleanText(event?.time,60),title:cleanText(event?.title,160),text:cleanText(event?.text,500),images:normalizedImages,image:normalizedImages[0]||''};
+        })
       };
     }).filter(day=>day.date)}
   };
@@ -933,6 +938,30 @@ export default {async fetch(request,env){
         const headers=new Headers();object.writeHttpMetadata(headers);headers.set('cache-control','private, max-age=300');headers.set('x-content-type-options','nosniff');
         if(object.customMetadata?.originalName)headers.set('x-original-filename',encodeURIComponent(object.customMetadata.originalName));
         return new Response(object.body,{headers});
+      }catch(error){return mediaError(error)}
+    }
+    if(url.pathname==='/api/trips/draft-image'&&request.method==='DELETE'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+        const id=normalizeTripId(url.searchParams.get('id'));
+        const key=String(url.searchParams.get('key')||'');
+        const prefix=`__system/trips/assets/${id}/program/`;
+        if(!id||!key.startsWith(prefix))throw Object.assign(new Error('Ungültiges Programmbild.'),{status:400});
+        const draft=await getTripDraft(env,id);
+        if(!draft)throw Object.assign(new Error('Entwurf wurde nicht gefunden.'),{status:404});
+        await env.MEDIA_BUCKET.delete(key);
+        draft.images=draft.images&&typeof draft.images==='object'?draft.images:{hero:'',hotel:'',program:[]};
+        draft.images.program=(Array.isArray(draft.images.program)?draft.images.program:[]).filter(x=>x!==key);
+        if(draft.program&&Array.isArray(draft.program.days)){
+          draft.program.days.forEach(day=>(Array.isArray(day.events)?day.events:[]).forEach(event=>{
+            const list=Array.isArray(event.images)?event.images:(event.image?[event.image]:[]);
+            event.images=list.filter(x=>x!==key);event.image=event.images[0]||'';
+          }));
+        }
+        draft.updatedAt=new Date().toISOString();draft.updatedBy=user.email;
+        await env.MEDIA_BUCKET.put(tripDraftKey(id),JSON.stringify(draft,null,2),{httpMetadata:{contentType:'application/json'}});
+        return json({ok:true,key,draft,message:'Programmbild gelöscht.'});
       }catch(error){return mediaError(error)}
     }
     if(url.pathname==='/api/trips/draft-image'&&request.method==='POST'){

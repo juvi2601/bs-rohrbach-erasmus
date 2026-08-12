@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.7.2.1">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.7.2.2">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -22,7 +22,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 7</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 7.2.2</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -105,7 +105,7 @@
 <div class="field full"><div class="image-slots">
  <div class="image-slot"><strong>Titelbild *</strong><p>Das große Hauptbild der Reisewebsite.</p><input id="heroImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="hero">Titelbild hochladen</button><div id="heroImageStatus" class="image-status">Noch kein Bild zugeordnet.</div></div>
  <div class="image-slot"><strong>Hotelbild</strong><p>Bild der Unterkunft bzw. des Hotels.</p><input id="hotelImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="hotel">Hotelbild hochladen</button><div id="hotelImageStatus" class="image-status">Noch kein Bild zugeordnet.</div></div>
- <div class="image-slot program"><strong>Programmbilder</strong><p>Mehrere Bilder für Programmpunkte. Die Zuordnung zu einzelnen Programmpunkten erfolgt in Schritt 7.</p><input id="programImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="program">Programmbild hinzufügen</button><div id="programImageStatus" class="image-status">Noch keine Programmbilder zugeordnet.</div></div>
+ <div class="image-slot program"><strong>Programmbilder</strong><p>Mehrere Bilder für Programmpunkte. Die Zuordnung zu einzelnen Programmpunkten erfolgt in Schritt 7.</p><input id="programImageFile" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" class="button" data-upload-slot="program">Programmbild hinzufügen</button><div id="programImageStatus" class="image-status">Noch keine Programmbilder zugeordnet.</div><div id="programImageLibrary" class="program-library"></div></div>
 </div></div>
 <div class="preview"><div class="preview-band" id="band"></div><p class="eyebrow">Vorschau</p><h3 id="previewTitle">Neue Erasmus+-Reise</h3><p id="previewMeta">Reiseziel und Zeitraum erscheinen hier.</p><p id="previewSub"></p></div>
 </div>
@@ -162,6 +162,7 @@ async function loadDraft(){
   $('destination').value=x.destination||'';$('country').value=x.country||'';$('startDate').value=x.startDate||'';$('endDate').value=x.endDate||'';
   $('subtitle').value=x.subtitle||'';$('primary').value=x.theme?.primary||'#0b4f8a';$('accent').value=x.theme?.accent||'#f2c94c';
   const w=x.website||{},tr=x.transport||{},ac=x.accommodation||{},tm=x.team||{},em=x.emergency||{},dc=x.documents||{},ft=x.features||{},im=x.images||{};
+  window.tripImages={hero:im.hero||'',hotel:im.hotel||'',program:Array.isArray(im.program)?im.program:[]};
   window.tripProgram=normalizeProgram(x.program); renderProgramDays();
   $('intro').value=w.intro||x.subtitle||'';
   $('outboundMode').value=tr.outboundMode||'';$('meetingPoint').value=tr.meetingPoint||'';$('arrivalInfo').value=tr.arrivalInfo||'';$('returnMode').value=tr.returnMode||'';$('returnInfo').value=tr.returnInfo||'';$('transportNotes').value=tr.notes||'';
@@ -170,7 +171,7 @@ async function loadDraft(){
   $('contactName').value=em.contactName||w.contactName||'';$('contactPhone').value=em.contactPhone||w.contactPhone||'';$('schoolPhone').value=em.schoolPhone||'';$('insurance').value=em.insurance||'';$('emergencyNotes').value=em.notes||'';
   $('docProgram').value=dc.program||'';$('docPacking').value=dc.packingList||'';$('docParent').value=dc.parentInfo||'';$('docInsurance').value=dc.insuranceInfo||'';$('docOther').value=dc.other||'';
   $('featDiary').checked=ft.diary!==false;$('featGallery').checked=ft.gallery!==false;$('featUpload').checked=ft.upload!==false;$('featMap').checked=ft.map!==false;$('featJourney').checked=ft.smartJourney!==false;$('featDownloads').checked=ft.downloads!==false;
-  window.tripImages={hero:im.hero||'',hotel:im.hotel||'',program:Array.isArray(im.program)?im.program:[]}; updateImageStatuses();
+  updateImageStatuses(); renderProgramImageLibrary();
   $('pageTitle').textContent='Reise-Entwurf bearbeiten';$('saveBtn').textContent='Änderungen speichern';$('state').textContent='Entwurf geladen';preview();
  }catch(e){$('message').className='notice';$('message').textContent=e.message}
 }
@@ -211,7 +212,47 @@ function updateImageStatuses(){
  const hs=$('heroImageStatus'),ts=$('hotelImageStatus'),ps=$('programImageStatus');
  if(hs){hs.textContent=im.hero?'✓ Titelbild zugeordnet':'Noch kein Bild zugeordnet.';hs.classList.toggle('ok',!!im.hero);}
  if(ts){ts.textContent=im.hotel?'✓ Hotelbild zugeordnet':'Noch kein Bild zugeordnet.';ts.classList.toggle('ok',!!im.hotel);}
- if(ps){const n=(im.program||[]).length;ps.textContent=n?`✓ ${n} Programmbild${n===1?'':'er'} zugeordnet`:'Noch keine Programmbilder zugeordnet.';ps.classList.toggle('ok',n>0);}
+ if(ps){const n=(im.program||[]).length;ps.textContent=n?`✓ ${n} Programmbild${n===1?'':'er'} vorhanden`:'Noch keine Programmbilder vorhanden.';ps.classList.toggle('ok',n>0);}
+}
+async function fetchDraftImageInfo(key,index=0){
+ const accessToken=await token();
+ const r=await fetch(`/api/trips/draft-image?key=${encodeURIComponent(key)}`,{headers:{Authorization:`Bearer ${accessToken}`}});
+ if(!r.ok)throw new Error('Bildvorschau konnte nicht geladen werden.');
+ const blob=await r.blob();let name='';
+ try{name=decodeURIComponent(r.headers.get('x-original-filename')||'')}catch{}
+ return {url:URL.createObjectURL(blob),name:name||`Programmbild ${index+1}`};
+}
+async function renderProgramImageLibrary(){
+ const box=$('programImageLibrary');if(!box)return;
+ const images=window.tripImages?.program||[];
+ if(!images.length){box.innerHTML='<div class="program-library-empty">Noch keine Programmbilder hochgeladen.</div>';return}
+ box.innerHTML=images.map((key,i)=>`<div class="program-library-item" data-library-key="${escHtml(key)}"><img alt="Programmbild ${i+1}"><div class="program-library-name">Programmbild ${i+1}</div><button type="button" class="danger-link delete-program-image" data-image-key="${escHtml(key)}">Löschen</button></div>`).join('');
+ try{
+   const cache=new Map();
+   for(const [i,item] of [...box.querySelectorAll('.program-library-item')].entries()){
+     const key=item.dataset.libraryKey;
+     let info=cache.get(key);if(!info){info=await fetchDraftImageInfo(key,i);cache.set(key,info)}
+     item.querySelector('img').src=info.url;item.querySelector('.program-library-name').textContent=info.name;
+   }
+ }catch(e){console.warn(e)}
+ box.querySelectorAll('.delete-program-image').forEach(btn=>btn.onclick=()=>deleteProgramImage(btn.dataset.imageKey));
+}
+async function deleteProgramImage(key){
+ if(!editId||!key)return;
+ if(!confirm('Dieses Programmbild wirklich löschen? Die Zuordnung zu Programmpunkten wird ebenfalls entfernt.'))return;
+ setStatus('Programmbild wird gelöscht…','');
+ try{
+   collectProgramDays();
+   const r=await fetch(`/api/trips/draft-image?id=${encodeURIComponent(editId)}&key=${encodeURIComponent(key)}`,{method:'DELETE',headers:{Authorization:`Bearer ${await token()}`}});
+   const data=await r.json();if(!r.ok)throw new Error(data.message||'Löschen fehlgeschlagen.');
+   window.tripImages.program=(window.tripImages.program||[]).filter(x=>x!==key);
+   (window.tripProgram?.days||[]).forEach(day=>(day.events||[]).forEach(event=>{
+     event.images=(Array.isArray(event.images)?event.images:(event.image?[event.image]:[])).filter(x=>x!==key);
+     event.image=event.images[0]||'';
+   }));
+   updateImageStatuses();renderProgramImageLibrary();renderProgramDays();
+   setStatus('Programmbild gelöscht. Die Zuordnungen wurden aktualisiert.','ok');
+ }catch(e){setStatus(e.message||'Löschen fehlgeschlagen.','error')}
 }
 async function uploadTripImage(slot){
  if(!editId){setStatus('Bitte den Entwurf zuerst speichern, bevor Bilder hochgeladen werden.','error');return;}
@@ -223,11 +264,12 @@ async function uploadTripImage(slot){
    const r=await fetch(`/api/trips/draft-image?id=${encodeURIComponent(editId)}&slot=${encodeURIComponent(slot)}`,{method:'POST',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':file.type,'X-File-Name':encodeURIComponent(file.name)},body:file});
    const data=await r.json(); if(!r.ok)throw new Error(data.message||'Upload fehlgeschlagen.');
    if(slot==='program')window.tripImages.program=[...(window.tripImages.program||[]),data.key]; else window.tripImages[slot]=data.key;
-   updateImageStatuses(); setStatus('Bild hochgeladen. Bitte anschließend Änderungen speichern.','ok');
+   updateImageStatuses(); if(slot==='program'){renderProgramImageLibrary();if(wizardStep===7){collectProgramDays();renderProgramDays();}}
+   setStatus('Bild hochgeladen. Bitte anschließend Änderungen speichern.','ok');
  }catch(e){setStatus(e.message||'Upload fehlgeschlagen.','error');}
 }
 document.querySelectorAll('[data-upload-slot]').forEach(b=>b.addEventListener('click',()=>uploadTripImage(b.dataset.uploadSlot)));
-updateImageStatuses();
+updateImageStatuses(); renderProgramImageLibrary();
 const weekdayShort=['So','Mo','Di','Mi','Do','Fr','Sa'];
 function isoDates(start,end){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(start||'')||!/^\d{4}-\d{2}-\d{2}$/.test(end||'')||end<start)return [];
@@ -237,7 +279,10 @@ function isoDates(start,end){
 function programDayId(date,index){const d=new Date(date+'T12:00:00');return `${weekdayShort[d.getDay()].toLowerCase()}-${index+1}`}
 function normalizeProgram(program){
  const days=Array.isArray(program?.days)?program.days:[];
- return {days:days.map((d,i)=>({id:String(d.id||programDayId(d.date||'',i)),date:String(d.date||''),short:String(d.short||''),title:String(d.title||''),subtitle:String(d.subtitle||''),events:Array.isArray(d.events)?d.events.map(e=>({time:String(e.time||''),title:String(e.title||''),text:String(e.text||''),image:String(e.image||'')})):[]}))};
+ return {days:days.map((d,i)=>({id:String(d.id||programDayId(d.date||'',i)),date:String(d.date||''),short:String(d.short||''),title:String(d.title||''),subtitle:String(d.subtitle||''),events:Array.isArray(d.events)?d.events.map(e=>{
+   const images=Array.isArray(e?.images)?e.images.map(String).filter(Boolean):(e?.image?[String(e.image)]:[]);
+   return {time:String(e?.time||''),title:String(e?.title||''),text:String(e?.text||''),images:[...new Set(images)],image:images[0]||''};
+ }):[]}))};
 }
 function syncProgramDays(){
  const dates=isoDates($('startDate').value,$('endDate').value),old=new Map((window.tripProgram?.days||[]).map(d=>[d.date,d]));
@@ -256,40 +301,58 @@ function renderProgramDays(){
  </article>`).join('');
  bindProgramControls(); loadProgramImageThumbs();
 }
-function programEventHtml(di,ei,e={}){return `<div class="program-event" data-event="${ei}"><div class="program-event-number">${ei+1}</div><div class="program-event-fields"><div class="field"><label>Zeit *</label><input data-event-field="time" value="${escHtml(e.time||'')}" placeholder="z. B. 09:30–11:00"></div><div class="field"><label>Programmpunkt *</label><input data-event-field="title" value="${escHtml(e.title||'')}" placeholder="z. B. Hafenrundfahrt"></div><div class="field full"><label>Beschreibung</label><textarea data-event-field="text" placeholder="Details, Treffpunkt, Hinweise …">${escHtml(e.text||'')}</textarea></div><div class="field full"><label>Programmbild</label>${programImagePicker(e.image||'')}</div></div><button type="button" class="danger-link remove-program-event" title="Programmpunkt löschen">Löschen</button></div>`}
-function programImagePicker(selected=''){
- const images=window.tripImages?.program||[];
- if(!images.length)return '<div class="program-image-empty">Noch keine Programmbilder in Schritt 6 hochgeladen.</div><input type="hidden" data-event-field="image" value="">';
- return `<div class="program-image-picker"><select data-event-field="image" class="program-image-select"><option value="">Kein Bild</option>${images.map((key,i)=>`<option data-image-option="${i}" value="${escHtml(key)}" ${selected===key?'selected':''}>Programmbild ${i+1}</option>`).join('')}</select><div class="program-image-thumbs">${images.map((key,i)=>`<button type="button" class="program-image-thumb ${selected===key?'selected':''}" data-image-key="${escHtml(key)}" data-image-index="${i}" title="Programmbild ${i+1} auswählen"><img alt="Programmbild ${i+1}"><span>${i+1}</span></button>`).join('')}</div></div>`;
+function programEventHtml(di,ei,e={}){
+ const selected=Array.isArray(e.images)?e.images:(e.image?[e.image]:[]);
+ return `<div class="program-event" data-event="${ei}"><div class="program-event-number">${ei+1}</div><div class="program-event-fields"><div class="field"><label>Zeit *</label><input data-event-field="time" value="${escHtml(e.time||'')}" placeholder="z. B. 09:30–11:00"></div><div class="field"><label>Programmpunkt *</label><input data-event-field="title" value="${escHtml(e.title||'')}" placeholder="z. B. Hafenrundfahrt"></div><div class="field full"><label>Beschreibung</label><textarea data-event-field="text" placeholder="Details, Treffpunkt, Hinweise …">${escHtml(e.text||'')}</textarea></div><div class="field full"><label>Programmbilder</label>${programImagePicker(selected)}</div></div><button type="button" class="danger-link remove-program-event" title="Programmpunkt löschen">Löschen</button></div>`;
+}
+function programImagePicker(selected=[]){
+ const images=window.tripImages?.program||[],chosen=new Set(Array.isArray(selected)?selected:(selected?[selected]:[]));
+ if(!images.length)return '<div class="program-image-empty">Noch keine Programmbilder in Schritt 6 hochgeladen.</div><input type="hidden" data-event-images value="[]">';
+ const count=images.filter(key=>chosen.has(key)).length;
+ return `<div class="program-image-picker"><input type="hidden" data-event-images value="${escHtml(JSON.stringify([...chosen]))}"><div class="program-image-count">${count} Bild${count===1?'':'er'} ausgewählt</div><div class="program-image-thumbs">${images.map((key,i)=>`<button type="button" class="program-image-thumb ${chosen.has(key)?'selected':''}" data-image-key="${escHtml(key)}" data-image-index="${i}" aria-pressed="${chosen.has(key)?'true':'false'}" title="Programmbild ${i+1} ${chosen.has(key)?'abwählen':'auswählen'}"><img alt="Programmbild ${i+1}"><span class="image-check">✓</span><span class="image-number">${i+1}</span></button>`).join('')}</div></div>`;
+}
+function updatePickerState(picker){
+ const selected=[...picker.querySelectorAll('.program-image-thumb.selected')].map(x=>x.dataset.imageKey);
+ const hidden=picker.querySelector('[data-event-images]');if(hidden)hidden.value=JSON.stringify(selected);
+ const count=picker.querySelector('.program-image-count');if(count)count.textContent=`${selected.length} Bild${selected.length===1?'':'er'} ausgewählt`;
+ picker.querySelectorAll('.program-image-thumb').forEach(btn=>{
+   const on=btn.classList.contains('selected');btn.setAttribute('aria-pressed',on?'true':'false');btn.title=(btn.dataset.imageName||`Programmbild ${Number(btn.dataset.imageIndex||0)+1}`)+(on?' abwählen':' auswählen');
+ });
 }
 async function loadProgramImageThumbs(){
- const buttons=[...document.querySelectorAll('.program-image-thumb')]; if(!buttons.length)return;
+ const buttons=[...document.querySelectorAll('.program-image-thumb')];if(!buttons.length)return;
  try{
-   const accessToken=await token(),cache=new Map();
+   const cache=new Map();
    for(const btn of buttons){
-     const key=btn.dataset.imageKey,idx=Number(btn.dataset.imageIndex||0); let info=cache.get(key);
-     if(!info){
-       const r=await fetch(`/api/trips/draft-image?key=${encodeURIComponent(key)}`,{headers:{Authorization:`Bearer ${accessToken}`}});
-       if(!r.ok)throw new Error('Bildvorschau konnte nicht geladen werden.');
-       const blob=await r.blob(); let name=''; try{name=decodeURIComponent(r.headers.get('x-original-filename')||'')}catch{}
-       info={url:URL.createObjectURL(blob),name:name||`Programmbild ${idx+1}`}; cache.set(key,info);
-     }
-     const img=btn.querySelector('img'); if(img)img.src=info.url; btn.title=`${info.name} auswählen`;
-     document.querySelectorAll(`option[data-image-option="${idx}"]`).forEach(o=>{if(o.value===key)o.textContent=info.name});
+     const key=btn.dataset.imageKey,idx=Number(btn.dataset.imageIndex||0);let info=cache.get(key);
+     if(!info){info=await fetchDraftImageInfo(key,idx);cache.set(key,info)}
+     const img=btn.querySelector('img');if(img)img.src=info.url;btn.dataset.imageName=info.name;
+     const on=btn.classList.contains('selected');btn.title=info.name+(on?' abwählen':' auswählen');
    }
  }catch(e){console.warn(e)}
 }
-
 function bindProgramControls(){
- document.querySelectorAll('.program-image-thumb').forEach(btn=>btn.onclick=()=>{const picker=btn.closest('.program-image-picker'),sel=picker.querySelector('.program-image-select');sel.value=btn.dataset.imageKey;picker.querySelectorAll('.program-image-thumb').forEach(x=>x.classList.toggle('selected',x===btn));});
- document.querySelectorAll('.program-image-select').forEach(sel=>sel.addEventListener('change',()=>{const picker=sel.closest('.program-image-picker');picker.querySelectorAll('.program-image-thumb').forEach(x=>x.classList.toggle('selected',x.dataset.imageKey===sel.value));}));
+ document.querySelectorAll('.program-image-thumb').forEach(btn=>btn.onclick=()=>{
+   const picker=btn.closest('.program-image-picker');btn.classList.toggle('selected');updatePickerState(picker);
+ });
  document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day);card.querySelectorAll('[data-day-field]').forEach(el=>el.addEventListener('input',()=>{window.tripProgram.days[di][el.dataset.dayField]=el.value}));});
- document.querySelectorAll('.add-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const di=Number(btn.dataset.day);window.tripProgram.days[di].events.push({time:'',title:'',text:'',image:''});renderProgramDays()});
+ document.querySelectorAll('.add-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const di=Number(btn.dataset.day);window.tripProgram.days[di].events.push({time:'',title:'',text:'',images:[],image:''});renderProgramDays()});
  document.querySelectorAll('.remove-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const card=btn.closest('.program-day'),event=btn.closest('.program-event'),di=Number(card.dataset.day),ei=Number(event.dataset.event);window.tripProgram.days[di].events.splice(ei,1);renderProgramDays()});
 }
 function collectProgramDays(){
- document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day),day=window.tripProgram.days[di];card.querySelectorAll('[data-day-field]').forEach(el=>day[el.dataset.dayField]=el.value);day.events=[...card.querySelectorAll('.program-event')].map(ev=>{const obj={};ev.querySelectorAll('[data-event-field]').forEach(el=>obj[el.dataset.eventField]=el.value);return obj})});
- return (window.tripProgram?.days||[]).map((d,i)=>({id:d.id||programDayId(d.date,i),date:d.date,short:d.short,title:d.title,subtitle:d.subtitle,events:(d.events||[]).map(e=>({time:e.time,title:e.title,text:e.text,image:e.image||''}))}));
+ document.querySelectorAll('.program-day').forEach(card=>{
+   const di=Number(card.dataset.day),day=window.tripProgram.days[di];
+   card.querySelectorAll('[data-day-field]').forEach(el=>day[el.dataset.dayField]=el.value);
+   day.events=[...card.querySelectorAll('.program-event')].map(ev=>{
+     const obj={time:'',title:'',text:'',images:[],image:''};
+     ev.querySelectorAll('[data-event-field]').forEach(el=>obj[el.dataset.eventField]=el.value);
+     const hidden=ev.querySelector('[data-event-images]');
+     if(hidden){try{obj.images=JSON.parse(hidden.value||'[]')}catch{obj.images=[]}}
+     obj.images=[...new Set((obj.images||[]).filter(Boolean))];obj.image=obj.images[0]||'';
+     return obj;
+   });
+ });
+ return (window.tripProgram?.days||[]).map((d,i)=>({id:d.id||programDayId(d.date,i),date:d.date,short:d.short,title:d.title,subtitle:d.subtitle,events:(d.events||[]).map(e=>({time:e.time,title:e.title,text:e.text,images:Array.isArray(e.images)?e.images:[],image:(Array.isArray(e.images)&&e.images[0])||e.image||''}))}));
 }
 function programComplete(){const days=collectProgramDays();return days.length>0&&days.every(d=>d.title.trim()&&d.events.length>0&&d.events.every(e=>e.time.trim()&&e.title.trim()))}
 ['startDate','endDate'].forEach(id=>$(id).addEventListener('change',syncProgramDays));
