@@ -35,7 +35,7 @@ footer{background:#071d38;color:#fff;padding:30px 18px}.footer-inner{width:min(1
 <div class="preview-bar"><div><strong>🔒 Geschützte Entwurfs-Vorschau</strong><span> · nicht veröffentlicht</span></div><a id="backLink" href="/admin/reisen.html">Zurück zur Verwaltung</a></div>
 <div id="loading" class="loading">Reisevorschau wird geladen …</div>
 <div id="app" hidden>
-<header class="hero" id="hero"><img id="heroImage" alt="" hidden><div class="hero-inner"><div class="kicker">BS Rohrbach · Erasmus+</div><h1 id="title"></h1><div class="subtitle" id="subtitle"></div><div class="meta"><span class="pill" id="destination"></span><span class="pill" id="dates"></span></div></div></header>
+<header class="hero" id="hero"><img id="heroImage" alt="" hidden><div class="hero-inner"><div class="kicker">BS Rohrbach · Erasmus+</div><h1 id="title"></h1><div class="subtitle" id="subtitle"></div><div class="meta"><span class="pill" id="destination"></span><span class="pill" id="dates"></span></div><div class="preview-countdown" id="countdown" aria-live="polite"></div></div></header>
 <div class="band"></div>
 <main>
 <section class="section"><h2>Über die Reise</h2><p class="section-intro" id="intro"></p><div class="grid" id="transportCards"></div></section>
@@ -94,7 +94,7 @@ async function render(d){
  $('destination').textContent=[d.destination,d.country].filter(Boolean).join(', ')||'Reiseziel';
  $('dates').textContent=[fmt(d.startDate),fmt(d.endDate)].filter(Boolean).join(' – ');
  const dep=new Date(String(d.startDate||'')+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);const diff=Math.ceil((dep-today)/86400000);
- $('countdown').textContent=diff>1?`🚌 Noch ${diff} Tage bis zur Abreise`:diff===1?'🚌 Morgen geht es los!':diff===0?'🚌 Heute geht es los!':'✓ Reisezeitraum begonnen/abgeschlossen';
+ const countdownEl=$('countdown');if(countdownEl)countdownEl.textContent=diff>1?`🚌 Noch ${diff} Tage bis zur Abreise`:diff===1?'🚌 Morgen geht es los!':diff===0?'🚌 Heute geht es los!':'✓ Reisezeitraum begonnen/abgeschlossen';
  $('intro').textContent=d.website?.intro||d.subtitle||'Noch keine Einleitung eingetragen.';
  $('backLink').href=`/admin/reise-neu.html?id=${encodeURIComponent(d.id||id)}`;
  await Promise.all([setImage($('heroImage'),d.images?.hero),setImage($('hotelImage'),d.images?.hotel)]);
