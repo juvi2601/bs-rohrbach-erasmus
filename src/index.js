@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.8.3.2';
+const VERSION = '14.0-dev.8.3.3';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -343,6 +343,7 @@ function cleanTripDraft(input={}){
   const features=(input.features&&typeof input.features==='object')?input.features:{};
   const images=(input.images&&typeof input.images==='object')?input.images:{};
   const program=(input.program&&typeof input.program==='object')?input.program:{};
+  const locations=(input.locations&&typeof input.locations==='object')?input.locations:{};
   const arr=v=>Array.isArray(v)?v.map(x=>cleanText(x,180)).filter(Boolean):[];
   const bool=(v,d=true)=>typeof v==='boolean'?v:d;
   return {
@@ -353,7 +354,8 @@ function cleanTripDraft(input={}){
     team:{editors:arr(team.editors),teachers:arr(team.teachers),studentListNote:cleanText(team.studentListNote,220)},
     emergency:{contactName:cleanText(emergency.contactName||contactName,140),contactPhone:cleanText(emergency.contactPhone||contactPhone,80),schoolPhone:cleanText(emergency.schoolPhone,80),insurance:cleanText(emergency.insurance,300),notes:cleanText(emergency.notes,400)},
     documents:{program:cleanText(documents.program,220),packingList:cleanText(documents.packingList,220),parentInfo:cleanText(documents.parentInfo,220),insuranceInfo:cleanText(documents.insuranceInfo,220),other:cleanText(documents.other,400)},
-    features:{diary:bool(features.diary),gallery:bool(features.gallery),upload:bool(features.upload),map:bool(features.map),smartJourney:bool(features.smartJourney),downloads:bool(features.downloads)},
+    features:{news:bool(features.news),diary:bool(features.diary),gallery:bool(features.gallery),upload:bool(features.upload),map:bool(features.map),smartJourney:bool(features.smartJourney),downloads:bool(features.downloads),emergency:bool(features.emergency)},
+    locations:{places:(Array.isArray(locations.places)?locations.places:[]).slice(0,40).map(place=>({name:cleanText(place?.name,140),address:cleanText(place?.address,220),description:cleanText(place?.description,400)})).filter(place=>place.name||place.address)},
     images:{hero:cleanText(images.hero,300),hotel:cleanText(images.hotel,300),program:arr(images.program).slice(0,30)},
     program:{days:(Array.isArray(program.days)?program.days:[]).slice(0,31).map((day,di)=>{
       const date=/^\d{4}-\d{2}-\d{2}$/.test(String(day?.date||''))?String(day.date):'';

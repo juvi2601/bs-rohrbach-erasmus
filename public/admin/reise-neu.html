@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.3.2">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.3.3">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -25,11 +25,16 @@
 .final-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}.final-check-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}.final-check-card.ok{border-color:#a8dfc2;background:#edf9f3}.final-check-card.warn{border-color:#f2d36b;background:#fff8df}.final-check-card strong{display:block;margin-bottom:4px}.final-check-details{display:grid;gap:10px;margin-top:18px}.final-check-issue{padding:12px 14px;border:1px solid #f2d36b;background:#fff8df;border-radius:12px}.final-check-issue button{margin-top:8px}.final-check-complete{padding:14px 16px;border:1px solid #a8dfc2;background:#edf9f3;border-radius:12px;font-weight:800}
 @media(max-width:720px){.final-check-grid{grid-template-columns:1fr}}
 .final-check-feedback{min-height:24px;margin-top:9px;font-size:13px;font-weight:800;color:#16633f}
+ 
+.feature-switches{display:flex;flex-wrap:wrap;gap:10px 18px}.feature-switches label{display:flex;align-items:center;gap:7px;font-weight:700}
+.map-place-row{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin:10px 0;padding:12px;border:1px solid #dce6ef;border-radius:14px;background:#fff}
+.map-place-row .full{grid-column:1/-1}.map-place-row input,.map-place-row textarea{width:100%}.map-place-actions{grid-column:1/-1;display:flex;justify-content:flex-end}
+@media(max-width:720px){.map-place-row{grid-template-columns:1fr}}
 </style></head><body>
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.3.2</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.3.3</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -100,13 +105,23 @@
 <div class="field"><label>Elterninformation</label><input id="docParent"></div>
 <div class="field"><label>Versicherungsinformationen</label><input id="docInsurance"></div>
 <div class="field full"><label>Weitere Dokumente / Links</label><textarea id="docOther"></textarea></div>
-<div class="field full"><h3>Website-Funktionen</h3><div class="notice" style="margin:0">
-<label><input id="featDiary" type="checkbox" checked> Reisetagebuch</label>&nbsp;&nbsp;
-<label><input id="featGallery" type="checkbox" checked> Galerie</label>&nbsp;&nbsp;
-<label><input id="featUpload" type="checkbox" checked> Schüler*innen-Upload</label>&nbsp;&nbsp;
-<label><input id="featMap" type="checkbox" checked> Karte</label>&nbsp;&nbsp;
-<label><input id="featJourney" type="checkbox" checked> Smart Journey</label>&nbsp;&nbsp;
-<label><input id="featDownloads" type="checkbox" checked> Downloads</label></div></div>
+<div class="field full"><h3>Website-Funktionen</h3><div class="notice feature-switches" style="margin:0">
+<label><input id="featNews" type="checkbox" checked> News & Hinweise</label>
+<label><input id="featDiary" type="checkbox" checked> Reisetagebuch</label>
+<label><input id="featGallery" type="checkbox" checked> Galerie</label>
+<label><input id="featUpload" type="checkbox" checked> Schüler*innen-Upload</label>
+<label><input id="featMap" type="checkbox" checked> Karte</label>
+<label><input id="featJourney" type="checkbox" checked> Smart Journey</label>
+<label><input id="featDownloads" type="checkbox" checked> Downloads</label>
+<label><input id="featEmergency" type="checkbox" checked> Hilfe / Notfall</label>
+</div></div>
+
+<div class="field full" id="mapPlacesSection">
+  <h3>Kartenorte</h3>
+  <p class="field-help">Nur nötig, wenn „Karte“ aktiviert ist. Du bestimmst selbst, welche Orte auf der Reisewebsite erscheinen.</p>
+  <div id="mapPlaces"></div>
+  <button type="button" class="button ghost" id="addMapPlace">＋ Ort hinzufügen</button>
+</div>
 </div>
 <div class="wizard-panel" data-panel="6" hidden>
 <div class="field full"><p class="eyebrow">Schritt 6</p><h2 style="margin:0">Bilder</h2><small>Die Bilder werden direkt dem Reise-Entwurf zugeordnet. JPG, PNG oder WebP; maximal 12 MB je Bild.</small></div>
@@ -199,7 +214,7 @@ async function loadDraft(){
   $('title').value=x.title||'';$('tripId').value=x.id||'';$('tripId').readOnly=true;$('tripId').dataset.edited='1';
   $('destination').value=x.destination||'';$('country').value=x.country||'';$('startDate').value=x.startDate||'';$('endDate').value=x.endDate||'';
   $('subtitle').value=x.subtitle||'';$('primary').value=x.theme?.primary||'#0b4f8a';$('accent').value=x.theme?.accent||'#f2c94c';
-  const w=x.website||{},tr=x.transport||{},ac=x.accommodation||{},tm=x.team||{},em=x.emergency||{},dc=x.documents||{},ft=x.features||{},im=x.images||{};
+  const w=x.website||{},tr=x.transport||{},ac=x.accommodation||{},tm=x.team||{},em=x.emergency||{},dc=x.documents||{},ft=x.features||{},im=x.images||{},loc=x.locations||{};
   window.tripImages={hero:im.hero||'',hotel:im.hotel||'',program:Array.isArray(im.program)?im.program:[]};
   window.tripProgram=normalizeProgram(x.program); renderProgramDays();
   $('intro').value=w.intro||x.subtitle||'';
@@ -208,7 +223,8 @@ async function loadDraft(){
   $('teachers').value=(tm.teachers||[]).join('\n');$('editors').value=(tm.editors||[]).join('\n');$('studentListNote').value=tm.studentListNote||'';
   $('contactName').value=em.contactName||w.contactName||'';$('contactPhone').value=em.contactPhone||w.contactPhone||'';$('schoolPhone').value=em.schoolPhone||'';$('insurance').value=em.insurance||'';$('emergencyNotes').value=em.notes||'';
   $('docProgram').value=dc.program||'';$('docPacking').value=dc.packingList||'';$('docParent').value=dc.parentInfo||'';$('docInsurance').value=dc.insuranceInfo||'';$('docOther').value=dc.other||'';
-  $('featDiary').checked=ft.diary!==false;$('featGallery').checked=ft.gallery!==false;$('featUpload').checked=ft.upload!==false;$('featMap').checked=ft.map!==false;$('featJourney').checked=ft.smartJourney!==false;$('featDownloads').checked=ft.downloads!==false;
+  $('featNews').checked=ft.news!==false;$('featDiary').checked=ft.diary!==false;$('featGallery').checked=ft.gallery!==false;$('featUpload').checked=ft.upload!==false;$('featMap').checked=ft.map!==false;$('featJourney').checked=ft.smartJourney!==false;$('featDownloads').checked=ft.downloads!==false;$('featEmergency').checked=ft.emergency!==false;
+  window.tripMapPlaces=Array.isArray(loc.places)?loc.places:[];renderMapPlaces();toggleMapPlaces();
   updateImageStatuses(); renderProgramImageLibrary();
   $('pageTitle').textContent='Reise-Entwurf bearbeiten';$('saveBtn').textContent='Änderungen speichern';$('state').textContent='Entwurf geladen';preview();
  }catch(e){$('message').className='notice';$('message').textContent=e.message}
@@ -230,7 +246,8 @@ $('tripForm').addEventListener('submit',async e=>{
     team:{teachers:lines('teachers'),editors:lines('editors'),studentListNote:$('studentListNote').value},
     emergency:{contactName:$('contactName').value,contactPhone:$('contactPhone').value,schoolPhone:$('schoolPhone').value,insurance:$('insurance').value,notes:$('emergencyNotes').value},
     documents:{program:$('docProgram').value,packingList:$('docPacking').value,parentInfo:$('docParent').value,insuranceInfo:$('docInsurance').value,other:$('docOther').value},
-    features:{diary:$('featDiary').checked,gallery:$('featGallery').checked,upload:$('featUpload').checked,map:$('featMap').checked,smartJourney:$('featJourney').checked,downloads:$('featDownloads').checked},
+    features:{news:$('featNews').checked,diary:$('featDiary').checked,gallery:$('featGallery').checked,upload:$('featUpload').checked,map:$('featMap').checked,smartJourney:$('featJourney').checked,downloads:$('featDownloads').checked,emergency:$('featEmergency').checked},
+    locations:{places:collectMapPlaces()},
     images:window.tripImages||{hero:'',hotel:'',program:[]},
     program:{days:collectProgramDays()}
   };
@@ -243,6 +260,30 @@ $('tripForm').addEventListener('submit',async e=>{
 init().catch(e=>$('message').textContent=e.message);
 
 
+window.tripMapPlaces=window.tripMapPlaces||[];
+function mapPlaceHtml(p={},i=0){
+ return `<div class="map-place-row" data-map-place="${i}">
+   <div><label>Name des Ortes</label><input data-map-field="name" value="${escHtml(p.name||'')}" placeholder="z. B. Ars Electronica Center"></div>
+   <div><label>Adresse</label><input data-map-field="address" value="${escHtml(p.address||'')}" placeholder="z. B. Ars-Electronica-Straße 1, 4040 Linz"></div>
+   <div class="full"><label>Kurze Beschreibung</label><textarea data-map-field="description" placeholder="Was soll auf der Karte zu diesem Ort stehen?">${escHtml(p.description||'')}</textarea></div>
+   <div class="map-place-actions"><button type="button" class="danger-link remove-map-place">Ort entfernen</button></div>
+ </div>`;
+}
+function renderMapPlaces(){
+ const box=$('mapPlaces');if(!box)return;
+ box.innerHTML=(window.tripMapPlaces||[]).map(mapPlaceHtml).join('')||'<div class="notice">Noch keine Kartenorte eingetragen.</div>';
+ box.querySelectorAll('.remove-map-place').forEach(btn=>btn.onclick=()=>{collectMapPlaces();const i=Number(btn.closest('.map-place-row').dataset.mapPlace);window.tripMapPlaces.splice(i,1);renderMapPlaces()});
+}
+function collectMapPlaces(){
+ const rows=[...document.querySelectorAll('.map-place-row')];
+ if(rows.length)window.tripMapPlaces=rows.map(row=>{const o={name:'',address:'',description:''};row.querySelectorAll('[data-map-field]').forEach(el=>o[el.dataset.mapField]=el.value.trim());return o}).filter(x=>x.name||x.address||x.description);
+ return window.tripMapPlaces||[];
+}
+function toggleMapPlaces(){
+ const section=$('mapPlacesSection');if(section)section.hidden=!$('featMap')?.checked;
+}
+$('addMapPlace')?.addEventListener('click',()=>{collectMapPlaces();window.tripMapPlaces.push({name:'',address:'',description:''});renderMapPlaces();const rows=document.querySelectorAll('.map-place-row');rows[rows.length-1]?.querySelector('input')?.focus()});
+$('featMap')?.addEventListener('change',toggleMapPlaces);
 window.tripImages=window.tripImages||{hero:'',hotel:'',program:[]};
 window.tripProgram=window.tripProgram||{days:[]};
 function updateImageStatuses(){
@@ -329,7 +370,7 @@ $('refreshFinalCheck')?.addEventListener('click',()=>{
  if(feedback)feedback.textContent=`✓ Prüfung aktualisiert – ${now} Uhr`;
  if(btn){btn.disabled=false;btn.textContent='Prüfung aktualisieren'}
 });
-updateImageStatuses(); renderProgramImageLibrary();
+updateImageStatuses(); renderProgramImageLibrary(); renderMapPlaces(); toggleMapPlaces();
 const weekdayShort=['So','Mo','Di','Mi','Do','Fr','Sa'];
 function isoDates(start,end){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(start||'')||!/^\d{4}-\d{2}-\d{2}$/.test(end||'')||end<start)return [];
