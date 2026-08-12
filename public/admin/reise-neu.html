@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.2.4">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.2.5">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -29,7 +29,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.2.4</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.2.5</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -174,14 +174,15 @@ $('title').addEventListener('input',()=>{if(!$('tripId').dataset.edited)$('tripI
 $('tripId').addEventListener('input',()=>{$('tripId').dataset.edited='1'});
 ['destination','country','startDate','endDate','subtitle','primary','accent','intro'].forEach(x=>$(x).addEventListener('input',preview));
 function cleanupPreviewAuthState(){
- try{
-   localStorage.removeItem('erasmusPreviewReturn');
-   localStorage.removeItem('erasmusPreviewReturnAt');
-   for(let i=localStorage.length-1;i>=0;i--){
-     const k=localStorage.key(i)||'';
-     if(/interaction\.status/i.test(k)||/interaction_in_progress/i.test(k))localStorage.removeItem(k);
+ for(const store of [sessionStorage,localStorage]){
+  try{
+   for(let i=store.length-1;i>=0;i--){
+    const k=store.key(i)||'',v=String(store.getItem(k)||'');
+    if(/interaction\.status/i.test(k)||/interaction_in_progress/i.test(k)||v==='interaction_in_progress')store.removeItem(k);
    }
- }catch{}
+  }catch{}
+ }
+ try{localStorage.removeItem('erasmusPreviewReturn');localStorage.removeItem('erasmusPreviewReturnAt')}catch{}
 }
 async function init(){
  cleanupPreviewAuthState();

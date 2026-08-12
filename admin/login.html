@@ -2,26 +2,39 @@
 .gate-wrap{min-height:calc(100vh - 72px);display:grid;place-items:center;padding:30px 18px}.gate-card{width:min(620px,100%);background:#fff;border:1px solid var(--line);border-radius:26px;padding:34px;box-shadow:var(--shadow);text-align:center}.gate-icon{width:66px;height:66px;margin:0 auto 18px;border-radius:20px;display:grid;place-items:center;background:#eaf5ff;font-size:30px}.gate-card h1{font-size:36px;margin:0 0 10px}.gate-card p{color:var(--muted);line-height:1.6}.gate-state{margin:22px 0;padding:15px;border-radius:14px;background:#f4f8fb}.gate-state.denied{background:#fff3f1;color:#9c302a}.gate-state.ok{background:#eefaf5;color:#147255}.gate-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.account{font-size:13px;margin-top:12px;color:var(--muted)}
 </style><script>
 (function(){
- try{
-   localStorage.removeItem('erasmusPreviewReturn');
-   localStorage.removeItem('erasmusPreviewReturnAt');
-   for(let i=localStorage.length-1;i>=0;i--){
-     const k=localStorage.key(i)||'';
-     if(/interaction\.status/i.test(k)||/interaction_in_progress/i.test(k))localStorage.removeItem(k);
+ for(const store of [sessionStorage,localStorage]){
+  try{
+   for(let i=store.length-1;i>=0;i--){
+    const k=store.key(i)||'',v=String(store.getItem(k)||'');
+    if(/interaction\.status/i.test(k)||/interaction_in_progress/i.test(k)||v==='interaction_in_progress')store.removeItem(k);
    }
- }catch{}
+  }catch{}
+ }
+ try{localStorage.removeItem('erasmusPreviewReturn');localStorage.removeItem('erasmusPreviewReturnAt')}catch{}
 })();
 </script>
 </head><body><header class="topbar"><a class="brand" href="/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Geschützter Bereich</small></span></a><div class="top-actions"><a class="button ghost" href="/">Zur Website</a></div></header>
 <main class="gate-wrap"><section class="gate-card"><div class="gate-icon">🔐</div><p class="eyebrow">Administrator & Reise-Redaktion</p><h1>Geschützter Bereich</h1><p>Bitte mit dem Microsoft-365-Schulkonto anmelden. Der passende Bereich wird anschließend automatisch geöffnet.</p><div class="gate-state" id="state">Noch nicht angemeldet.</div><div class="gate-actions"><button class="button primary" id="login">Mit Microsoft anmelden</button></div><div class="account" id="account"></div></section></main>
 <script>
 let cfg,app,acct;const $=id=>document.getElementById(id);
-async function init(){cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});await app.initialize();acct=app.getAllAccounts()[0]||null;if(acct)route(false)}
+function clearStaleMsalInteraction(){
+ for(const store of [sessionStorage,localStorage]){
+  try{
+   for(let i=store.length-1;i>=0;i--){
+    const k=store.key(i)||'',v=String(store.getItem(k)||'');
+    if(/interaction\.status/i.test(k)||/interaction_in_progress/i.test(k)||v==='interaction_in_progress')store.removeItem(k);
+   }
+  }catch{}
+ }
+ try{localStorage.removeItem('erasmusPreviewReturn');localStorage.removeItem('erasmusPreviewReturnAt')}catch{}
+}
+
+async function init(){clearStaleMsalInteraction();cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});await app.initialize();acct=app.getAllAccounts()[0]||null;if(acct)route(false)}
 async function token(interactive){if(!acct){if(!interactive)throw new Error('Nicht angemeldet');const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});acct=x.account||app.getAllAccounts()[0]}try{return(await app.acquireTokenSilent({scopes:['User.Read'],account:acct})).accessToken}catch(e){if(!interactive)throw e;return(await app.acquireTokenPopup({scopes:['User.Read'],account:acct})).accessToken}}
 async function route(interactive=true){try{$('state').className='gate-state';$('state').textContent='Berechtigung wird geprüft …';const tk=await token(interactive);const r=await fetch('/api/access/me',{headers:{authorization:'Bearer '+tk},cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.message||'Anmeldung fehlgeschlagen.');$('account').textContent=d.user?.email||acct?.username||'';
  if(d.access?.role==='admin'){ $('state').className='gate-state ok';$('state').textContent='Admin erkannt – Dashboard wird geöffnet …';location.replace('/admin/?verified=1');return}
  if(d.access?.role==='teacher'){ $('state').className='gate-state ok';$('state').textContent='Lehrkraft erkannt – Reise-Redaktion wird geöffnet …';location.replace('/admin/redaktion.html?verified=1');return}
  $('state').className='gate-state denied';$('state').textContent='Sie haben keinen Zugriff auf diesen Bereich.';$('login').textContent='Mit anderem Konto anmelden';
-}catch(e){if(String(e.message).includes('Nicht angemeldet')){$('state').textContent='Noch nicht angemeldet.';return}$('state').className='gate-state denied';$('state').textContent=e.message||'Anmeldung nicht möglich.'}}
+}catch(e){const msg=e?.message||String(e);if(String(msg).includes('Nicht angemeldet')){$('state').textContent='Noch nicht angemeldet.';return}if(String(msg).includes('interaction_in_progress')){clearStaleMsalInteraction();acct=app?.getAllAccounts?.()[0]||null;$('state').className='gate-state';$('state').textContent='Microsoft-Anmeldung wurde zurückgesetzt. Bitte jetzt nochmals auf „Mit Microsoft anmelden“ klicken.';return}$('state').className='gate-state denied';$('state').textContent=msg||'Anmeldung nicht möglich.'}}
 $('login').onclick=()=>route(true);init().catch(e=>{$('state').className='gate-state denied';$('state').textContent=e.message});
 </script></body></html>
