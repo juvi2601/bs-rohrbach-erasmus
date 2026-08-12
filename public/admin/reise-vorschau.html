@@ -26,7 +26,10 @@ main{width:min(1120px,calc(100% - 36px));margin:34px auto 70px}.section{margin:3
 .notice{padding:14px 16px;border:1px solid #f2d36b;background:#fff8df;border-radius:13px;margin:18px 0}.error{border-color:#efa8a1;background:#fff0ef}.loading{padding:60px 20px;text-align:center;color:var(--muted)}
 footer{background:#071d38;color:#fff;padding:30px 18px}.footer-inner{width:min(1120px,100%);margin:auto}.footer-inner strong{display:block}.footer-inner span{font-size:12px;opacity:.72}
 @media(max-width:760px){.grid,.hotel-card{grid-template-columns:1fr}.event{grid-template-columns:1fr;gap:5px}.hero{min-height:360px}.event-images img{width:calc(50% - 5px);height:110px}.preview-bar span{display:none}}
-</style>
+.preview-countdown{display:inline-flex;margin-top:14px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.94);color:#071d3d;font-weight:800}
+.day-head.has-image{position:relative;overflow:hidden;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;background-size:cover;background-position:center}
+.day-head.has-image:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,19,48,.12),rgba(2,19,48,.82))}
+.day-head.has-image>*{position:relative;z-index:1}</style>
 </head>
 <body>
 <div class="preview-bar"><div><strong>🔒 Geschützte Entwurfs-Vorschau</strong><span> · nicht veröffentlicht</span></div><a id="backLink" href="/admin/reisen.html">Zurück zur Verwaltung</a></div>
@@ -38,10 +41,10 @@ footer{background:#071d38;color:#fff;padding:30px 18px}.footer-inner{width:min(1
 <section class="section"><h2>Über die Reise</h2><p class="section-intro" id="intro"></p><div class="grid" id="transportCards"></div></section>
 <section class="section"><h2>Unterkunft</h2><div class="card hotel-card"><img id="hotelImage" alt="Unterkunft" hidden><div class="hotel-content" id="hotelContent"></div></div></section>
 <section class="section"><h2>Tagesprogramm</h2><p class="section-intro">So könnte das Programm auf der späteren Reisewebsite dargestellt werden.</p><div class="days" id="days"></div></section>
-<section class="section"><h2>Funktionen</h2><div class="features" id="features"></div></section>
+<section class="section"><h2>Aktivierte Funktionen der Reise</h2><p class="section-intro">Diese Funktionen sind für die Reise vorgesehen. In der Entwurfs-Vorschau sind sie noch nicht interaktiv.</p><div class="features" id="features"></div></section>
 <div class="notice"><strong>Vorschau:</strong> Diese Darstellung dient nur zur Kontrolle des Reise-Entwurfs. Es wurde nichts veröffentlicht.</div>
 </main>
-<footer><div class="footer-inner"><strong>© 2026 Berufsschule Rohrbach · Erasmus+</strong><span>Entwurfs-Vorschau · DEV 14.0 Modul 8.2.5</span></div></footer>
+<footer><div class="footer-inner"><strong>© 2026 Berufsschule Rohrbach · Erasmus+</strong><span>Entwurfs-Vorschau · DEV 14.0 Modul 8.2.6</span></div></footer>
 </div>
 <script>
 let tokenValue='';
@@ -90,6 +93,8 @@ async function render(d){
  $('subtitle').textContent=d.subtitle||d.website?.intro||'';
  $('destination').textContent=[d.destination,d.country].filter(Boolean).join(', ')||'Reiseziel';
  $('dates').textContent=[fmt(d.startDate),fmt(d.endDate)].filter(Boolean).join(' – ');
+ const dep=new Date(String(d.startDate||'')+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);const diff=Math.ceil((dep-today)/86400000);
+ $('countdown').textContent=diff>1?`🚌 Noch ${diff} Tage bis zur Abreise`:diff===1?'🚌 Morgen geht es los!':diff===0?'🚌 Heute geht es los!':'✓ Reisezeitraum begonnen/abgeschlossen';
  $('intro').textContent=d.website?.intro||d.subtitle||'Noch keine Einleitung eingetragen.';
  $('backLink').href=`/admin/reise-neu.html?id=${encodeURIComponent(d.id||id)}`;
  await Promise.all([setImage($('heroImage'),d.images?.hero),setImage($('hotelImage'),d.images?.hotel)]);
@@ -102,7 +107,8 @@ async function render(d){
  const ac=d.accommodation||{};
  $('hotelContent').innerHTML=`<h3>${esc(ac.name||'Unterkunft noch offen')}</h3>${ac.address?`<div class="label">Adresse</div><div class="value">${esc(ac.address)}</div>`:''}${ac.website?`<div class="label">Website</div><div class="value">${esc(ac.website)}</div>`:''}${ac.phone?`<div class="label">Telefon</div><div class="value">${esc(ac.phone)}</div>`:''}${ac.checkIn?`<div class="label">Check-in</div><div class="value">${esc(ac.checkIn)}</div>`:''}${ac.checkOut?`<div class="label">Check-out</div><div class="value">${esc(ac.checkOut)}</div>`:''}${ac.notes?`<div class="label">Hinweise</div><div class="value">${esc(ac.notes)}</div>`:''}`;
  const days=d.program?.days||[];
- $('days').innerHTML=days.length?days.map((day,di)=>`<article class="day"><div class="day-head"><div class="date">${esc(day.short||'Tag')} · ${esc(fmt(day.date))}</div><h3>${esc(day.title||`Reisetag ${di+1}`)}</h3>${day.subtitle?`<p>${esc(day.subtitle)}</p>`:''}</div><div class="events">${(day.events||[]).length?(day.events||[]).map((e,ei)=>`<div class="event"><div class="time">${esc(e.time||'—')}</div><div><h4>${esc(e.title||`Programmpunkt ${ei+1}`)}</h4>${e.text?`<p>${esc(e.text)}</p>`:''}<div class="event-images" data-images="${esc(JSON.stringify(Array.isArray(e.images)?e.images:(e.image?[e.image]:[])))}"></div></div></div>`).join(''):'<div class="event"><div></div><div class="muted">Noch keine Programmpunkte eingetragen.</div></div>'}</div></article>`).join(''):'<div class="card muted">Noch kein Tagesprogramm vorhanden.</div>';
+ const dayHeroUrls={};for(const day of days){if(day.heroImage){try{dayHeroUrls[day.id||day.date]=await imageUrl(day.heroImage)}catch{}}}
+ $('days').innerHTML=days.length?days.map((day,di)=>`<article class="day"><div class="day-head ${day.heroImage?'has-image':''}" ${day.heroImage&&dayHeroUrls[day.id||day.date]?`style="background-image:url('${dayHeroUrls[day.id||day.date]}')"`:''}><div class="date">${esc(day.short||'Tag')} · ${esc(fmt(day.date))}</div><h3>${esc(day.title||`Reisetag ${di+1}`)}</h3>${day.subtitle?`<p>${esc(day.subtitle)}</p>`:''}</div><div class="events">${(day.events||[]).length?(day.events||[]).map((e,ei)=>`<div class="event"><div class="time">${esc(e.time||'—')}</div><div><h4>${esc(e.title||`Programmpunkt ${ei+1}`)}</h4>${e.text?`<p>${esc(e.text)}</p>`:''}<div class="event-images" data-images="${esc(JSON.stringify(Array.isArray(e.images)?e.images:(e.image?[e.image]:[])))}"></div></div></div>`).join(''):'<div class="event"><div></div><div class="muted">Noch keine Programmpunkte eingetragen.</div></div>'}</div></article>`).join(''):'<div class="card muted">Noch kein Tagesprogramm vorhanden.</div>';
  const featureLabels={diary:'Reisetagebuch',gallery:'Galerie',upload:'Foto-Upload',map:'Karte',smartJourney:'Smart Journey',downloads:'Downloads'};
  $('features').innerHTML=Object.entries(featureLabels).filter(([k])=>d.features?.[k]!==false).map(([k,v])=>`<span class="feature">✓ ${esc(v)}</span>`).join('');
  for(const box of document.querySelectorAll('.event-images')){

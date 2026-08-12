@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.2.5">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.2.6">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -29,7 +29,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.2.5</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.2.6</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -355,7 +355,7 @@ function renderProgramDays(){
  if(!days.length){box.innerHTML='<div class="notice">Bitte zuerst in Schritt 1 einen gültigen Reisezeitraum festlegen.</div>';return}
  box.innerHTML=days.map((d,di)=>`<article class="program-day" data-day="${di}">
   <div class="program-day-head"><div><p class="eyebrow">${escHtml(d.short)} · ${fmt(d.date)}</p><h3>Reisetag ${di+1}</h3></div><span class="badge">${d.events.length} Programmpunkt${d.events.length===1?'':'e'}</span></div>
-  <div class="form-grid"><div class="field"><label>Titel des Tages *</label><input data-day-field="title" value="${escHtml(d.title)}" placeholder="z. B. Antwerpen"></div><div class="field"><label>Kurzname</label><input data-day-field="short" value="${escHtml(d.short)}" maxlength="8"></div><div class="field full"><label>Untertitel / Schwerpunkt</label><input data-day-field="subtitle" value="${escHtml(d.subtitle)}" placeholder="Kurze Zusammenfassung des Tages"></div></div>
+  <div class="form-grid"><div class="field"><label>Titel des Tages *</label><input data-day-field="title" value="${escHtml(d.title)}" placeholder="z. B. Antwerpen"></div><div class="field"><label>Kurzname</label><input data-day-field="short" value="${escHtml(d.short)}" maxlength="8"></div><div class="field full"><label>Untertitel / Schwerpunkt</label><input data-day-field="subtitle" value="${escHtml(d.subtitle)}" placeholder="Kurze Zusammenfassung des Tages"></div><div class="field full"><label>Tagesbild (optional)</label><p class="field-help">Aus den in Schritt 6 hochgeladenen Programmbildern auswählen.</p>${dayImagePicker(d.heroImage||'')}</div></div>
   <div class="program-events">${d.events.map((e,ei)=>programEventHtml(di,ei,e)).join('')}</div>
   <button type="button" class="button ghost add-program-event" data-day="${di}">＋ Programmpunkt hinzufügen</button>
   ${programDayValidationHtml(d,di)}
@@ -366,7 +366,7 @@ function programEventHtml(di,ei,e={}){
  const selected=Array.isArray(e.images)?e.images:(e.image?[e.image]:[]);
  const last=(window.tripProgram?.days?.[di]?.events?.length||1)-1;
  const timeMissing=!(e.time||'').trim(),titleMissing=!(e.title||'').trim();
- return `<div class="program-event" data-event="${ei}"><div class="program-event-number">${ei+1}</div><div class="program-event-fields"><div class="field ${timeMissing?'invalid':''}"><label>Zeit *</label><input data-event-field="time" value="${escHtml(e.time||'')}" placeholder="z. B. 09:30–11:00"></div><div class="field ${titleMissing?'invalid':''}"><label>Programmpunkt *</label><input data-event-field="title" value="${escHtml(e.title||'')}" placeholder="z. B. Hafenrundfahrt"></div><div class="field full"><label>Beschreibung</label><textarea data-event-field="text" placeholder="Details, Treffpunkt, Hinweise …">${escHtml(e.text||'')}</textarea></div><div class="field full"><label>Programmbilder</label>${programImagePicker(selected)}</div></div><div class="program-event-actions"><button type="button" class="program-move move-program-up" title="Nach oben" ${ei===0?'disabled':''}>↑</button><button type="button" class="program-move move-program-down" title="Nach unten" ${ei===last?'disabled':''}>↓</button><button type="button" class="danger-link remove-program-event" title="Programmpunkt löschen">Löschen</button></div></div>`;
+ return `<div class="program-event" data-event="${ei}"><div class="program-event-number">${ei+1}</div><div class="program-event-fields"><div class="field ${timeMissing?'invalid':''}"><label>Zeit *</label><input data-event-field="time" value="${escHtml(e.time||'')}" placeholder="z. B. 09:30–11:00"></div><div class="field ${titleMissing?'invalid':''}"><label>Programmpunkt *</label><input data-event-field="title" value="${escHtml(e.title||'')}" placeholder="z. B. Hafenrundfahrt"></div><div class="field full"><label>Beschreibung</label><textarea data-event-field="text" placeholder="Details, Treffpunkt, Hinweise …">${escHtml(e.text||'')}</textarea></div><div class="field full"><label>Programmbilder</label>${programImagePicker(selected)}</div></div><div class="program-event-actions"><button type="button" tabindex="-1" class="program-move move-program-up" title="Nach oben" ${ei===0?'disabled':''}>↑</button><button type="button" tabindex="-1" class="program-move move-program-down" title="Nach unten" ${ei===last?'disabled':''}>↓</button><button type="button" tabindex="-1" class="danger-link remove-program-event" title="Programmpunkt löschen">Löschen</button></div></div>`;
 }
 function programDayValidationHtml(d,di){
  const issues=[];
@@ -379,7 +379,12 @@ function programImagePicker(selected=[]){
  const images=window.tripImages?.program||[],chosen=new Set(Array.isArray(selected)?selected:(selected?[selected]:[]));
  if(!images.length)return '<div class="program-image-empty">Noch keine Programmbilder in Schritt 6 hochgeladen.</div><input type="hidden" data-event-images value="[]">';
  const count=images.filter(key=>chosen.has(key)).length;
- return `<div class="program-image-picker"><input type="hidden" data-event-images value="${escHtml(JSON.stringify([...chosen]))}"><div class="program-image-count">${count} Bild${count===1?'':'er'} ausgewählt</div><div class="program-image-thumbs">${images.map((key,i)=>`<button type="button" class="program-image-thumb ${chosen.has(key)?'selected':''}" data-image-key="${escHtml(key)}" data-image-index="${i}" aria-pressed="${chosen.has(key)?'true':'false'}" title="Programmbild ${i+1} ${chosen.has(key)?'abwählen':'auswählen'}"><img alt="Programmbild ${i+1}"><span class="image-check">✓</span><span class="image-number">${i+1}</span></button>`).join('')}</div></div>`;
+ return `<div class="program-image-picker"><input type="hidden" data-event-images value="${escHtml(JSON.stringify([...chosen]))}"><div class="program-image-count">${count} Bild${count===1?'':'er'} ausgewählt</div><div class="program-image-thumbs">${images.map((key,i)=>`<button type="button" tabindex="-1" class="program-image-thumb ${chosen.has(key)?'selected':''}" data-image-key="${escHtml(key)}" data-image-index="${i}" aria-pressed="${chosen.has(key)?'true':'false'}" title="Programmbild ${i+1} ${chosen.has(key)?'abwählen':'auswählen'}"><img alt="Programmbild ${i+1}"><span class="image-check">✓</span><span class="image-number">${i+1}</span></button>`).join('')}</div></div>`;
+}
+function dayImagePicker(selected=''){
+ const images=window.tripImages?.program||[];
+ if(!images.length)return '<div class="program-image-empty">Noch keine Programmbilder in Schritt 6 hochgeladen.</div><input type="hidden" data-day-image value="">';
+ return `<div class="program-image-picker day-image-picker"><input type="hidden" data-day-image value="${escHtml(selected)}"><div class="program-image-count">${selected?'1 Tagesbild ausgewählt':'Kein Tagesbild ausgewählt'}</div><div class="program-image-thumbs">${images.map((key,i)=>`<button type="button" tabindex="-1" class="program-image-thumb day-image-thumb ${selected===key?'selected':''}" data-image-key="${escHtml(key)}" data-image-index="${i}" aria-pressed="${selected===key?'true':'false'}"><img alt="Programmbild ${i+1}"><span class="image-check">✓</span><span class="image-number">${i+1}</span></button>`).join('')}</div></div>`;
 }
 function updatePickerState(picker){
  const selected=[...picker.querySelectorAll('.program-image-thumb.selected')].map(x=>x.dataset.imageKey);
@@ -402,6 +407,12 @@ async function loadProgramImageThumbs(){
  }catch(e){console.warn(e)}
 }
 function bindProgramControls(){
+ document.querySelectorAll('.day-image-thumb').forEach(btn=>btn.onclick=()=>{
+   const picker=btn.closest('.day-image-picker'),card=btn.closest('.program-day'),di=Number(card.dataset.day),hidden=picker.querySelector('[data-day-image]');
+   const was=btn.classList.contains('selected');picker.querySelectorAll('.day-image-thumb').forEach(x=>x.classList.remove('selected'));
+   if(!was)btn.classList.add('selected');hidden.value=was?'':btn.dataset.imageKey;window.tripProgram.days[di].heroImage=hidden.value;
+   picker.querySelector('.program-image-count').textContent=hidden.value?'1 Tagesbild ausgewählt':'Kein Tagesbild ausgewählt';
+ });
  document.querySelectorAll('.program-image-thumb').forEach(btn=>btn.onclick=()=>{
    const picker=btn.closest('.program-image-picker');btn.classList.toggle('selected');updatePickerState(picker);
  });
@@ -413,7 +424,7 @@ function bindProgramControls(){
 function collectProgramDays(){
  document.querySelectorAll('.program-day').forEach(card=>{
    const di=Number(card.dataset.day),day=window.tripProgram.days[di];
-   card.querySelectorAll('[data-day-field]').forEach(el=>day[el.dataset.dayField]=el.value);
+   card.querySelectorAll('[data-day-field]').forEach(el=>day[el.dataset.dayField]=el.value);day.heroImage=card.querySelector('[data-day-image]')?.value||day.heroImage||'';
    day.events=[...card.querySelectorAll('.program-event')].map(ev=>{
      const obj={time:'',title:'',text:'',images:[],image:''};
      ev.querySelectorAll('[data-event-field]').forEach(el=>obj[el.dataset.eventField]=el.value);
@@ -423,7 +434,7 @@ function collectProgramDays(){
      return obj;
    });
  });
- return (window.tripProgram?.days||[]).map((d,i)=>({id:d.id||programDayId(d.date,i),date:d.date,short:d.short,title:d.title,subtitle:d.subtitle,events:(d.events||[]).map(e=>({time:e.time,title:e.title,text:e.text,images:Array.isArray(e.images)?e.images:[],image:(Array.isArray(e.images)&&e.images[0])||e.image||''}))}));
+ return (window.tripProgram?.days||[]).map((d,i)=>({id:d.id||programDayId(d.date,i),date:d.date,short:d.short,title:d.title,subtitle:d.subtitle,heroImage:d.heroImage||'',events:(d.events||[]).map(e=>({time:e.time,title:e.title,text:e.text,images:Array.isArray(e.images)?e.images:[],image:(Array.isArray(e.images)&&e.images[0])||e.image||''}))}));
 }
 function programComplete(){const days=collectProgramDays();return days.length>0&&days.every(d=>d.title.trim()&&d.events.length>0&&d.events.every(e=>e.time.trim()&&e.title.trim()))}
 ['startDate','endDate'].forEach(id=>$(id).addEventListener('change',syncProgramDays));

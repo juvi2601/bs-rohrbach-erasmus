@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.8.2.5';
+const VERSION = '14.0-dev.8.2.6';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -358,7 +358,7 @@ function cleanTripDraft(input={}){
     program:{days:(Array.isArray(program.days)?program.days:[]).slice(0,31).map((day,di)=>{
       const date=/^\d{4}-\d{2}-\d{2}$/.test(String(day?.date||''))?String(day.date):'';
       return {
-        id:cleanText(day?.id,40)||`day-${di+1}`,date,short:cleanText(day?.short,12),title:cleanText(day?.title,120),subtitle:cleanText(day?.subtitle,220),
+        id:cleanText(day?.id,40)||`day-${di+1}`,date,short:cleanText(day?.short,12),title:cleanText(day?.title,120),subtitle:cleanText(day?.subtitle,220),heroImage:cleanText(day?.heroImage,300),
         events:(Array.isArray(day?.events)?day.events:[]).slice(0,30).map(event=>{
           const eventImages=arr(event?.images).slice(0,10);
           const legacyImage=cleanText(event?.image,300);
