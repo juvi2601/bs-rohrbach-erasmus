@@ -4,58 +4,114 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Reisevorschau – BS Rohrbach Erasmus+</title>
-<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<title>Reisevorschau · BS Rohrbach Erasmus+</title>
+<link rel="icon" href="/images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="stylesheet" href="/styles.css">
 <style>
-:root{--primary:#0b4f8a;--accent:#f2c94c;--ink:#0a2342;--muted:#607086;--line:#d9e3ec;--bg:#f3f7fa;--card:#fff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
-.preview-bar{position:sticky;top:0;z-index:20;background:#071d38;color:#fff;padding:10px 18px;display:flex;gap:14px;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,.16)}
-.preview-bar strong{font-size:14px}.preview-bar span{font-size:12px;opacity:.82}.preview-bar a{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:7px 10px;border-radius:9px;font-weight:700;font-size:12px}
-.hero{position:relative;min-height:420px;display:grid;align-items:end;background:linear-gradient(135deg,var(--primary),#071d38);overflow:hidden}
-.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(3,18,38,.88),rgba(3,18,38,.12) 65%)}
-.hero-inner{position:relative;z-index:1;width:min(1120px,calc(100% - 36px));margin:0 auto;padding:64px 0;color:#fff}
-.kicker{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:900;opacity:.9}.hero h1{font-size:clamp(38px,7vw,72px);line-height:.98;margin:10px 0 12px}.hero .subtitle{font-size:clamp(17px,2vw,22px);max-width:760px}.meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:7px 10px;border-radius:999px;font-size:13px;font-weight:800}
-.band{height:8px;background:var(--accent)}
-main{width:min(1120px,calc(100% - 36px));margin:34px auto 70px}.section{margin:34px 0}.section h2{font-size:30px;margin:0 0 6px}.section-intro{color:var(--muted);max-width:800px;margin:0 0 18px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 5px 20px rgba(10,35,66,.04)}.card h3{margin:0 0 10px}.label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:var(--muted);margin-top:12px}.value{font-weight:650}.muted{color:var(--muted)}
-.hotel-card{display:grid;grid-template-columns:minmax(220px,.8fr) 1.2fr;gap:0;overflow:hidden;padding:0}.hotel-card img{width:100%;height:100%;min-height:280px;object-fit:cover;background:#e9eff4}.hotel-content{padding:22px}
-.days{display:grid;gap:22px}.day{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden}.day-head{padding:18px 22px;background:linear-gradient(110deg,var(--primary),#11365e);color:#fff}.day-head .date{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;opacity:.85}.day-head h3{font-size:26px;margin:4px 0}.day-head p{margin:0;opacity:.9}
-.events{padding:10px 22px 22px}.event{display:grid;grid-template-columns:110px 1fr;gap:18px;padding:18px 0;border-bottom:1px solid var(--line)}.event:last-child{border-bottom:0}.time{font-weight:900;color:var(--primary)}.event h4{font-size:18px;margin:0 0 5px}.event p{margin:0;color:var(--muted)}
-.event-images{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.event-images img{width:150px;height:100px;object-fit:cover;border-radius:11px;border:1px solid var(--line);background:#eef3f7}
-.features{display:flex;gap:8px;flex-wrap:wrap}.feature{border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:999px;font-size:12px;font-weight:800}
-.notice{padding:14px 16px;border:1px solid #f2d36b;background:#fff8df;border-radius:13px;margin:18px 0}.error{border-color:#efa8a1;background:#fff0ef}.loading{padding:60px 20px;text-align:center;color:var(--muted)}
-footer{background:#071d38;color:#fff;padding:30px 18px}.footer-inner{width:min(1120px,100%);margin:auto}.footer-inner strong{display:block}.footer-inner span{font-size:12px;opacity:.72}
-@media(max-width:760px){.grid,.hotel-card{grid-template-columns:1fr}.event{grid-template-columns:1fr;gap:5px}.hero{min-height:360px}.event-images img{width:calc(50% - 5px);height:110px}.preview-bar span{display:none}}
-.preview-countdown{display:inline-flex;margin-top:14px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.94);color:#071d3d;font-weight:800}
-.day-head.has-image{position:relative;overflow:hidden;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;background-size:cover;background-position:center}
-.day-head.has-image:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,19,48,.12),rgba(2,19,48,.82))}
-.day-head.has-image>*{position:relative;z-index:1}</style>
+body.preview-mode{min-height:100vh}
+.preview-lockbar{position:sticky;top:0;z-index:1000;background:#071d49;color:#fff;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.preview-lockbar strong{font-weight:900}.preview-lockbar a{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:6px 9px;font-weight:800}
+.preview-message{margin:28px auto;width:min(1180px,calc(100% - 32px));padding:16px 18px;border-radius:16px;background:#fff8df;border:1px solid #f2d36b;color:#664e00;font-weight:700}
+.preview-error{background:#fff0ef;border-color:#e9a9a4;color:#9a302a}
+.preview-placeholder{width:min(1180px,calc(100% - 32px));margin:44px auto 80px;padding:30px;border-radius:24px;background:#fff;border:1px solid #dce6ef;box-shadow:0 16px 42px rgba(8,31,62,.08)}
+.preview-placeholder h2{margin-top:0}
+.preview-only-hidden{display:none!important}
+</style>
 </head>
-<body>
-<div class="preview-bar"><div><strong>🔒 Geschützte Entwurfs-Vorschau</strong><span> · nicht veröffentlicht</span></div><a id="backLink" href="/admin/reisen.html">Zurück zur Verwaltung</a></div>
-<div id="loading" class="loading">Reisevorschau wird geladen …</div>
-<div id="app" hidden>
-<header class="hero" id="hero"><img id="heroImage" alt="" hidden><div class="hero-inner"><div class="kicker">BS Rohrbach · Erasmus+</div><h1 id="title"></h1><div class="subtitle" id="subtitle"></div><div class="meta"><span class="pill" id="destination"></span><span class="pill" id="dates"></span></div><div class="preview-countdown" id="countdown" aria-live="polite"></div></div></header>
-<div class="band"></div>
+<body class="preview-mode">
+<div class="preview-lockbar"><div><strong>🔒 Geschützte Entwurfs-Vorschau</strong> · nicht veröffentlicht</div><a id="backLink" href="/admin/reisen.html">Zurück zur Verwaltung</a></div>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a class="brand" href="#" aria-label="BS Rohrbach Erasmus+">
+      <img src="/images/bs-rohrbach-logo.png" alt="BS Rohrbach">
+      <span><strong>BS Rohrbach Erasmus+</strong><small id="brandTrip">Reisevorschau</small></span>
+    </a>
+    <nav aria-label="Hauptnavigation" id="mainNav">
+      <a href="#heute">Heute</a>
+      <a href="#news">News</a>
+      <a href="#reisetagebuch" data-feature="diary">Reisetagebuch</a>
+      <a href="#programm">Programm</a>
+      <a href="#karte" data-feature="map">Karte</a>
+      <a href="#galerie" data-feature="gallery">Galerie</a>
+      <a href="#downloads" data-feature="downloads">Downloads</a>
+      <a class="nav-emergency" href="#notfall" id="emergencyNavButton">Hilfe</a>
+      <a class="nav-upload" href="#reisegruppe" data-feature="upload">Interner Bereich 🔒</a>
+    </nav>
+  </div>
+</header>
+
 <main>
-<section class="section"><h2>Über die Reise</h2><p class="section-intro" id="intro"></p><div class="grid" id="transportCards"></div></section>
-<section class="section"><h2>Unterkunft</h2><div class="card hotel-card"><img id="hotelImage" alt="Unterkunft" hidden><div class="hotel-content" id="hotelContent"></div></div></section>
-<section class="section"><h2>Tagesprogramm</h2><p class="section-intro">So könnte das Programm auf der späteren Reisewebsite dargestellt werden.</p><div class="days" id="days"></div></section>
-<section class="section"><h2>Aktivierte Funktionen der Reise</h2><p class="section-intro">Diese Funktionen sind für die Reise vorgesehen. In der Entwurfs-Vorschau sind sie noch nicht interaktiv.</p><div class="features" id="features"></div></section>
-<div class="notice"><strong>Vorschau:</strong> Diese Darstellung dient nur zur Kontrolle des Reise-Entwurfs. Es wurde nichts veröffentlicht.</div>
+<section class="hero" id="start">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-copy reveal visible">
+      <p class="eyebrow" id="heroEyebrow">BERUFSSCHULE ROHRBACH UNTERWEGS</p>
+      <h1 id="heroTitle">Erasmus+ Reise</h1>
+      <p class="hero-subtitle" id="heroSubtitle"></p>
+      <div class="hero-actions">
+        <a class="button button-yellow" href="#programm">📘 Reiseprogramm</a>
+        <a class="button button-dark" href="#reisegruppe" data-feature="upload">🔒 Internen Bereich öffnen</a>
+      </div>
+    </div>
+
+    <aside aria-label="Countdown zur Abfahrt" class="countdown-card reveal visible">
+      <p class="countdown-label" id="countdownLabel">🚌 Abfahrt</p>
+      <h2 id="countdownDateText"></h2>
+      <div class="countdown" id="countdown">
+        <div><strong id="cdDays">0</strong><small>TAGE</small></div>
+        <div><strong id="cdHours">00</strong><small>STUNDEN</small></div>
+        <div><strong id="cdMinutes">00</strong><small>MINUTEN</small></div>
+        <div><strong id="cdSeconds">00</strong><small>SEKUNDEN</small></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="quick-grid-wrap">
+  <div class="quick-grid" id="quickGrid">
+    <a href="#reisetagebuch" data-feature="diary"><span>📖</span><b>Reisetagebuch</b><small>Berichte & Fotos</small></a>
+    <a href="#programm"><span>🗓️</span><b>Programm</b><small>Tag für Tag</small></a>
+    <a href="#karte" data-feature="map"><span>🗺️</span><b>Karte</b><small>Alle Reiseziele</small></a>
+    <a href="#wetter"><span>🌤️</span><b>Wetter</b><small id="weatherLabel">Reiseziel & Ausflüge</small></a>
+    <a href="#reisegruppe" data-feature="upload"><span>🔒</span><b>Interner Bereich</b><small>Geschützte Inhalte</small></a>
+    <a href="#downloads" data-feature="downloads"><span>📥</span><b>Downloads</b><small>Dokumente & Infos</small></a>
+  </div>
+</section>
+
+<section class="section today-section" id="heute">
+  <div class="today-card">
+    <div>
+      <p class="eyebrow">HEUTE AUF UNSERER REISE</p>
+      <h2 id="todayTitle">Die Reise beginnt bald</h2>
+      <p id="todayIntro">Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.</p>
+    </div>
+    <div class="today-status-card">
+      <strong id="todayPhase">Reisephase</strong>
+      <span id="todayDates"></span>
+      <b id="todayState">Vor der Reise</b>
+    </div>
+  </div>
+</section>
+
+<section class="preview-placeholder" id="previewNext">
+  <p class="eyebrow">DEV 14.0 · MODUL 8.3.1</p>
+  <h2>Master-Template-Grundlage</h2>
+  <p>Ab hier folgen in 8.3.2 die restlichen Brüssel-Template-Bereiche dynamisch: News, Tagesprogramm, Karte, Galerie, Unterkunft, Downloads, interner Bereich und Hilfe/Notfall.</p>
+</section>
 </main>
-<footer><div class="footer-inner"><strong>© 2026 Berufsschule Rohrbach · Erasmus+</strong><span>Entwurfs-Vorschau · DEV 14.0 Modul 8.2.6</span></div></footer>
-</div>
+
 <script>
-let tokenValue='';
+let tokenValue='',countdownTimer=null;
 const params=new URLSearchParams(location.search),id=params.get('id')||'';
 const $=x=>document.getElementById(x);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=d=>{if(!d)return '';try{return new Intl.DateTimeFormat('de-AT',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(d+'T12:00:00'))}catch{return d}};
-async function token(){
- if(tokenValue)return tokenValue;
- throw new Error('Vorschau-Anmeldung fehlt. Bitte die Vorschau erneut aus dem Reise-Assistenten öffnen.');
-}
+const fmtLong=d=>{if(!d)return '';try{return new Intl.DateTimeFormat('de-AT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(d+'T12:00:00'))}catch{return d}};
+
 function waitForOpenerToken(){
  return new Promise((resolve,reject)=>{
    if(!window.opener){reject(new Error('Bitte diese Vorschau über „Reisevorschau öffnen“ im Reise-Assistenten starten.'));return}
@@ -72,64 +128,95 @@ function waitForOpenerToken(){
    window.opener.postMessage({type:'erasmus-preview-ready',id},location.origin);
  });
 }
+
 async function imageUrl(key){
  if(!key)return '';
- const r=await fetch(`/api/trips/draft-image?key=${encodeURIComponent(key)}`,{headers:{Authorization:`Bearer ${await token()}`}});
+ const r=await fetch(`/api/trips/draft-image?key=${encodeURIComponent(key)}`,{headers:{Authorization:`Bearer ${tokenValue}`}});
  if(!r.ok)return '';
  return URL.createObjectURL(await r.blob());
 }
-async function setImage(el,key){
- if(!key)return;
- const url=await imageUrl(key);if(url){el.src=url;el.hidden=false}
+
+function applyFeatureVisibility(features={}){
+ document.querySelectorAll('[data-feature]').forEach(el=>{
+   const key=el.dataset.feature;
+   el.classList.toggle('preview-only-hidden',features[key]===false);
+ });
 }
-function card(label,value){
- if(!value)return '';
- return `<div class="card"><div class="label">${esc(label)}</div><div class="value">${esc(value)}</div></div>`;
+
+function setTheme(d){
+ const primary=d.theme?.primary||'#0b4f8a',accent=d.theme?.accent||'#f2c94c';
+ document.documentElement.style.setProperty('--preview-primary',primary);
+ document.documentElement.style.setProperty('--preview-accent',accent);
+ // Existing Brussels stylesheet uses these in many components; override common theme variables when present.
+ document.documentElement.style.setProperty('--blue',primary);
+ document.documentElement.style.setProperty('--yellow',accent);
+ document.documentElement.style.setProperty('--accent',accent);
+ document.documentElement.style.setProperty('--primary',primary);
+ const yellowButtons=document.querySelectorAll('.button-yellow');
+ yellowButtons.forEach(el=>{el.style.background=accent;el.style.borderColor=accent});
+ document.querySelectorAll('.countdown-card,.today-status-card').forEach(el=>el.style.setProperty('background',primary));
 }
-async function render(d){
- document.documentElement.style.setProperty('--primary',d.theme?.primary||'#0b4f8a');
- document.documentElement.style.setProperty('--accent',d.theme?.accent||'#f2c94c');
- $('title').textContent=d.title||'Erasmus+-Reise';
- $('subtitle').textContent=d.subtitle||d.website?.intro||'';
- $('destination').textContent=[d.destination,d.country].filter(Boolean).join(', ')||'Reiseziel';
- $('dates').textContent=[fmt(d.startDate),fmt(d.endDate)].filter(Boolean).join(' – ');
- const dep=new Date(String(d.startDate||'')+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);const diff=Math.ceil((dep-today)/86400000);
- const countdownEl=$('countdown');if(countdownEl)countdownEl.textContent=diff>1?`🚌 Noch ${diff} Tage bis zur Abreise`:diff===1?'🚌 Morgen geht es los!':diff===0?'🚌 Heute geht es los!':'✓ Reisezeitraum begonnen/abgeschlossen';
- $('intro').textContent=d.website?.intro||d.subtitle||'Noch keine Einleitung eingetragen.';
- $('backLink').href=`/admin/reise-neu.html?id=${encodeURIComponent(d.id||id)}`;
- await Promise.all([setImage($('heroImage'),d.images?.hero),setImage($('hotelImage'),d.images?.hotel)]);
- const tr=d.transport||{};
- $('transportCards').innerHTML=[
-   card('Anreise',tr.outboundMode),card('Treffpunkt / Abfahrt',tr.meetingPoint),
-   card('Geplante Ankunft',tr.arrivalInfo),card('Rückreise',tr.returnMode),
-   card('Geplante Rückkehr',tr.returnInfo),card('Hinweise zur Fahrt',tr.notes)
- ].join('')||'<div class="card muted">Noch keine Reiseinformationen eingetragen.</div>';
- const ac=d.accommodation||{};
- $('hotelContent').innerHTML=`<h3>${esc(ac.name||'Unterkunft noch offen')}</h3>${ac.address?`<div class="label">Adresse</div><div class="value">${esc(ac.address)}</div>`:''}${ac.website?`<div class="label">Website</div><div class="value">${esc(ac.website)}</div>`:''}${ac.phone?`<div class="label">Telefon</div><div class="value">${esc(ac.phone)}</div>`:''}${ac.checkIn?`<div class="label">Check-in</div><div class="value">${esc(ac.checkIn)}</div>`:''}${ac.checkOut?`<div class="label">Check-out</div><div class="value">${esc(ac.checkOut)}</div>`:''}${ac.notes?`<div class="label">Hinweise</div><div class="value">${esc(ac.notes)}</div>`:''}`;
- const days=d.program?.days||[];
- const dayHeroUrls={};for(const day of days){if(day.heroImage){try{dayHeroUrls[day.id||day.date]=await imageUrl(day.heroImage)}catch{}}}
- $('days').innerHTML=days.length?days.map((day,di)=>`<article class="day"><div class="day-head ${day.heroImage?'has-image':''}" ${day.heroImage&&dayHeroUrls[day.id||day.date]?`style="background-image:url('${dayHeroUrls[day.id||day.date]}')"`:''}><div class="date">${esc(day.short||'Tag')} · ${esc(fmt(day.date))}</div><h3>${esc(day.title||`Reisetag ${di+1}`)}</h3>${day.subtitle?`<p>${esc(day.subtitle)}</p>`:''}</div><div class="events">${(day.events||[]).length?(day.events||[]).map((e,ei)=>`<div class="event"><div class="time">${esc(e.time||'—')}</div><div><h4>${esc(e.title||`Programmpunkt ${ei+1}`)}</h4>${e.text?`<p>${esc(e.text)}</p>`:''}<div class="event-images" data-images="${esc(JSON.stringify(Array.isArray(e.images)?e.images:(e.image?[e.image]:[])))}"></div></div></div>`).join(''):'<div class="event"><div></div><div class="muted">Noch keine Programmpunkte eingetragen.</div></div>'}</div></article>`).join(''):'<div class="card muted">Noch kein Tagesprogramm vorhanden.</div>';
- const featureLabels={diary:'Reisetagebuch',gallery:'Galerie',upload:'Foto-Upload',map:'Karte',smartJourney:'Smart Journey',downloads:'Downloads'};
- $('features').innerHTML=Object.entries(featureLabels).filter(([k])=>d.features?.[k]!==false).map(([k,v])=>`<span class="feature">✓ ${esc(v)}</span>`).join('');
- for(const box of document.querySelectorAll('.event-images')){
-   let keys=[];try{keys=JSON.parse(box.dataset.images||'[]')}catch{}
-   for(const key of keys){
-     const url=await imageUrl(key);if(url){const img=document.createElement('img');img.src=url;img.alt='Programmbild';box.appendChild(img)}
+
+function startCountdown(d){
+ if(countdownTimer)clearInterval(countdownTimer);
+ const target=new Date(String(d.startDate||'')+'T20:00:00');
+ const end=new Date(String(d.endDate||'')+'T23:59:00');
+ $('countdownDateText').textContent=fmtLong(d.startDate);
+ $('countdownLabel').textContent=`🚌 Abfahrt nach ${d.destination||'Reiseziel'}`;
+ $('todayDates').textContent=[fmt(d.startDate),fmt(d.endDate)].filter(Boolean).join(' – ');
+ const tick=()=>{
+   const now=new Date(),diff=target-now;
+   if(now>end){
+     $('todayTitle').textContent='Die Reise ist abgeschlossen';
+     $('todayIntro').textContent='Die Reise liegt bereits hinter uns.';
+     $('todayState').textContent='Nach der Reise';
+   }else if(diff<=0){
+     $('todayTitle').textContent='Wir sind unterwegs';
+     $('todayIntro').textContent='Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.';
+     $('todayState').textContent='Während der Reise';
+   }else{
+     $('todayTitle').textContent='Die Reise beginnt bald';
+     $('todayIntro').textContent='Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.';
+     $('todayState').textContent='Vor der Reise';
    }
- }
+   const ms=Math.max(0,diff),days=Math.floor(ms/86400000),hours=Math.floor(ms%86400000/3600000),mins=Math.floor(ms%3600000/60000),secs=Math.floor(ms%60000/1000);
+   $('cdDays').textContent=String(days).padStart(2,'0');
+   $('cdHours').textContent=String(hours).padStart(2,'0');
+   $('cdMinutes').textContent=String(mins).padStart(2,'0');
+   $('cdSeconds').textContent=String(secs).padStart(2,'0');
+ };
+ tick();countdownTimer=setInterval(tick,1000);
 }
+
+async function render(d){
+ document.title=`${d.title||'Reise'} · Vorschau`;
+ $('backLink').href=`/admin/reise-neu.html?id=${encodeURIComponent(d.id||id)}`;
+ $('brandTrip').textContent=[d.destination,d.startDate?.slice(0,4)].filter(Boolean).join(' · ')||'Reisevorschau';
+ $('heroTitle').textContent=d.title||'Erasmus+ Reise';
+ $('heroSubtitle').textContent=d.website?.intro||d.subtitle||'';
+ $('weatherLabel').textContent=d.destination||'Reiseziel';
+ setTheme(d);applyFeatureVisibility(d.features||{});
+ const hero=await imageUrl(d.images?.hero);
+ if(hero){
+   const bg=$('heroBg');
+   bg.style.backgroundImage=`url("${hero}")`;
+   bg.style.backgroundSize='cover';bg.style.backgroundPosition='center';
+ }
+ startCountdown(d);
+}
+
 async function init(){
  if(!id)throw new Error('Keine Reise-ID angegeben.');
  await waitForOpenerToken();
- const r=await fetch('/api/trips/drafts/'+encodeURIComponent(id),{headers:{Authorization:`Bearer ${await token()}`},cache:'no-store'});
+ const r=await fetch('/api/trips/drafts/'+encodeURIComponent(id),{headers:{Authorization:`Bearer ${tokenValue}`},cache:'no-store'});
  const data=await r.json();if(!r.ok)throw new Error(data.message||'Entwurf konnte nicht geladen werden.');
  await render(data.draft);
- $('loading').hidden=true;$('app').hidden=false;
 }
 init().catch(e=>{
- const msg=String(e?.message||e||'');
- $('loading').className='loading notice error';
- $('loading').innerHTML=`<strong>Vorschau konnte nicht geladen werden.</strong><br>${esc(msg)}`;
+ const box=document.createElement('div');
+ box.className='preview-message preview-error';
+ box.innerHTML=`<strong>Vorschau konnte nicht geladen werden.</strong><br>${esc(e?.message||e)}`;
+ document.body.insertBefore(box,document.querySelector('main'));
 });
 </script>
 </body>
