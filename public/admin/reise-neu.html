@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.1.2">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.2">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -29,7 +29,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.1.2</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.2</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -133,15 +133,15 @@
   <div class="field full" style="margin-top:26px">
     <p class="eyebrow">Schritt 8</p>
     <h2 style="margin:0">Prüfen & Veröffentlichen</h2>
-    <small>Hier wird der Reise-Entwurf vollständig geprüft. In Modul 8.1 ist noch kein Livegang möglich.</small>
+    <small>Hier wird der Reise-Entwurf vollständig geprüft. Zusätzlich kann der zuletzt gespeicherte Stand als geschützte Reisevorschau geöffnet werden.</small>
   </div>
-  <div class="notice"><strong>Sicherer Prüfmodus:</strong> Diese Seite verändert keine bestehende veröffentlichte Reise und veröffentlicht auch die Testreise noch nicht.</div>
+  <div class="notice"><strong>Sicherer Prüfmodus:</strong> Die Vorschau ist nur für Administratoren sichtbar. Sie veröffentlicht keine Reise und verändert keine bestehende Website. <strong>Die Vorschau zeigt den zuletzt gespeicherten Entwurf.</strong></div>
   <div id="finalCheckSummary" class="final-check-grid"></div>
   <div id="finalCheckDetails" class="final-check-details"></div>
   <div class="actions">
     <button type="button" class="button ghost" id="refreshFinalCheck">Prüfung aktualisieren</button>
-    <button type="button" class="button" id="previewPlaceholder" disabled>Reisevorschau folgt in Modul 8.2</button>
-    <button type="button" class="button" id="publishPlaceholder" disabled>Veröffentlichen folgt später</button>
+    <button type="button" class="button" id="openTripPreview">Reisevorschau öffnen</button>
+    <button type="button" class="button" id="publishPlaceholder" disabled>Veröffentlichen folgt in Modul 8.3</button>
   </div>
   <div id="finalCheckFeedback" class="final-check-feedback" aria-live="polite"></div>
 </div>
@@ -295,6 +295,10 @@ async function uploadTripImage(slot){
  }catch(e){setStatus(e.message||'Upload fehlgeschlagen.','error');}
 }
 document.querySelectorAll('[data-upload-slot]').forEach(b=>b.addEventListener('click',()=>uploadTripImage(b.dataset.uploadSlot)));
+$('openTripPreview')?.addEventListener('click',()=>{
+ if(!editId){setStatus('Bitte den Entwurf zuerst speichern.','error');return}
+ window.open(`/admin/reise-vorschau.html?id=${encodeURIComponent(editId)}`,'_blank','noopener');
+});
 $('refreshFinalCheck')?.addEventListener('click',()=>{
  const btn=$('refreshFinalCheck'),feedback=$('finalCheckFeedback');
  if(btn){btn.disabled=true;btn.textContent='Prüfung läuft…'}
@@ -458,7 +462,7 @@ function renderFinalCheck(){
  const data=finalCheckData(),summary=$('finalCheckSummary'),details=$('finalCheckDetails');
  if(summary)summary.innerHTML=data.sections.map(x=>`<div class="final-check-card ${x.ok?'ok':'warn'}"><strong>${x.ok?'✓':'⚠'} ${escHtml(x.label)}</strong><span>${x.ok?'vollständig':'Angaben prüfen'}</span></div>`).join('');
  if(details){
-   if(!data.issues.length)details.innerHTML='<div class="final-check-complete">✓ Der Reise-Entwurf ist vollständig. In Modul 8.2 folgt als Nächstes die Reisevorschau.</div>';
+   if(!data.issues.length)details.innerHTML='<div class="final-check-complete">✓ Der Reise-Entwurf ist vollständig. Die geschützte Reisevorschau kann jetzt geöffnet werden.</div>';
    else details.innerHTML=data.issues.map(i=>`<div class="final-check-issue"><strong>⚠ ${escHtml(i.section)}</strong><div>${escHtml(i.message)}</div><button type="button" class="button ghost jump-to-step" data-target-step="${i.step}">Zu Schritt ${i.step}</button></div>`).join('');
  }
  document.querySelectorAll('.jump-to-step').forEach(btn=>btn.onclick=()=>showWizardStep(Number(btn.dataset.targetStep)));
