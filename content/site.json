@@ -216,12 +216,12 @@
     "button": "Redaktionsbereich öffnen"
   },
   "footer": {
-    "title": "© 2026 Berufsschule Rohrbach · Erasmus+ Brüsselreise",
+    "title": "© 2026 Berufsschule Rohrbach · Erasmus+",
     "subtitle": "Projektleitung und technische Umsetzung: Jürgen Vierlinger",
     "topLink": "Nach oben ↑",
     "privacy": "Keine personenbezogenen Reisedaten öffentlich",
-    "version": "Version 10.1.1",
-    "updated": "Letzte Aktualisierung: 25.07.2026"
+    "version": "Version 14.0-dev.8.1.1",
+    "updated": "Letzte Aktualisierung: 12.08.2026"
   },
   "notice": "Noch nicht endgültig bestätigte Punkte sind entsprechend markiert.",
   "liveStatus": {
