@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.2.6">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.2.7">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -29,7 +29,7 @@
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.2.6</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.2.7</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -406,6 +406,23 @@ async function loadProgramImageThumbs(){
    }
  }catch(e){console.warn(e)}
 }
+function updateProgramValidation(card,di){
+ const day=window.tripProgram?.days?.[di];if(!card||!day)return;
+ const issues=[];
+ if(!(day.title||'').trim())issues.push('Tagestitel fehlt');
+ if(!(day.events||[]).length)issues.push('noch kein Programmpunkt');
+ (day.events||[]).forEach((e,i)=>{const miss=[];if(!(e.time||'').trim())miss.push('Zeit');if(!(e.title||'').trim())miss.push('Titel');if(miss.length)issues.push(`Programmpunkt ${i+1}: ${miss.join(' + ')} fehlt`)});
+ const box=card.querySelector('.program-validation');
+ if(box){
+   box.className=`program-validation ${issues.length?'warn':'ok'}`;
+   box.textContent=issues.length?`⚠ ${issues.join(' · ')}`:`✓ Reisetag ${di+1} vollständig`;
+ }
+ card.querySelectorAll('.program-event').forEach((ev,i)=>{
+   const e=day.events?.[i]||{},time=ev.querySelector('[data-event-field="time"]'),title=ev.querySelector('[data-event-field="title"]');
+   time?.closest('.field')?.classList.toggle('invalid',!(e.time||'').trim());
+   title?.closest('.field')?.classList.toggle('invalid',!(e.title||'').trim());
+ });
+}
 function bindProgramControls(){
  document.querySelectorAll('.day-image-thumb').forEach(btn=>btn.onclick=()=>{
    const picker=btn.closest('.day-image-picker'),card=btn.closest('.program-day'),di=Number(card.dataset.day),hidden=picker.querySelector('[data-day-image]');
@@ -416,7 +433,17 @@ function bindProgramControls(){
  document.querySelectorAll('.program-image-thumb').forEach(btn=>btn.onclick=()=>{
    const picker=btn.closest('.program-image-picker');btn.classList.toggle('selected');updatePickerState(picker);
  });
- document.querySelectorAll('.program-day').forEach(card=>{const di=Number(card.dataset.day);card.querySelectorAll('[data-day-field]').forEach(el=>{el.addEventListener('input',()=>{window.tripProgram.days[di][el.dataset.dayField]=el.value});el.addEventListener('blur',()=>{collectProgramDays();renderProgramDays()})});card.querySelectorAll('[data-event-field]').forEach(el=>el.addEventListener('blur',()=>{collectProgramDays();renderProgramDays()}));});
+ document.querySelectorAll('.program-day').forEach(card=>{
+   const di=Number(card.dataset.day);
+   card.querySelectorAll('[data-day-field]').forEach(el=>el.addEventListener('input',()=>{
+     window.tripProgram.days[di][el.dataset.dayField]=el.value;
+     updateProgramValidation(card,di);
+   }));
+   card.querySelectorAll('[data-event-field]').forEach(el=>el.addEventListener('input',()=>{
+     collectProgramDays();
+     updateProgramValidation(card,di);
+   }));
+ });
  document.querySelectorAll('.move-program-up,.move-program-down').forEach(btn=>btn.onclick=()=>{collectProgramDays();const card=btn.closest('.program-day'),event=btn.closest('.program-event'),di=Number(card.dataset.day),ei=Number(event.dataset.event),delta=btn.classList.contains('move-program-up')?-1:1,ni=ei+delta;if(ni<0||ni>=window.tripProgram.days[di].events.length)return;const list=window.tripProgram.days[di].events;[list[ei],list[ni]]=[list[ni],list[ei]];renderProgramDays()});
  document.querySelectorAll('.add-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const di=Number(btn.dataset.day);window.tripProgram.days[di].events.push({time:'',title:'',text:'',images:[],image:''});renderProgramDays()});
  document.querySelectorAll('.remove-program-event').forEach(btn=>btn.onclick=()=>{collectProgramDays();const card=btn.closest('.program-day'),event=btn.closest('.program-event'),di=Number(card.dataset.day),ei=Number(event.dataset.event);window.tripProgram.days[di].events.splice(ei,1);renderProgramDays()});
