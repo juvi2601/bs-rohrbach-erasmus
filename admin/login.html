@@ -1,6 +1,18 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Administrator – BS Rohrbach Erasmus+</title><link rel="stylesheet" href="/admin/admin.css?v=13.8"><script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script><style>
 .gate-wrap{min-height:calc(100vh - 72px);display:grid;place-items:center;padding:30px 18px}.gate-card{width:min(620px,100%);background:#fff;border:1px solid var(--line);border-radius:26px;padding:34px;box-shadow:var(--shadow);text-align:center}.gate-icon{width:66px;height:66px;margin:0 auto 18px;border-radius:20px;display:grid;place-items:center;background:#eaf5ff;font-size:30px}.gate-card h1{font-size:36px;margin:0 0 10px}.gate-card p{color:var(--muted);line-height:1.6}.gate-state{margin:22px 0;padding:15px;border-radius:14px;background:#f4f8fb}.gate-state.denied{background:#fff3f1;color:#9c302a}.gate-state.ok{background:#eefaf5;color:#147255}.gate-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.account{font-size:13px;margin-top:12px;color:var(--muted)}
-</style></head><body><header class="topbar"><a class="brand" href="/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Geschützter Bereich</small></span></a><div class="top-actions"><a class="button ghost" href="/">Zur Website</a></div></header>
+</style><script>
+(function(){
+ try{
+   localStorage.removeItem('erasmusPreviewReturn');
+   localStorage.removeItem('erasmusPreviewReturnAt');
+   for(let i=localStorage.length-1;i>=0;i--){
+     const k=localStorage.key(i)||'';
+     if(/interaction\.status/i.test(k)||/interaction_in_progress/i.test(k))localStorage.removeItem(k);
+   }
+ }catch{}
+})();
+</script>
+</head><body><header class="topbar"><a class="brand" href="/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Geschützter Bereich</small></span></a><div class="top-actions"><a class="button ghost" href="/">Zur Website</a></div></header>
 <main class="gate-wrap"><section class="gate-card"><div class="gate-icon">🔐</div><p class="eyebrow">Administrator & Reise-Redaktion</p><h1>Geschützter Bereich</h1><p>Bitte mit dem Microsoft-365-Schulkonto anmelden. Der passende Bereich wird anschließend automatisch geöffnet.</p><div class="gate-state" id="state">Noch nicht angemeldet.</div><div class="gate-actions"><button class="button primary" id="login">Mit Microsoft anmelden</button></div><div class="account" id="account"></div></section></main>
 <script>
 let cfg,app,acct;const $=id=>document.getElementById(id);

@@ -13,26 +13,6 @@
   <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 </head>
 <body>
-<script>
-(function(){
-  try{
-    const target=localStorage.getItem('erasmusPreviewReturn')||'';
-    const started=Number(localStorage.getItem('erasmusPreviewReturnAt')||0);
-    const fresh=started>0 && (Date.now()-started)<10*60*1000;
-    const isPreview=target.startsWith(location.origin+'/admin/reise-vorschau.html?id=');
-    const authReturn=location.hash.includes('code=')||location.hash.includes('error=')||location.search.includes('code=')||location.search.includes('error=');
-    if(fresh&&isPreview&&authReturn){
-      localStorage.removeItem('erasmusPreviewReturn');
-      localStorage.removeItem('erasmusPreviewReturnAt');
-      location.replace(target+location.hash);
-    }else if(started&&!fresh){
-      localStorage.removeItem('erasmusPreviewReturn');
-      localStorage.removeItem('erasmusPreviewReturnAt');
-    }
-  }catch{}
-})();
-</script>
-
 <a class="skip-link" href="#mainContent">Zum Inhalt springen</a>
 <header class="upload-header">
   <a class="brand" href="/" aria-label="Zurück zur Reisewebsite">
