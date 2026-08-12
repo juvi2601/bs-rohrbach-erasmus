@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Neue Reise – BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.7.3">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.8.1">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 <style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
@@ -21,11 +21,14 @@
 
 .program-event-actions{display:flex;flex-direction:column;gap:7px;align-items:stretch}.program-move{min-width:42px;padding:7px 9px;border:1px solid #b8cad9;border-radius:9px;background:#fff;cursor:pointer;font-weight:900}.program-move:disabled{opacity:.35;cursor:not-allowed}.program-validation{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:700}.program-validation.ok{background:#edf9f3;border:1px solid #a8dfc2;color:#16633f}.program-validation.warn{background:#fff8df;border:1px solid #f2d36b;color:#795d00}.field.invalid input,.field.invalid textarea{border-color:#c7352b;box-shadow:0 0 0 2px rgba(199,53,43,.08)}
 @media(max-width:720px){.program-event-actions{grid-column:2;flex-direction:row;flex-wrap:wrap}}
+
+.final-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}.final-check-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}.final-check-card.ok{border-color:#a8dfc2;background:#edf9f3}.final-check-card.warn{border-color:#f2d36b;background:#fff8df}.final-check-card strong{display:block;margin-bottom:4px}.final-check-details{display:grid;gap:10px;margin-top:18px}.final-check-issue{padding:12px 14px;border:1px solid #f2d36b;background:#fff8df;border-radius:12px}.final-check-issue button{margin-top:8px}.final-check-complete{padding:14px 16px;border:1px solid #a8dfc2;background:#edf9f3;border-radius:12px;font-weight:800}
+@media(max-width:720px){.final-check-grid{grid-template-columns:1fr}}
 </style></head><body>
 <header class="topbar"><a class="brand" href="/admin/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Neue Reise</small></span></a>
 <div class="top-actions"><a class="button ghost" href="/admin/reisen.html">Reisen</a><a class="button ghost" href="/admin/">Dashboard</a></div></header>
 <main class="shell">
-<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 7.3</p><h1 id="pageTitle">Neue Reise erstellen</h1>
+<section class="welcome"><div><p class="eyebrow">DEV 14.0 · Modul 8.1</p><h1 id="pageTitle">Neue Reise erstellen</h1>
 <p>Grunddaten eingeben und zunächst als sicheren Entwurf speichern.</p></div>
 <div class="status-card"><span class="status-dot"></span><div><strong id="state">Bereit</strong><small>Nur für Administratoren</small></div></div></section>
 
@@ -40,6 +43,7 @@
 <button type="button" class="wizard-step" data-step="5">5 · Dokumente<small>Links & Funktionen</small></button>
 <button type="button" class="wizard-step" data-step="6">6 · Bilder<small>Titel, Hotel, Programm</small></button>
 <button type="button" class="wizard-step" data-step="7">7 · Tagesprogramm<small>Reisetage & Programmpunkte</small></button>
+<button type="button" class="wizard-step" data-step="8">8 · Prüfen & Veröffentlichen<small>Gesamtprüfung</small></button>
 </div>
 <form id="tripForm">
 <div class="wizard-panel" data-panel="1">
@@ -123,7 +127,24 @@
 <div class="wizard-nav">
 <button type="button" class="button" id="wizardBack" style="display:none">← Zurück</button>
 <div class="right"><button type="button" class="button primary" id="wizardNext">Weiter →</button></div>
-</div></form></section></main>
+</div>
+<div class="wizard-panel" data-panel="8" hidden>
+  <div class="field full" style="margin-top:26px">
+    <p class="eyebrow">Schritt 8</p>
+    <h2 style="margin:0">Prüfen & Veröffentlichen</h2>
+    <small>Hier wird der Reise-Entwurf vollständig geprüft. In Modul 8.1 ist noch kein Livegang möglich.</small>
+  </div>
+  <div class="notice"><strong>Sicherer Prüfmodus:</strong> Diese Seite verändert keine bestehende veröffentlichte Reise und veröffentlicht auch die Testreise noch nicht.</div>
+  <div id="finalCheckSummary" class="final-check-grid"></div>
+  <div id="finalCheckDetails" class="final-check-details"></div>
+  <div class="actions">
+    <button type="button" class="button ghost" id="refreshFinalCheck">Prüfung aktualisieren</button>
+    <button type="button" class="button" id="previewPlaceholder" disabled>Reisevorschau folgt in Modul 8.2</button>
+    <button type="button" class="button" id="publishPlaceholder" disabled>Veröffentlichen folgt später</button>
+  </div>
+</div>
+
+</form></section></main>
 <script>
 let cfg,app,account,tokenValue;const params=new URLSearchParams(location.search),editId=params.get('id')||'';
 const $=id=>document.getElementById(id);
@@ -272,6 +293,7 @@ async function uploadTripImage(slot){
  }catch(e){setStatus(e.message||'Upload fehlgeschlagen.','error');}
 }
 document.querySelectorAll('[data-upload-slot]').forEach(b=>b.addEventListener('click',()=>uploadTripImage(b.dataset.uploadSlot)));
+$('refreshFinalCheck')?.addEventListener('click',renderFinalCheck);
 updateImageStatuses(); renderProgramImageLibrary();
 const weekdayShort=['So','Mo','Di','Mi','Do','Fr','Sa'];
 function isoDates(start,end){
@@ -375,20 +397,62 @@ let wizardStep=1;
 function wizardRequired(step){
  const ids={1:['title','tripId','destination','country','startDate','endDate'],
  2:['intro','outboundMode','meetingPoint','returnInfo'],
- 3:['hotelName','hotelAddress'],4:['teachers'],5:[],6:[],7:[]}[step]||[];
+ 3:['hotelName','hotelAddress'],4:['teachers'],5:[],6:[],7:[],8:[]}[step]||[];
  return ids.filter(id=>!($(id)?.value||'').trim());
 }
 function showWizardStep(n){
- wizardStep=Math.max(1,Math.min(7,n));
+ wizardStep=Math.max(1,Math.min(8,n));
  document.querySelectorAll('.wizard-panel').forEach(p=>p.hidden=Number(p.dataset.panel)!==wizardStep);
  document.querySelectorAll('.wizard-step').forEach(b=>{
    const s=Number(b.dataset.step); b.classList.toggle('active',s===wizardStep);
    b.classList.toggle('done',s<wizardStep && wizardRequired(s).length===0);
  });
  $('wizardBack').style.display=wizardStep===1?'none':'inline-flex';
- $('wizardNext').style.display=wizardStep===7?'none':'inline-flex';
- if(wizardStep===7){syncProgramDays();renderWizardSummary();}
+ $('wizardNext').style.display=wizardStep===8?'none':'inline-flex';
+ if(wizardStep===7){syncProgramDays();renderWizardSummary();} if(wizardStep===8){collectProgramDays();renderFinalCheck();}
  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function finalCheckData(){
+ collectProgramDays();
+ const issues=[];
+ const add=(step,section,message)=>issues.push({step,section,message});
+ const reqLabels={
+  title:'Reisename',tripId:'Reise-ID',destination:'Reiseziel',country:'Land',startDate:'Abreise',endDate:'Rückkehr',
+  intro:'Einleitung / Kurzbeschreibung',outboundMode:'Verkehrsmittel Anreise',meetingPoint:'Treffpunkt / Abfahrtszeit',returnInfo:'Rückreise / geplante Rückkehr',
+  hotelName:'Hotel / Unterkunft',hotelAddress:'Adresse',teachers:'Lehrkräfte'
+ };
+ [1,2,3,4].forEach(step=>wizardRequired(step).forEach(id=>add(step,step===1?'Grunddaten':step===2?'Reiseinfos':step===3?'Unterkunft':'Personen',`${reqLabels[id]||id} fehlt`)));
+ if(!(window.tripImages?.hero||'').trim())add(6,'Bilder','Titelbild fehlt');
+ const days=window.tripProgram?.days||[];
+ if(!days.length)add(7,'Tagesprogramm','Keine Reisetage vorhanden');
+ days.forEach((d,di)=>{
+   if(!(d.title||'').trim())add(7,'Tagesprogramm',`Reisetag ${di+1}: Tagestitel fehlt`);
+   if(!(d.events||[]).length)add(7,'Tagesprogramm',`Reisetag ${di+1}: kein Programmpunkt`);
+   (d.events||[]).forEach((e,ei)=>{
+     if(!(e.time||'').trim())add(7,'Tagesprogramm',`Reisetag ${di+1}, Programmpunkt ${ei+1}: Zeit fehlt`);
+     if(!(e.title||'').trim())add(7,'Tagesprogramm',`Reisetag ${di+1}, Programmpunkt ${ei+1}: Titel fehlt`);
+   });
+ });
+ const sections=[
+  {step:1,label:'Grunddaten'},
+  {step:2,label:'Reiseinfos'},
+  {step:3,label:'Unterkunft'},
+  {step:4,label:'Personen'},
+  {step:5,label:'Dokumente'},
+  {step:6,label:'Bilder'},
+  {step:7,label:'Tagesprogramm'}
+ ];
+ return {issues,sections:sections.map(x=>({...x,ok:!issues.some(i=>i.step===x.step)}))};
+}
+function renderFinalCheck(){
+ const data=finalCheckData(),summary=$('finalCheckSummary'),details=$('finalCheckDetails');
+ if(summary)summary.innerHTML=data.sections.map(x=>`<div class="final-check-card ${x.ok?'ok':'warn'}"><strong>${x.ok?'✓':'⚠'} ${escHtml(x.label)}</strong><span>${x.ok?'vollständig':'Angaben prüfen'}</span></div>`).join('');
+ if(details){
+   if(!data.issues.length)details.innerHTML='<div class="final-check-complete">✓ Der Reise-Entwurf ist vollständig. In Modul 8.2 folgt als Nächstes die Reisevorschau.</div>';
+   else details.innerHTML=data.issues.map(i=>`<div class="final-check-issue"><strong>⚠ ${escHtml(i.section)}</strong><div>${escHtml(i.message)}</div><button type="button" class="button ghost jump-to-step" data-target-step="${i.step}">Zu Schritt ${i.step}</button></div>`).join('');
+ }
+ document.querySelectorAll('.jump-to-step').forEach(btn=>btn.onclick=()=>showWizardStep(Number(btn.dataset.targetStep)));
 }
 function renderWizardSummary(){
  const checks=[
