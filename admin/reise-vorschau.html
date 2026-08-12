@@ -41,7 +41,7 @@ footer{background:#071d38;color:#fff;padding:30px 18px}.footer-inner{width:min(1
 <section class="section"><h2>Funktionen</h2><div class="features" id="features"></div></section>
 <div class="notice"><strong>Vorschau:</strong> Diese Darstellung dient nur zur Kontrolle des Reise-Entwurfs. Es wurde nichts veröffentlicht.</div>
 </main>
-<footer><div class="footer-inner"><strong>© 2026 Berufsschule Rohrbach · Erasmus+</strong><span>Entwurfs-Vorschau · DEV 14.0 Modul 8.2.2</span></div></footer>
+<footer><div class="footer-inner"><strong>© 2026 Berufsschule Rohrbach · Erasmus+</strong><span>Entwurfs-Vorschau · DEV 14.0 Modul 8.2.3</span></div></footer>
 </div>
 <script>
 let cfg,app,account,tokenValue;
@@ -53,6 +53,8 @@ async function token(){
  if(tokenValue)return tokenValue;
  account=account||app.getActiveAccount()||app.getAllAccounts()[0]||null;
  if(!account){
+   localStorage.setItem('erasmusPreviewReturn',location.href);
+   localStorage.setItem('erasmusPreviewReturnAt',String(Date.now()));
    await app.loginRedirect({scopes:['User.Read'],prompt:'select_account'});
    throw new Error('Microsoft-Anmeldung wird geöffnet …');
  }
@@ -60,6 +62,8 @@ async function token(){
    tokenValue=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken;
    return tokenValue;
  }catch{
+   localStorage.setItem('erasmusPreviewReturn',location.href);
+   localStorage.setItem('erasmusPreviewReturnAt',String(Date.now()));
    await app.acquireTokenRedirect({scopes:['User.Read'],account});
    throw new Error('Microsoft-Anmeldung wird erneuert …');
  }
