@@ -20,16 +20,11 @@
 <link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3Vt8cF5B6T4Y7YQWl9xY7X3p+zv0M=" rel="stylesheet"/>
 <link href="/styles.css?v=11.1.2" rel="stylesheet"/>
 <style>
-.draft-preview-bar{position:fixed;left:0;right:0;top:0;z-index:3000;height:34px;background:#071d49;color:#fff;display:flex;align-items:center;padding:0 18px;font:12px/1 Inter,system-ui,sans-serif}
-.draft-preview-bar a{margin-left:auto;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 9px;font-weight:800}
-.draft-master-preview .site-header{top:34px}
-.draft-master-preview .hero{padding-top:184px}
-.draft-hidden{display:none!important}
-.draft-preview-note{width:min(1180px,calc(100% - 32px));margin:30px auto;padding:16px 18px;border:1px solid #dce4ef;border-radius:16px;background:#fff;font-weight:700}
-.draft-preview-error{border-color:#e5aaa4;background:#fff1ef;color:#962f29}
+.draft-preview-bar{position:fixed;top:0;left:0;right:0;z-index:5000;height:34px;display:flex;align-items:center;padding:0 16px;background:#071d49;color:#fff;font:12px/1 Inter,system-ui,sans-serif}
+.draft-preview-bar a{margin-left:auto;color:#fff;border:1px solid rgba(255,255,255,.35);padding:5px 9px;border-radius:8px;font-weight:800}
+body.draft-preview .site-header{top:34px}body.draft-preview .hero{padding-top:184px}
 </style></head>
-<body class="draft-master-preview">
-<div class="draft-preview-bar"><strong>🔒 Geschützte Entwurfs-Vorschau</strong><span> · Brüssel-Master-Template · nicht veröffentlicht</span><a id="draftBackLink" href="/admin/reisen.html">Zurück zur Verwaltung</a></div>
+<body class="draft-preview"><div class="draft-preview-bar"><strong>🔒 Geschützte Entwurfs-Vorschau</strong><span>&nbsp;· Brüssel-Master-Template · nicht veröffentlicht</span><a id="draftBackLink" href="/admin/reisen.html">Zurück zur Verwaltung</a></div>
 <a class="skip-link" href="#main">Zum Inhalt</a>
 <header class="site-header" id="siteHeader">
 <a aria-label="Zur Startseite" class="brand" href="#start">
@@ -146,97 +141,34 @@
 </div>
 <div aria-label="Bildansicht" aria-modal="true" class="lightbox" hidden="" id="lightbox" role="dialog"><button aria-label="Schließen" class="lightbox-close" id="lightboxClose">×</button><button aria-label="Vorheriges Bild" class="lightbox-nav prev" id="lightboxPrev">‹</button><figure><img alt="" id="lightboxImage"/><figcaption><strong id="lightboxTitle"></strong><span id="lightboxCaption"></span></figcaption></figure><button aria-label="Nächstes Bild" class="lightbox-nav next" id="lightboxNext">›</button></div>
 <section class="eu-funding" aria-label="Erasmus+ Förderhinweis"><div class="eu-funding-inner"><div class="eu-funding-head"><div><p class="eu-funding-kicker">ERASMUS+ · EUROPÄISCHE UNION</p><h2>Gemeinsam Europa erleben.</h2></div><img src="/images/eu-cofunded-de.svg" alt="Kofinanziert von der Europäischen Union" class="eu-funding-logo"></div><p class="eu-funding-disclaimer">„Von der Europäischen Union finanziert. Die geäußerten Ansichten und Meinungen entsprechen jedoch ausschließlich denen des Autors bzw. der Autoren und spiegeln nicht zwingend die der Europäischen Union oder der OeAD-GmbH wider. Weder die Europäische Union noch die OeAD-GmbH können dafür verantwortlich gemacht werden.“</p></div></section><footer><div class="footer-brand"><strong id="footerTitle">© 2026 Berufsschule Rohrbach · Erasmus+</strong><span id="footerSubtitle">Projektleitung und technische Umsetzung: Jürgen Vierlinger</span><span class="footer-build"><span id="footerVersion">Version 14.0-dev.8.1.1</span><span aria-hidden="true">·</span><span id="footerUpdated">Letzte Aktualisierung: 12.08.2026</span></span></div><div class="footer-meta"><div class="footer-legal-links" id="footerLegalLinks"></div><div class="footer-note"><a href="#start" id="footerTopLink">Nach oben ↑</a><span id="footerPrivacy">Keine personenbezogenen Reisedaten öffentlich</span></div></div></footer>
-<script crossorigin="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
+<script src="/config.js"></script><script crossorigin="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
+window.TRAVEL_PREVIEW_MODE=true;
 (()=>{
-const params=new URLSearchParams(location.search),draftId=params.get('id')||'';
-const $=id=>document.getElementById(id);
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let accessToken='',timer=null,blobUrls=[];
-const dateObj=v=>v?new Date(String(v)+'T12:00:00'):null;
-const fmt=v=>{const d=dateObj(v);return d?new Intl.DateTimeFormat('de-AT',{day:'numeric',month:'long',year:'numeric'}).format(d):''};
-const fmtShort=v=>{const d=dateObj(v);return d?new Intl.DateTimeFormat('de-AT',{day:'numeric',month:'numeric',year:'numeric'}).format(d):''};
-const dateRange=d=>[fmtShort(d.startDate),fmtShort(d.endDate)].filter(Boolean).join(' – ');
-function setText(id,v){const el=$(id);if(el&&v!==undefined&&v!==null)el.textContent=v}
-function waitToken(){return new Promise((resolve,reject)=>{
- if(!window.opener)return reject(new Error('Bitte die Vorschau über den Reise-Assistenten öffnen.'));
- const timeout=setTimeout(()=>reject(new Error('Microsoft-Anmeldung konnte nicht übernommen werden. Vorschau schließen und erneut öffnen.')),12000);
- const onMessage=e=>{if(e.origin!==location.origin||e.data?.type!=='erasmus-preview-token'||String(e.data?.id||'')!==String(draftId))return;clearTimeout(timeout);window.removeEventListener('message',onMessage);accessToken=String(e.data.token||'');accessToken?resolve():reject(new Error('Microsoft-Anmeldung fehlt.'))};
- window.addEventListener('message',onMessage);window.opener.postMessage({type:'erasmus-preview-ready',id:draftId},location.origin);
-})}
-async function asset(key){if(!key)return '';const r=await fetch(`/api/trips/draft-image?key=${encodeURIComponent(key)}`,{headers:{Authorization:`Bearer ${accessToken}`}});if(!r.ok)return '';const u=URL.createObjectURL(await r.blob());blobUrls.push(u);return u}
-function setTheme(d){const p=d.theme?.primary||'#0a49a5',a=d.theme?.accent||'#ffd43b';document.documentElement.style.setProperty('--blue',p);document.documentElement.style.setProperty('--blue2',p);document.documentElement.style.setProperty('--yellow',a)}
-function feature(d,key,sectionId,targets=[]){const on=d.features?.[key]!==false;const sec=$(sectionId);if(sec)sec.classList.toggle('draft-hidden',!on);targets.forEach(sel=>document.querySelectorAll(sel).forEach(x=>x.classList.toggle('draft-hidden',!on)));return on}
-function renderNav(d){
- const f=d.features||{};
- const items=[['Heute','#heute',true,''],['News','#news',true,''],['Programm','#programm',true,''],['Karte','#karte',f.map!==false,''],['Galerie','#galerie',f.gallery!==false,''],['Downloads','#downloads',f.downloads!==false,''],['Hilfe','#notfall',true,'nav-emergency'],['Interner Bereich 🔒','#reisegruppe',f.upload!==false,'nav-upload']];
- $('mainNav').innerHTML=items.filter(x=>x[2]).map(x=>`<a class="${x[3]}" href="${x[1]}">${x[0]}</a>`).join('');
- $('quickLinks').innerHTML=[
-  ['📅','Programm','Tag für Tag','#programm',true],
-  ['🗺️','Karte','Alle Reiseziele','#karte',f.map!==false],
-  ['🌤️','Wetter',`${d.destination||'Reiseziel'} & Ausflüge`,'#wetter',true],
-  ['🔒','Interner Bereich','Geschützte Inhalte','#reisegruppe',f.upload!==false]
- ].filter(x=>x[4]).map(x=>`<a href="${x[3]}"><span>${x[0]}</span><b>${x[1]}</b><small>${esc(x[2])}</small></a>`).join('');
-}
-function countdown(d){
- if(timer)clearInterval(timer);
- const dep=new Date(String(d.startDate||'')+'T00:00:00');
- setText('countdownLabel',`🚌 Abfahrt nach ${d.destination||'Reiseziel'}`);
- setText('countdownDateText',fmt(d.startDate));
- const box=$('countdown');
- const tick=()=>{const diff=dep-new Date(),ms=Math.max(0,diff),vals=[Math.floor(ms/86400000),Math.floor(ms%86400000/3600000),Math.floor(ms%3600000/60000),Math.floor(ms%60000/1000)],labels=['TAGE','STUNDEN','MINUTEN','SEKUNDEN'];box.innerHTML=vals.map((v,i)=>`<div><strong>${String(v).padStart(i?2:1,'0')}</strong><span>${labels[i]}</span></div>`).join('')};tick();timer=setInterval(tick,1000)
-}
-function renderToday(d){
- setText('todayEyebrow','Heute auf unserer Reise');setText('progressLabel','Reisephase');setText('progressDate',dateRange(d));
- const now=new Date(),start=new Date(String(d.startDate||'')+'T00:00:00'),end=new Date(String(d.endDate||'')+'T23:59:59');
- if(now<start){setText('todayTitle','Die Reise beginnt bald');setText('todayText','Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.');setText('progressValue','Vor der Reise')}
- else if(now>end){setText('todayTitle','Die Reise ist abgeschlossen');setText('todayText','Unsere gemeinsame Reise liegt bereits hinter uns.');setText('progressValue','Nach der Reise')}
- else{setText('todayTitle','Wir sind unterwegs');setText('todayText','Hier findest du das aktuelle Tagesprogramm.');setText('progressValue','Während der Reise')}
- $('todaySchedule').innerHTML='';
-}
-function renderProgram(d){
- const days=d.program?.days||[];setText('programEyebrow','Tag für Tag');setText('programTitle','Unser Reiseprogramm');setText('programNotice','');
- $('dayTabs').innerHTML=days.map((x,i)=>`<button type="button" role="tab" class="${i===0?'active':''}" data-di="${i}">${esc(x.short||`Tag ${i+1}`)}</button>`).join('');
- $('dayPanels').innerHTML=days.map((x,i)=>`<article class="day-panel ${i===0?'active':''}" data-panel="${i}"><div class="day-heading"><p class="eyebrow">${esc(x.short||'')} · ${esc(fmt(x.date))}</p><h3>${esc(x.title||`Reisetag ${i+1}`)}</h3>${x.subtitle?`<p>${esc(x.subtitle)}</p>`:''}</div><div class="timeline">${(x.events||[]).map(e=>`<div class="timeline-item"><div class="time">${esc(e.time)}</div><div><h4>${esc(e.title)}</h4>${e.text?`<p>${esc(e.text)}</p>`:''}</div></div>`).join('')}</div></article>`).join('');
- $('dayTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{const i=b.dataset.di;$('dayTabs').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));$('dayPanels').querySelectorAll('[data-panel]').forEach(x=>x.classList.toggle('active',x.dataset.panel===i))});
-}
-async function renderHotel(d){
- const a=d.accommodation||{};setText('hotelEyebrow',`Unser Zuhause in ${d.destination||'der Reise'}`);setText('hotelTitle',a.name||'Unterkunft');$('hotelAddress').innerHTML=esc(a.address||'').replace(/\n/g,'<br>');
- $('hotelDetails').innerHTML=[a.phone&&`<div><strong>Telefon</strong><span>${esc(a.phone)}</span></div>`,a.checkIn&&`<div><strong>Check-in</strong><span>${esc(a.checkIn)}</span></div>`,a.checkOut&&`<div><strong>Check-out</strong><span>${esc(a.checkOut)}</span></div>`,a.notes&&`<div><strong>Hinweis</strong><span>${esc(a.notes)}</span></div>`].filter(Boolean).join('');
- const img=await asset(d.images?.hotel);if(img)$('hotelImage').src=img;else $('hotelImage').closest('.hotel-photo')?.classList.add('draft-hidden');
- const maps=$('hotelMapsButton');if(a.address){maps.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(a.address)}else maps.classList.add('draft-hidden');
-}
-function renderEmergency(d){
- const e=d.people?.emergency||{};const items=[['Ansprechperson',e.contactName],['Notfallnummer',e.contactPhone],['Schule',e.schoolPhone],['Versicherung',e.insurance],['Hinweise',e.notes]].filter(x=>x[1]);
- $('emergencyGrid').innerHTML=items.length?items.map(x=>`<article><span>${esc(x[0])}</span><strong>${esc(x[1])}</strong></article>`).join(''):'<div class="empty-state">Keine Notfallinformationen für diese Reise hinterlegt.</div>';
-}
-async function render(d){
- document.title=`${d.title||'Reise'} · BS Rohrbach Erasmus+ · Vorschau`;
- $('draftBackLink').href=`/admin/reise-neu.html?id=${encodeURIComponent(d.id||draftId)}`;
- setTheme(d);renderNav(d);
- setText('brandSubtitle',`${d.destination||''} · ${dateRange(d)}`);
- setText('heroEyebrow','Berufsschule Rohrbach unterwegs');
- const ht=$('heroTitle'),year=String(d.startDate||'').slice(0,4);ht.textContent=d.title||d.destination||'Erasmus+ Reise';
- if(year&&!String(d.title||'').includes(year)){ht.append(' ');const sp=document.createElement('span');sp.textContent=year;ht.appendChild(sp)}
- setText('heroSubtitle',d.website?.intro||d.subtitle||'');
- const hero=await asset(d.images?.hero);if(hero)$('heroMedia').style.backgroundImage=`url("${hero}")`;
- countdown(d);renderToday(d);renderProgram(d);await renderHotel(d);renderEmergency(d);
- // Optional areas: if off, section + nav/quick links disappear.
- feature(d,'map','karte');feature(d,'gallery','galerie');feature(d,'downloads','downloads');feature(d,'upload','reisegruppe');feature(d,'diary','reisetagebuch');
- // 8.3.2 intentionally hides template areas that do not yet have draft data mappings.
- ['news','karte','wetter','galerie','downloads','faq','reisetagebuch'].forEach(id=>$(id)?.classList.add('draft-hidden'));
- // Keep Hotel, Program, Today and Emergency as real Brussels sections already driven by draft data.
-}
-async function init(){
- if(!draftId)throw new Error('Keine Reise-ID angegeben.');
- await waitToken();
- const r=await fetch('/api/trips/drafts/'+encodeURIComponent(draftId),{headers:{Authorization:`Bearer ${accessToken}`},cache:'no-store'});
- const data=await r.json();if(!r.ok)throw new Error(data.message||'Entwurf konnte nicht geladen werden.');
- await render(data.draft);
-}
-init().catch(err=>{const n=document.createElement('div');n.className='draft-preview-note draft-preview-error';n.innerHTML=`<strong>Vorschau konnte nicht geladen werden.</strong><br>${esc(err?.message||err)}`;document.querySelector('main')?.prepend(n)});
-window.addEventListener('beforeunload',()=>blobUrls.forEach(URL.revokeObjectURL));
+ const params=new URLSearchParams(location.search),id=params.get('id')||'';
+ let token='',tokenPromise=null;const blobUrls=[],cache=new Map(),nativeFetch=window.fetch.bind(window);
+ const waitToken=()=>tokenPromise||(tokenPromise=new Promise((resolve,reject)=>{
+   if(!id)return reject(new Error('Keine Reise-ID angegeben.'));
+   if(!window.opener)return reject(new Error('Bitte die Vorschau über den Reise-Assistenten öffnen.'));
+   const timeout=setTimeout(()=>reject(new Error('Microsoft-Anmeldung konnte nicht übernommen werden.')),12000);
+   const receive=e=>{if(e.origin!==location.origin||e.data?.type!=='erasmus-preview-token'||String(e.data?.id||'')!==id)return;clearTimeout(timeout);removeEventListener('message',receive);token=String(e.data.token||'');token?resolve(token):reject(new Error('Microsoft-Anmeldung fehlt.'))};
+   addEventListener('message',receive);window.opener.postMessage({type:'erasmus-preview-ready',id},location.origin);
+ }));
+ async function image(key){if(!key)return '';const k='img:'+key;if(cache.has(k))return cache.get(k);await waitToken();const r=await nativeFetch(`/api/trips/draft-image?key=${encodeURIComponent(key)}`,{headers:{Authorization:`Bearer ${token}`}});if(!r.ok)return '';const u=URL.createObjectURL(await r.blob());blobUrls.push(u);cache.set(k,u);return u}
+ async function hydrate(resource,data){
+   if(resource==='site'){if(data.heroKey)data.hero=await image(data.heroKey);if(data.hotel?.imageKey)data.hotel.image=await image(data.hotel.imageKey);return data}
+   if(resource==='program'){for(const day of data.days||[]){if(day.coverKey)day.cover=await image(day.coverKey);day.gallery=[];for(const key of day.galleryKeys||[]){const u=await image(key);if(u)day.gallery.push(u)}for(const ev of day.events||[]){ev.images=[];for(const key of ev.imageKeys||[]){const u=await image(key);if(u)ev.images.push(u)}}}return data}
+   return data;
+ }
+ window.TRAVEL_DATA_PROVIDER=async url=>{
+   const raw=String(url),m=raw.match(/(?:^|\/)(site|program|places|downloads|faq|news|gallery|diary|journey)\.json(?:\?|$)/);
+   if(m){const resource=m[1],key='res:'+resource;if(cache.has(key))return cache.get(key);await waitToken();const r=await nativeFetch(`/api/trips/draft-resource?id=${encodeURIComponent(id)}&resource=${resource}`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});if(!r.ok)throw new Error('Vorschau-Daten konnten nicht geladen werden: '+resource);const data=await hydrate(resource,await r.json());cache.set(key,data);return data}
+   if(raw.includes('/api/media/gallery'))return {items:[]};
+   if(/(?:^|\/)legal\.json/.test(raw)){const r=await nativeFetch('/content/legal.json',{cache:'no-store'});return r.json()}
+   if(/(?:^|\/)version\.json/.test(raw)){const r=await nativeFetch('/version.json',{cache:'no-store'});return r.json()}
+   return undefined;
+ };
+ addEventListener('beforeunload',()=>blobUrls.forEach(URL.revokeObjectURL));
+ document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('draftBackLink');if(b)b.href=`/admin/reise-neu.html?id=${encodeURIComponent(id)}`});
 })();
-</script>
+</script><script src="/app.js?v=11.1.2"></script>
 </body></html>

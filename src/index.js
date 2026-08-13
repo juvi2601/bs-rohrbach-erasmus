@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.8.3.3';
+const VERSION = '14.0-dev.8.3.4';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -371,6 +371,113 @@ function cleanTripDraft(input={}){
     }).filter(day=>day.date)}
   };
 }
+
+function draftDateParts(value=''){
+  const m=String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?{year:m[1],month:m[2],day:m[3],short:`${m[3]}.${m[2]}.`}:{year:'',month:'',day:'',short:''};
+}
+function draftDateRange(draft){
+  const a=draftDateParts(draft.startDate),b=draftDateParts(draft.endDate);
+  return a.year&&b.year?`${a.day}.${a.month}.${a.year} – ${b.day}.${b.month}.${b.year}`:'';
+}
+function draftNavigation(draft){
+  const f=draft.features||{},items=[
+    {label:'Heute',target:'#heute',on:true},{label:'News',target:'#news',on:f.news!==false},
+    {label:'Programm',target:'#programm',on:true},{label:'Karte',target:'#karte',on:f.map!==false},
+    {label:'Galerie',target:'#galerie',on:f.gallery!==false},{label:'Downloads',target:'#downloads',on:f.downloads!==false},
+    {label:'Hilfe',target:'#notfall',on:f.emergency!==false,emergency:true},
+    {label:'Interner Bereich 🔒',target:'#reisegruppe',on:f.upload!==false,highlight:true}
+  ];return items.filter(x=>x.on).map(({on,...x})=>x);
+}
+function draftQuickLinks(draft){
+  const f=draft.features||{},rows=[
+    {icon:'📖',title:'Reisetagebuch',subtitle:'Berichte & Fotos',target:'#reisetagebuch',on:f.diary!==false},
+    {icon:'📅',title:'Programm',subtitle:'Tag für Tag',target:'#programm',on:true},
+    {icon:'🗺️',title:'Karte',subtitle:'Alle Reiseziele',target:'#karte',on:f.map!==false},
+    {icon:'🌤️',title:'Wetter',subtitle:`${draft.destination||'Reiseziel'} & Ausflüge`,target:'#wetter',on:true},
+    {icon:'🔒',title:'Interner Bereich',subtitle:'Geschützte Inhalte',target:'#reisegruppe',on:f.upload!==false},
+    {icon:'📥',title:'Downloads',subtitle:'Dokumente & Infos',target:'#downloads',on:f.downloads!==false}
+  ];return rows.filter(x=>x.on).map(({on,...x})=>x);
+}
+function draftEmergencyItems(draft){
+  const e=draft.emergency||{},rows=[];
+  if(e.contactName||e.contactPhone)rows.push({icon:'👤',title:e.contactName||'Notfall-Ansprechperson',text:e.contactPhone||''});
+  if(e.schoolPhone)rows.push({icon:'🏫',title:'Berufsschule Rohrbach',text:e.schoolPhone,url:`tel:${e.schoolPhone.replace(/\s/g,'')}`,button:'Schule anrufen'});
+  if(e.insurance)rows.push({icon:'🛡️',title:'Versicherung / Reiseinfo',text:e.insurance});
+  if(e.notes)rows.push({icon:'ℹ️',title:'Weitere Hinweise',text:e.notes});
+  return rows;
+}
+function draftProgramResource(draft){
+  return {days:(draft.program?.days||[]).map((day,di)=>{
+    const p=draftDateParts(day.date),imageKeys=[...new Set((day.events||[]).flatMap(e=>Array.isArray(e.images)?e.images:[]).filter(Boolean))];
+    return {dayNumber:di+1,date:p.short,year:p.year,coverKey:day.heroImage||'',galleryKeys:imageKeys,title:day.title||`Reisetag ${di+1}`,subtitle:day.subtitle||'',id:day.id||`day-${di+1}`,short:day.short||`Tag ${di+1}`,events:(day.events||[]).map(e=>({time:e.time||'',title:e.title||'',text:e.text||'',status:'',imageKeys:Array.isArray(e.images)?e.images:[]}))};
+  })};
+}
+function draftSiteResource(draft){
+  const a=draft.accommodation||{},f=draft.features||{},year=draftDateParts(draft.startDate).year,range=draftDateRange(draft),depTime=draft.website?.departureTime||'20:00';
+  return {
+    meta:{pageTitle:`${draft.title} · BS Rohrbach Erasmus+`,description:draft.website?.intro||draft.subtitle||''},
+    tripTitle:draft.title,tripYear:year,school:'BS Rohrbach Erasmus+',brandSubtitle:`${draft.destination} · ${range}`,
+    subtitle:draft.website?.intro||draft.subtitle||'',departure:`${draft.startDate}T${depTime}:00`,returnDate:`${draft.endDate}T${draft.website?.returnTime||'23:59'}:00`,
+    heroKey:draft.images?.hero||'',heroEyebrow:'Berufsschule Rohrbach unterwegs',heroTitle:draft.title,heroPrimaryButton:'Reiseprogramm',heroSecondaryButton:'Internen Bereich öffnen',
+    countdownLabel:`🚌 Abfahrt nach ${draft.destination}`,countdownDateText:`${draft.startDate} · ${depTime} Uhr`,
+    navigation:draftNavigation(draft),quickLinks:draftQuickLinks(draft),features:f,theme:draft.theme||{},
+    today:{eyebrow:'Heute auf unserer Reise',beforeTitle:'Die Reise beginnt bald',beforeText:'Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.',beforeLabel:'Reisephase',dateRange:range,afterTitle:`${draft.title} ist abgeschlossen`,afterText:'Reisetagebuch, Galerie und Reiseinformationen bleiben weiterhin erreichbar.',afterLabel:'Abgeschlossen'},
+    sections:{
+      news:{eyebrow:'Aktuelles zur Reise',title:'News & Hinweise',intro:'Neue Informationen werden hier laufend ergänzt.'},
+      program:{eyebrow:'Tag für Tag',title:'Unser Reiseprogramm',intro:''},
+      map:{eyebrow:'Orientierung vor Ort',title:'Interaktive Reisekarte',intro:'Klicke auf einen Ort für Adresse, Beschreibung und Navigation.'},
+      weather:{eyebrow:'Aktuelle Vorschau',title:'Wetter an unseren Reisezielen',intro:'Die Wetterdaten werden automatisch aktualisiert.'},
+      gallery:{eyebrow:'Reise in Bildern',title:'Unsere Reiseziele',intro:'Hier erscheinen die für diese Reise freigegebenen Bilder.'},
+      downloads:{eyebrow:'Wichtige Unterlagen',title:'Downloads',intro:'Hier erscheinen die für diese Reise vorgesehenen Dokumente.'},
+      faq:{eyebrow:'Kurz erklärt',title:'Häufige Fragen',intro:''}
+    },
+    hotel:{eyebrow:`Unser Zuhause in ${draft.destination}`,title:a.name||'Unterkunft',imageKey:draft.images?.hotel||'',address:a.address||'',mapsUrl:a.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.address)}`:'',mapsButton:'In Google Maps öffnen',details:[
+      a.phone&&{icon:'☎️',title:'Telefon',text:a.phone},a.checkIn&&{icon:'🕓',title:'Check-in',text:a.checkIn},a.checkOut&&{icon:'🧳',title:'Check-out',text:a.checkOut},a.notes&&{icon:'ℹ️',title:'Hinweis',text:a.notes}
+    ].filter(Boolean)},
+    weatherLocations:[],
+    studentArea:{icon:'🔒',eyebrow:'Nur mit Schulkonto',title:'Interner Bereich',text:'Fotos und kurze Videos können über den geschützten Bereich eingereicht werden.',uploadButton:'🔐 Zum Foto-Upload',galleryButton:'Galerie',note:'Anmeldung mit dem Microsoft-365-Schulkonto erforderlich.',uploadUrl:'/upload.html',galleryUrl:'#galerie'},
+    emergency:{eyebrow:'Hilfe unterwegs',title:'Wichtige Kontakte',intro:'Nur für den Fall, dass unterwegs rasch Hilfe benötigt wird.',items:draftEmergencyItems(draft)},
+    footer:{title:'© Berufsschule Rohrbach · Erasmus+',subtitle:'Projektleitung und technische Umsetzung: Jürgen Vierlinger',topLink:'Nach oben ↑',privacy:'Keine personenbezogenen Reisedaten öffentlich',version:'',updated:''},
+    notice:draft.website?.notice||'',liveStatus:{enabled:false,mode:'automatic'}
+  };
+}
+function draftPlacesResource(draft){
+  return {places:(draft.locations?.places||[]).map(p=>({title:p.name||p.address,category:'Sehenswürdigkeit',address:p.address||'',walk:'',image:'',description:p.description||'',maps:p.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`:'',lat:Number(p.lat)||null,lng:Number(p.lng)||null}))};
+}
+function draftDownloadsResource(draft){
+  const d=draft.documents||{},isLink=v=>/^https?:\/\//i.test(String(v||''))||String(v||'').startsWith('/');
+  const rows=[
+    ['Reiseprogramm','Aktueller Ablauf der Reise.',d.program,'📅'],
+    ['Packliste','Was für die Reise mitgenommen werden soll.',d.packingList,'🧳'],
+    ['Elterninformation','Informationen für Eltern und Erziehungsberechtigte.',d.parentInfo,'📄'],
+    ['Versicherungsinformationen','Informationen zum Versicherungsschutz.',d.insuranceInfo,'🛡️']
+  ];return {downloads:rows.map(([title,description,file,icon])=>({title,description,file:isLink(file)?file:'',icon,published:isLink(file)}))};
+}
+function draftFaqResource(draft){
+  const a=draft.accommodation||{},dep=draft.website?.departureTime||'20:00';
+  return {items:[
+    {question:'Wann fahren wir ab?',answer:`Am ${draft.startDate} um ${dep} Uhr.`},
+    ...(draft.features?.upload!==false?[{question:'Wie funktioniert der Fotoupload?',answer:'Fotos und kurze Videos werden über den geschützten Bereich mit dem schulischen Microsoft-365-Konto eingereicht und vor einer Veröffentlichung geprüft.'}]:[]),
+    ...(a.name?[{question:'Wo ist unsere Unterkunft?',answer:`${a.name}${a.address?`, ${a.address}`:''}.`}]:[])
+  ]};
+}
+function draftJourneyResource(draft){
+  const dep=draft.website?.departureTime||'20:00',ret=draft.website?.returnTime||'23:59';
+  return {enabled:draft.features?.smartJourney!==false,automaticStatus:true,timezone:'Europe/Vienna',trip:{name:draft.title,start:`${draft.startDate}T${dep}:00`,end:`${draft.endDate}T${ret}:00`},before:{emoji:'⏳',title:`${draft.title} rückt näher`,text:`Die Reise startet am ${draft.startDate}.`},after:{emoji:'🎉',title:`${draft.title} ist abgeschlossen`,text:'Reisetagebuch, Galerie und Reiseinformationen bleiben weiterhin erreichbar.'},days:(draft.program?.days||[]).map(day=>({date:day.date,programId:day.id,emoji:'📍',title:day.title,status:day.subtitle||'',place:draft.destination}))};
+}
+function draftResource(draft,resource){
+  if(resource==='site')return draftSiteResource(draft);
+  if(resource==='program')return draftProgramResource(draft);
+  if(resource==='places')return draftPlacesResource(draft);
+  if(resource==='downloads')return draftDownloadsResource(draft);
+  if(resource==='faq')return draftFaqResource(draft);
+  if(resource==='journey')return draftJourneyResource(draft);
+  if(resource==='news')return {news:[]};
+  if(resource==='gallery')return {photos:[]};
+  if(resource==='diary')return {entries:[]};
+  return null;
+}
+
 async function listTripDrafts(env){
   if(!env.MEDIA_BUCKET)return [];
   const prefix='__system/trips/drafts/';
@@ -927,6 +1034,17 @@ export default {async fetch(request,env){
         draft.createdAt=new Date().toISOString();draft.updatedAt=draft.createdAt;draft.createdBy=user.email;draft.updatedBy=user.email;
         await env.MEDIA_BUCKET.put(tripDraftKey(draft.id),JSON.stringify(draft,null,2),{httpMetadata:{contentType:'application/json'}});
         return json({ok:true,draft,message:'Entwurf gespeichert. Die Reise ist noch nicht veröffentlicht.'});
+      }catch(error){return mediaError(error)}
+    }
+    if(url.pathname==='/api/trips/draft-resource'&&request.method==='GET'){
+      try{
+        await verifyTripRole(request,env,['admin']);
+        const id=normalizeTripId(url.searchParams.get('id')),resource=String(url.searchParams.get('resource')||'');
+        const draft=await getTripDraft(env,id);
+        if(!draft)throw Object.assign(new Error('Entwurf wurde nicht gefunden.'),{status:404});
+        const data=draftResource(draft,resource);
+        if(!data)throw Object.assign(new Error('Unbekannte Vorschau-Ressource.'),{status:400});
+        return json(data);
       }catch(error){return mediaError(error)}
     }
     if(url.pathname==='/api/trips/draft-image'&&request.method==='GET'){

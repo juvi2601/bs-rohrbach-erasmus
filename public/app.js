@@ -1,6 +1,6 @@
 const qs=(s,c=document)=>c.querySelector(s), qsa=(s,c=document)=>[...c.querySelectorAll(s)];
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-const fetchJson=async url=>{const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(url);return r.json()};
+const fetchJson=async url=>{if(typeof window.TRAVEL_DATA_PROVIDER==="function"){const provided=await window.TRAVEL_DATA_PROVIDER(url);if(provided!==undefined)return provided}const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(url);return r.json()};
 let programData={days:[]}, galleryData=[], activeGallery=[], legalData={}, journeyData=null;
 
 async function init(){
@@ -29,6 +29,8 @@ function renderSectionHead(prefix,data={}){setText(prefix+"Eyebrow",data.eyebrow
 function applySite(site){
   window.__SITE=site;
   if(site.meta){document.title=site.meta.pageTitle||document.title;const m=qs('meta[name="description"]');if(m&&site.meta.description)m.content=site.meta.description}
+  if(site.theme){const root=document.documentElement;if(site.theme.primary){root.style.setProperty("--blue",site.theme.primary);root.style.setProperty("--blue2",site.theme.primary)}if(site.theme.accent)root.style.setProperty("--yellow",site.theme.accent)}
+  if(site.features){const sections={news:"news",diary:"reisetagebuch",gallery:"galerie",upload:"reisegruppe",map:"karte",downloads:"downloads",emergency:"notfall"};Object.entries(sections).forEach(([key,id])=>{const el=qs("#"+id);if(el)el.hidden=site.features[key]===false})}
   setText("brandTitle",site.school);setText("brandSubtitle",site.brandSubtitle);
   setText("heroEyebrow",site.heroEyebrow);const heroTitle=site.heroTitle||site.tripTitle||"";const heroTitleEl=qs("#heroTitle");if(heroTitleEl){const match=heroTitle.match(/^(.*?)(\s+\d{4})$/);if(match){heroTitleEl.textContent=match[1]+" ";const accent=document.createElement("span");accent.textContent=match[2].trim();heroTitleEl.appendChild(accent)}else{heroTitleEl.textContent=heroTitle}}setText("heroSubtitle",site.subtitle);
   setText("heroPrimaryButton",site.heroPrimaryButton);setText("heroSecondaryButton",site.heroSecondaryButton);
@@ -53,8 +55,8 @@ function applySite(site){
     const now=getJourneyNow(),nowMs=now.getTime(),el=qs("#countdown");if(!el)return;
     const state=currentJourneyState(journeyData,programData.days||[]);
     if(state?.phase==="after"||nowMs>tripEnd){
-      setText("countdownLabel","✅ Brüsselreise abgeschlossen");
-      setText("countdownDateText",journeyData?.after?.title||site.today?.afterTitle||"Schöne Erinnerungen an Brüssel");
+      setText("countdownLabel",`✅ ${site.tripTitle||"Reise"} abgeschlossen`);
+      setText("countdownDateText",journeyData?.after?.title||site.today?.afterTitle||"Schöne Erinnerungen an unsere Reise");
       el.innerHTML='<div><strong>🇧🇪</strong><small>Reise beendet</small></div>';
       return;
     }
@@ -63,7 +65,7 @@ function applySite(site){
       const index=Math.max(0,(programData.days||[]).findIndex(d=>d.id===programDay?.id));
       const dayNumber=index+1,total=Math.max(1,(programData.days||[]).length||6);
       setText("countdownLabel",`${state?.data?.emoji||"📍"} ${state?.data?.title||"Wir sind unterwegs"}`);
-      setText("countdownDateText",programDay?`${programDay.short}, ${programDay.date}2026 · Tag ${dayNumber} von ${total}`:`Tag ${dayNumber} unserer Brüsselreise`);
+      setText("countdownDateText",programDay?`${programDay.short}, ${programDay.date}2026 · Tag ${dayNumber} von ${total}`:`Tag ${dayNumber} unserer Reise`);
       el.innerHTML=`<div><strong>${dayNumber}</strong><small>Tag von ${total}</small></div><div><strong>${state?.data?.emoji||"🧭"}</strong><small>${esc(state?.data?.place||"Brüsselreise")}</small></div>`;
       return;
     }
@@ -226,7 +228,7 @@ function renderProgram(days){
       <header class="day-cover ${d.cover?'photo-cover':''}" ${d.cover?`style="--bg:url('${esc(d.cover)}')"`:''}>
         <div class="day-cover-topline"><span>${esc(dayLabel)}</span></div>
         <div class="day-cover-content">
-          <p class="day-date-large">${esc(d.short)} · ${esc(d.date)}2026</p>
+          <p class="day-date-large">${esc(d.short)} · ${esc(d.date)}${esc(d.year||window.__SITE?.tripYear||"")}</p>
           <h3>${esc(d.title)}</h3>
           <p>${esc(d.subtitle)}</p>
           <div class="day-cover-chips">
@@ -245,9 +247,9 @@ function renderProgram(days){
       </div>
 
       <div class="program-overview">
-        <div><span class="overview-label">Datum</span><strong>${esc(d.short)}, ${esc(d.date)}2026</strong></div>
+        <div><span class="overview-label">Datum</span><strong>${esc(d.short)}, ${esc(d.date)}${esc(d.year||window.__SITE?.tripYear||"")}</strong></div>
         <div><span class="overview-label">Tagesfokus</span><strong>${esc(d.title)}</strong></div>
-        <div><span class="overview-label">Reisezeitraum</span><strong>21.–26. November 2026</strong></div>
+        <div><span class="overview-label">Reisezeitraum</span><strong>${esc(window.__SITE?.today?.dateRange||"")}</strong></div>
       </div>
 
       <div class="timeline-heading"><div><span class="eyebrow">Tagesablauf</span><h4>Unser Programm im Überblick</h4></div></div>
@@ -259,6 +261,7 @@ function renderProgram(days){
             <div class="timeline-card-head"><span class="timeline-step">Stopp ${String(index+1).padStart(2,'0')}</span>${e.status?`<span class="status-dot ${esc(e.status)}">${e.status==='confirmed'?'Bestätigt':'In Planung'}</span>`:''}</div>
             <h4>${esc(e.title)}</h4>
             <p>${esc(e.text)}</p>
+            ${(e.images||[]).length?`<div class="timeline-images">${e.images.map((img,j)=>`<img src="${esc(img)}" alt="${esc(e.title)} – Bild ${j+1}" loading="lazy" decoding="async">`).join("")}</div>`:''}
             ${e.status?`<span class="badge ${esc(e.status)}"><span aria-hidden="true">${e.status==='confirmed'?'✓':'○'}</span>${e.status==='confirmed'?'Bereits gebucht':'Noch nicht bestätigt'}</span>`:''}
           </div>
         </article>`).join("")}
@@ -306,15 +309,15 @@ function activateDay(id,scroll=false){
 function renderToday(days,journey=journeyData){
   const site=window.__SITE||{},t=site.today||{},state=currentJourneyState(journey,days),total=Math.max(1,days.length||6);
   const schedule=qs("#todaySchedule"),bar=qs("#progressBar"),value=qs("#progressValue"),track=qs(".progress-track");
-  let pct=0,label="Reisephase",valueText="Vor der Reise",dateText=t.dateRange||"21.–26. November 2026",showProgress=false;
+  let pct=0,label="Reisephase",valueText="Vor der Reise",dateText=t.dateRange||"",showProgress=false;
   if(state?.phase==="during"&&state.day){
     const day=days.find(d=>d.id===state.day.programId)||days[0],index=Math.max(0,days.findIndex(d=>d.id===day.id));
-    pct=Math.round(((index+1)/total)*100);label=`Tag ${index+1} von ${total}`;valueText=`${pct} %`;dateText=`${day.short}, ${day.date}2026`;showProgress=true;
+    pct=Math.round(((index+1)/total)*100);label=`Tag ${index+1} von ${total}`;valueText=`${pct} %`;dateText=`${day.short}, ${day.date}${day.year||site.tripYear||""}`;showProgress=true;
     setText("todayEyebrow","Heute auf unserer Reise");setText("todayTitle",`${state.day.emoji||day.icon||"📍"} ${state.day.title||day.title}`);setText("todayText",state.day.status||day.subtitle||"");
     if(schedule)schedule.innerHTML=(day.events||[]).slice(0,3).map(e=>`<article class="today-item"><time>${esc(e.time)}</time><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("");
     activateDay(day.id);
   }else if(state?.phase==="after"){
-    label="Reisephase";valueText=t.afterLabel||"Abgeschlossen";dateText=journey?.trip?.name||"Brüssel 2026";
+    label="Reisephase";valueText=t.afterLabel||"Abgeschlossen";dateText=journey?.trip?.name||site.tripTitle||"Unsere Reise";
     setText("todayEyebrow","Unsere Reise · Rückblick");setText("todayTitle",journey?.after?.title||t.afterTitle||"Unsere Brüsselreise ist abgeschlossen");setText("todayText",journey?.after?.text||t.afterText||"Entdecke unsere Berichte und Erinnerungen im Reisetagebuch und in der Galerie.");
     if(schedule)schedule.innerHTML='<a class="button button-blue" href="#reisetagebuch">Zum Reisetagebuch</a><a class="button button-light" href="#galerie">Zur Galerie</a>';
     if(days.length)activateDay(days[days.length-1].id);
@@ -557,5 +560,5 @@ function bindNavLinks(){const nav=qs("#mainNav");qsa("a",nav).forEach(a=>a.addEv
 function setupNav(){const toggle=qs("#navToggle"),nav=qs("#mainNav");toggle.addEventListener("click",()=>{const open=nav.classList.toggle("open");toggle.setAttribute("aria-expanded",String(open))});document.addEventListener("click",e=>{if(nav.classList.contains("open")&&!nav.contains(e.target)&&!toggle.contains(e.target)){nav.classList.remove("open");toggle.setAttribute("aria-expanded","false")}});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&nav.classList.contains("open")){nav.classList.remove("open");toggle.setAttribute("aria-expanded","false");toggle.focus()}});bindNavLinks();addEventListener("scroll",()=>qs("#siteHeader").classList.toggle("scrolled",scrollY>20),{passive:true})}
 function setupActiveNavigation(){if(!("IntersectionObserver" in window))return;const links=qsa('#mainNav a[href^="#"]'),sections=links.map(a=>qs(a.getAttribute("href"))).filter(Boolean);const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;links.forEach(a=>{const active=a.getAttribute("href")==="#"+visible.target.id;a.classList.toggle("current",active);if(active)a.setAttribute("aria-current","location");else a.removeAttribute("aria-current")})},{rootMargin:"-28% 0px -58% 0px",threshold:[0,.2,.5]});sections.forEach(section=>observer.observe(section))}
 function setupReveal(){const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible")}),{threshold:.1});qsa(".reveal").forEach(x=>obs.observe(x))}
-function setupPwa(){let prompt;const btn=qs("#installButton");addEventListener("beforeinstallprompt",e=>{e.preventDefault();prompt=e;btn.hidden=false});btn.addEventListener("click",async()=>{if(!prompt)return;prompt.prompt();await prompt.userChoice;prompt=null;btn.hidden=true});if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
+function setupPwa(){if(window.TRAVEL_PREVIEW_MODE)return;let prompt;const btn=qs("#installButton");addEventListener("beforeinstallprompt",e=>{e.preventDefault();prompt=e;btn.hidden=false});btn.addEventListener("click",async()=>{if(!prompt)return;prompt.prompt();await prompt.userChoice;prompt=null;btn.hidden=true});if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
 init();
