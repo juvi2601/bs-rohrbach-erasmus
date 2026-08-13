@@ -14,7 +14,9 @@
       "/callback",
       "/api/*",
       "/bruessel-2026",
-      "/bruessel-2026/"
+      "/bruessel-2026/",
+      "/linz-2027",
+      "/linz-2027/"
     ]
   },
   "r2_buckets": [

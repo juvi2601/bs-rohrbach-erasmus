@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.9.0.2';
+const VERSION = '14.0-dev.9.0.3';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -298,6 +298,16 @@ const TRIP_REGISTRY = Object.freeze({
     features:{countdown:true,diary:true,liveStatus:true,gallery:true,mediaUpload:true,map:true}
   })
 });
+const DRAFT_ROUTE_REGISTRY = Object.freeze({
+  'linz-2027': Object.freeze({
+    id:'linz-2027',
+    draftId:'testreise-2027',
+    title:'Testreise 2027',
+    destination:'Linz',
+    status:'draft',
+    published:false
+  })
+});
 const MEDIA_PROJECT = DEFAULT_TRIP_ID; // Kompatibilität zu STABLE 13.9
 function normalizeTripId(value){return String(value||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'')}
 function resolveTripId(request,url){
@@ -317,7 +327,9 @@ function publicRouteInfo(pathname=''){
   if(!id)return null;
   if(id===DEFAULT_TRIP_ID)return {id,path:tripPublicPath(id),status:'legacy-alias',published:true};
   const registered=TRIP_REGISTRY[id];
-  return registered?{id,path:tripPublicPath(id),status:registered.status||'active',published:true}:null;
+  if(registered)return {id,path:tripPublicPath(id),status:registered.status||'active',published:true};
+  const draftRoute=DRAFT_ROUTE_REGISTRY[id];
+  return draftRoute?{...draftRoute,path:tripPublicPath(id)}:null;
 }
 function tripDraftKey(id){return `__system/trips/drafts/${id}.json`}
 function cleanTripDraft(input={}){
@@ -1160,11 +1172,25 @@ export default {async fetch(request,env){
       return json({
         ok:true,
         homepage:{path:'/',mode:'legacy-brussels',message:'Die Hauptadresse bleibt vorerst unverändert.'},
-        routes:Object.values(TRIP_REGISTRY).map(trip=>({
-          id:trip.id,title:trip.title,path:tripPublicPath(trip.id),status:trip.status||'active'
-        })),
+        routes:[
+          ...Object.values(TRIP_REGISTRY).map(trip=>({
+            id:trip.id,title:trip.title,path:tripPublicPath(trip.id),status:trip.status||'active',published:true
+          })),
+          ...Object.values(DRAFT_ROUTE_REGISTRY).map(route=>({
+            id:route.id,title:route.title,destination:route.destination,path:tripPublicPath(route.id),
+            status:'draft',published:false,draftId:route.draftId
+          }))
+        ],
         publishingEnabled:false
       });
+    }
+
+    // Zukünftige Testreise-URL ist reserviert, aber bewusst noch NICHT öffentlich.
+    if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
+      return new Response(
+        '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reise noch nicht veröffentlicht</title></head><body><main style="font-family:system-ui,sans-serif;max-width:680px;margin:12vh auto;padding:28px"><h1>Diese Reise ist noch nicht veröffentlicht.</h1><p>Die URL <strong>/linz-2027/</strong> ist bereits reserviert, die Reise selbst bleibt bis zur Veröffentlichung geschützt.</p></main></body></html>',
+        {status:404,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}}
+      );
     }
 
     // Der künftige Brüssel-Pfad ist bereits reserviert, ohne die aktuelle Hauptseite umzubauen.
@@ -1180,6 +1206,18 @@ export default {async fetch(request,env){
       const id=resolveTripId(request,url);
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
+    if(url.pathname==='/api/trips/route-draft'&&request.method==='GET'){
+      try{
+        await verifyTripRole(request,env,['admin']);
+        const routeId=normalizeTripId(url.searchParams.get('route'));
+        const route=DRAFT_ROUTE_REGISTRY[routeId];
+        if(!route)throw Object.assign(new Error('Unbekannte Entwurfs-Route.'),{status:404});
+        const draft=await getTripDraft(env,route.draftId);
+        if(!draft)throw Object.assign(new Error('Verknüpfter Reise-Entwurf wurde nicht gefunden.'),{status:404});
+        return json({ok:true,route:{...route,path:tripPublicPath(route.id)},draft:{id:draft.id,title:draft.title,destination:draft.destination,status:draft.status||'draft'}});
+      }catch(error){return mediaError(error)}
+    }
+
     if(url.pathname==='/api/trips/drafts'&&request.method==='GET'){
       try{
         const user=await verifyTripRole(request,env,['admin']);
