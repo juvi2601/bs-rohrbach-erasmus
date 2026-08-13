@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.8.4.0';
+const VERSION = '14.0-dev.9.0.1';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -307,6 +307,18 @@ function resolveTripId(request,url){
   return TRIP_REGISTRY[candidate]?candidate:DEFAULT_TRIP_ID;
 }
 function tripConfig(id=DEFAULT_TRIP_ID){return TRIP_REGISTRY[id]||TRIP_REGISTRY[DEFAULT_TRIP_ID]}
+function tripPublicPath(id){const value=normalizeTripId(id);return value?`/${value}/`:'/'}
+function tripIdFromPath(pathname=''){
+  const match=String(pathname||'').match(/^\/([a-z0-9][a-z0-9-]*)\/?$/);
+  return match?normalizeTripId(match[1]):'';
+}
+function publicRouteInfo(pathname=''){
+  const id=tripIdFromPath(pathname);
+  if(!id)return null;
+  if(id===DEFAULT_TRIP_ID)return {id,path:tripPublicPath(id),status:'legacy-alias',published:true};
+  const registered=TRIP_REGISTRY[id];
+  return registered?{id,path:tripPublicPath(id),status:registered.status||'active',published:true}:null;
+}
 function tripDraftKey(id){return `__system/trips/drafts/${id}.json`}
 function cleanTripDraft(input={}){
   const id=normalizeTripId(input.id);
@@ -1142,6 +1154,25 @@ async function handleEditorReset(request,env,url,kind){
 
 export default {async fetch(request,env){
   const url=new URL(request.url);
+
+    // --- DEV 14.0 Modul 9.0.1: Multi-Reise-Routing-Grundlage ---
+    if(url.pathname==='/api/trips/routes'&&request.method==='GET'){
+      return json({
+        ok:true,
+        homepage:{path:'/',mode:'legacy-brussels',message:'Die Hauptadresse bleibt vorerst unverändert.'},
+        routes:Object.values(TRIP_REGISTRY).map(trip=>({
+          id:trip.id,title:trip.title,path:tripPublicPath(trip.id),status:trip.status||'active'
+        })),
+        publishingEnabled:false
+      });
+    }
+
+    // Der künftige Brüssel-Pfad ist bereits reserviert, ohne die aktuelle Hauptseite umzubauen.
+    // Vorerst Weiterleitung auf die bestehende, bestätigte Brüssel-Seite.
+    if((url.pathname==='/bruessel-2026'||url.pathname==='/bruessel-2026/')&&request.method==='GET'){
+      return Response.redirect(`${url.origin}/`,302);
+    }
+
     if(url.pathname==='/api/trips'&&request.method==='GET'){
       return json({ok:true,defaultTrip:DEFAULT_TRIP_ID,trips:Object.values(TRIP_REGISTRY)});
     }
