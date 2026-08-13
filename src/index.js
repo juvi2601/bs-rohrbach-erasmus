@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.9.0.3';
+const VERSION = '14.0-dev.9.1.0';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -332,6 +332,80 @@ function publicRouteInfo(pathname=''){
   return draftRoute?{...draftRoute,path:tripPublicPath(id)}:null;
 }
 function tripDraftKey(id){return `__system/trips/drafts/${id}.json`}
+function publishedMetaKey(id){return `__system/trips/published/${normalizeTripId(id)}/meta.json`}
+function publishedResourceKey(id,resource){return `__system/trips/published/${normalizeTripId(id)}/${String(resource||'')}.json`}
+function publishedAssetPrefix(id){return `__system/trips/published-assets/${normalizeTripId(id)}/`}
+async function getPublishedMeta(env,id){
+  if(!env.MEDIA_BUCKET)return null;
+  const object=await env.MEDIA_BUCKET.get(publishedMetaKey(id));
+  if(!object)return null;
+  try{return JSON.parse(await object.text())}catch{return null}
+}
+function publishRouteForDraft(draftId){
+  return Object.values(DRAFT_ROUTE_REGISTRY).find(route=>route.draftId===draftId)||null;
+}
+function serverPublishIssues(draft){
+  const issues=[];
+  const req=(value,label)=>{if(!String(value||'').trim())issues.push(label)};
+  req(draft?.title,'Reisename');
+  req(draft?.id,'Reise-ID');
+  req(draft?.destination,'Reiseziel');
+  req(draft?.country,'Land');
+  req(draft?.startDate,'Abreise');
+  req(draft?.endDate,'Rückkehr');
+  req(draft?.website?.intro||draft?.subtitle,'Einleitung / Kurzbeschreibung');
+  req(draft?.transport?.outboundMode,'Verkehrsmittel Anreise');
+  req(draft?.transport?.meetingPoint,'Treffpunkt / Abfahrtszeit');
+  req(draft?.transport?.returnInfo,'Rückreise / geplante Rückkehr');
+  req(draft?.accommodation?.name,'Hotel / Unterkunft');
+  req(draft?.accommodation?.address,'Unterkunft-Adresse');
+  if(!(draft?.team?.teachers||[]).length)issues.push('Lehrkräfte');
+  if(!String(draft?.images?.hero||'').trim())issues.push('Titelbild');
+  const days=draft?.program?.days||[];
+  if(!days.length)issues.push('Tagesprogramm');
+  days.forEach((day,di)=>{
+    if(!String(day?.title||'').trim())issues.push(`Reisetag ${di+1}: Titel`);
+    if(!(day?.events||[]).length)issues.push(`Reisetag ${di+1}: Programmpunkt`);
+    (day?.events||[]).forEach((event,ei)=>{
+      if(!String(event?.time||'').trim())issues.push(`Reisetag ${di+1}, Punkt ${ei+1}: Zeit`);
+      if(!String(event?.title||'').trim())issues.push(`Reisetag ${di+1}, Punkt ${ei+1}: Titel`);
+    });
+  });
+  return issues;
+}
+async function copyPublishedAsset(env,routeId,key){
+  const sourceKey=String(key||'');if(!sourceKey)return '';
+  if(!sourceKey.startsWith('__system/trips/assets/'))return sourceKey;
+  const safeName=sourceKey.split('/').pop()||crypto.randomUUID();
+  const target=`${publishedAssetPrefix(routeId)}${crypto.randomUUID()}-${safeName.replace(/[^a-zA-Z0-9._-]/g,'-')}`;
+  const object=await env.MEDIA_BUCKET.get(sourceKey);
+  if(!object)return '';
+  const headers=new Headers();object.writeHttpMetadata(headers);
+  const contentType=headers.get('content-type')||'application/octet-stream';
+  await env.MEDIA_BUCKET.put(target,object.body,{httpMetadata:{contentType},customMetadata:{sourceKey,publishedAt:new Date().toISOString()}});
+  return target;
+}
+async function rewritePublishedImageKeys(env,routeId,resources){
+  const map=new Map();
+  const copy=async key=>{
+    const value=String(key||'');if(!value)return '';
+    if(map.has(value))return map.get(value);
+    const target=await copyPublishedAsset(env,routeId,value);map.set(value,target);return target;
+  };
+  const site=resources.site||{};
+  if(site.heroKey)site.heroKey=await copy(site.heroKey);
+  if(site.hotel?.imageKey)site.hotel.imageKey=await copy(site.hotel.imageKey);
+  const program=resources.program||{};
+  for(const day of program.days||[]){
+    if(day.coverKey)day.coverKey=await copy(day.coverKey);
+    if(Array.isArray(day.galleryKeys))day.galleryKeys=await Promise.all(day.galleryKeys.map(copy));
+    for(const event of day.events||[]){
+      if(Array.isArray(event.imageKeys))event.imageKeys=await Promise.all(event.imageKeys.map(copy));
+    }
+  }
+  const places=resources.places||{};
+  for(const place of places.places||[]){if(place.imageKey)place.imageKey=await copy(place.imageKey)}
+}
 function cleanTripDraft(input={}){
   const id=normalizeTripId(input.id);
   const title=cleanText(input.title,100);
@@ -1169,6 +1243,15 @@ export default {async fetch(request,env){
 
     // --- DEV 14.0 Modul 9.0.1: Multi-Reise-Routing-Grundlage ---
     if(url.pathname==='/api/trips/routes'&&request.method==='GET'){
+      const draftRoutes=[];
+      for(const route of Object.values(DRAFT_ROUTE_REGISTRY)){
+        const meta=await getPublishedMeta(env,route.id);
+        draftRoutes.push({
+          id:route.id,title:route.title,destination:route.destination,path:tripPublicPath(route.id),
+          status:meta?.published?'published':'draft',published:!!meta?.published,draftId:route.draftId,
+          publishedAt:meta?.publishedAt||''
+        });
+      }
       return json({
         ok:true,
         homepage:{path:'/',mode:'legacy-brussels',message:'Die Hauptadresse bleibt vorerst unverändert.'},
@@ -1176,17 +1259,20 @@ export default {async fetch(request,env){
           ...Object.values(TRIP_REGISTRY).map(trip=>({
             id:trip.id,title:trip.title,path:tripPublicPath(trip.id),status:trip.status||'active',published:true
           })),
-          ...Object.values(DRAFT_ROUTE_REGISTRY).map(route=>({
-            id:route.id,title:route.title,destination:route.destination,path:tripPublicPath(route.id),
-            status:'draft',published:false,draftId:route.draftId
-          }))
+          ...draftRoutes
         ],
-        publishingEnabled:false
+        publishingEnabled:true
       });
     }
 
-    // Zukünftige Testreise-URL ist reserviert, aber bewusst noch NICHT öffentlich.
+    // Reservierte neue Reise: nur veröffentlichte Snapshots werden öffentlich ausgeliefert.
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
+      const meta=await getPublishedMeta(env,'linz-2027');
+      if(meta?.published){
+        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html`,{method:'GET'}));
+        const headers=new Headers(asset.headers);headers.set('cache-control','no-store');
+        return new Response(asset.body,{status:asset.status,headers});
+      }
       return new Response(
         '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reise noch nicht veröffentlicht</title></head><body><main style="font-family:system-ui,sans-serif;max-width:680px;margin:12vh auto;padding:28px"><h1>Diese Reise ist noch nicht veröffentlicht.</h1><p>Die URL <strong>/linz-2027/</strong> ist bereits reserviert, die Reise selbst bleibt bis zur Veröffentlichung geschützt.</p></main></body></html>',
         {status:404,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}}
@@ -1206,6 +1292,72 @@ export default {async fetch(request,env){
       const id=resolveTripId(request,url);
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
+    if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){
+      try{
+        const trip=normalizeTripId(url.searchParams.get('trip')),resource=String(url.searchParams.get('resource')||'');
+        const meta=await getPublishedMeta(env,trip);
+        if(!meta?.published)throw Object.assign(new Error('Reise ist nicht veröffentlicht.'),{status:404});
+        if(!['site','program','places','downloads','faq','news','gallery','diary','journey'].includes(resource))
+          throw Object.assign(new Error('Unbekannte Reiseressource.'),{status:400});
+        const object=await env.MEDIA_BUCKET.get(publishedResourceKey(trip,resource));
+        if(!object)throw Object.assign(new Error('Veröffentlichte Reiseressource fehlt.'),{status:404});
+        const data=JSON.parse(await object.text());
+        return json(data,{headers:{'cache-control':'public, max-age=60'}});
+      }catch(error){return mediaError(error)}
+    }
+
+    if(url.pathname==='/api/trips/public-image'&&request.method==='GET'){
+      try{
+        const trip=normalizeTripId(url.searchParams.get('trip')),key=String(url.searchParams.get('key')||'');
+        const meta=await getPublishedMeta(env,trip);
+        if(!meta?.published)throw Object.assign(new Error('Reise ist nicht veröffentlicht.'),{status:404});
+        if(!key.startsWith(publishedAssetPrefix(trip)))throw Object.assign(new Error('Ungültiger veröffentlichter Bildpfad.'),{status:400});
+        const object=await env.MEDIA_BUCKET.get(key);
+        if(!object)return new Response('Nicht gefunden',{status:404});
+        const headers=new Headers();object.writeHttpMetadata(headers);
+        headers.set('cache-control','public, max-age=86400');headers.set('x-content-type-options','nosniff');
+        return new Response(object.body,{headers});
+      }catch(error){return mediaError(error)}
+    }
+
+    if(url.pathname==='/api/trips/publish'&&request.method==='POST'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+        const body=await request.json().catch(()=>({}));
+        const draftId=normalizeTripId(body.draftId),route=publishRouteForDraft(draftId);
+        if(!route)throw Object.assign(new Error('Für diesen Entwurf ist noch keine öffentliche Reise-URL reserviert.'),{status:400});
+        const draft=await getTripDraft(env,draftId);
+        if(!draft)throw Object.assign(new Error('Reise-Entwurf wurde nicht gefunden.'),{status:404});
+        const issues=serverPublishIssues(draft);
+        if(issues.length)throw Object.assign(new Error(`Veröffentlichung nicht möglich. Es fehlen: ${issues.join(', ')}`),{status:400});
+
+        const names=['site','program','places','downloads','faq','news','gallery','diary','journey'];
+        const resources={};
+        for(const name of names){
+          const data=await draftResource(draft,name,env);
+          if(data===null||data===undefined)throw Object.assign(new Error(`Reiseressource ${name} konnte nicht erzeugt werden.`),{status:500});
+          resources[name]=data;
+        }
+        await rewritePublishedImageKeys(env,route.id,resources);
+        const publishedAt=new Date().toISOString();
+        for(const [name,data] of Object.entries(resources)){
+          await env.MEDIA_BUCKET.put(publishedResourceKey(route.id,name),JSON.stringify(data,null,2),{
+            httpMetadata:{contentType:'application/json; charset=utf-8'},
+            customMetadata:{routeId:route.id,draftId,publishedAt}
+          });
+        }
+        const meta={
+          id:route.id,draftId,title:draft.title,destination:draft.destination,
+          published:true,publishedAt,publishedBy:user.email,sourceDraftUpdatedAt:draft.updatedAt||''
+        };
+        await env.MEDIA_BUCKET.put(publishedMetaKey(route.id),JSON.stringify(meta,null,2),{
+          httpMetadata:{contentType:'application/json; charset=utf-8'}
+        });
+        return json({ok:true,meta,url:`${url.origin}${tripPublicPath(route.id)}`,message:'Reise wurde veröffentlicht.'});
+      }catch(error){return mediaError(error)}
+    }
+
     if(url.pathname==='/api/trips/route-draft'&&request.method==='GET'){
       try{
         await verifyTripRole(request,env,['admin']);

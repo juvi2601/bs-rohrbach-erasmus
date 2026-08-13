@@ -156,7 +156,7 @@
   <div class="actions">
     <button type="button" class="button ghost" id="refreshFinalCheck">Prüfung aktualisieren</button>
     <button type="button" class="button" id="openTripPreview">Reisevorschau öffnen</button>
-    <button type="button" class="button" id="publishPlaceholder" disabled>Veröffentlichen folgt in Modul 8.3</button>
+    <button type="button" class="button primary" id="publishTrip" disabled>Reise veröffentlichen</button>
   </div>
   <div id="finalCheckFeedback" class="final-check-feedback" aria-live="polite"></div>
 </div>
@@ -362,6 +362,22 @@ window.addEventListener('message',async event=>{
    event.source?.postMessage({type:'erasmus-preview-token',id:editId,token:accessToken},location.origin);
  }catch(e){setStatus(e.message||'Microsoft-Anmeldung für Vorschau fehlgeschlagen.','error')}
 });
+$('publishTrip')?.addEventListener('click',async()=>{
+ const btn=$('publishTrip'),feedback=$('finalCheckFeedback'),data=finalCheckData();
+ if(data.issues.length){renderFinalCheck();if(feedback)feedback.textContent='Veröffentlichung nicht möglich: Bitte zuerst alle Pflichtangaben vervollständigen.';return}
+ if(!editId){if(feedback)feedback.textContent='Bitte den Entwurf zuerst speichern.';return}
+ if(!confirm('Diese Reise jetzt öffentlich veröffentlichen? Der aktuell gespeicherte Stand wird als eigener Veröffentlichungs-Snapshot gespeichert.'))return;
+ try{
+   btn.disabled=true;btn.textContent='Wird veröffentlicht…';
+   const r=await fetch('/api/trips/publish',{method:'POST',headers:{authorization:'Bearer '+await token(),'content-type':'application/json'},body:JSON.stringify({draftId:editId})});
+   const d=await r.json();if(!r.ok)throw new Error(d.message||d.error||'Veröffentlichung fehlgeschlagen.');
+   if(feedback)feedback.innerHTML=`✓ Reise veröffentlicht: <a href="${escHtml(d.url)}" target="_blank" rel="noopener">${escHtml(d.url)}</a>`;
+   btn.textContent='Erneut veröffentlichen';
+ }catch(e){
+   if(feedback)feedback.textContent=e.message||'Veröffentlichung fehlgeschlagen.';
+   btn.textContent='Reise veröffentlichen';
+ }finally{btn.disabled=finalCheckData().issues.length>0}
+});
 $('refreshFinalCheck')?.addEventListener('click',()=>{
  const btn=$('refreshFinalCheck'),feedback=$('finalCheckFeedback');
  if(btn){btn.disabled=true;btn.textContent='Prüfung läuft…'}
@@ -560,12 +576,13 @@ function finalCheckData(){
  return {issues,sections:sections.map(x=>({...x,ok:!issues.some(i=>i.step===x.step)}))};
 }
 function renderFinalCheck(){
- const data=finalCheckData(),summary=$('finalCheckSummary'),details=$('finalCheckDetails');
+ const data=finalCheckData(),summary=$('finalCheckSummary'),details=$('finalCheckDetails'),publish=$('publishTrip');
  if(summary)summary.innerHTML=data.sections.map(x=>`<div class="final-check-card ${x.ok?'ok':'warn'}"><strong>${x.ok?'✓':'⚠'} ${escHtml(x.label)}</strong><span>${x.ok?'vollständig':'Angaben prüfen'}</span></div>`).join('');
  if(details){
-   if(!data.issues.length)details.innerHTML='<div class="final-check-complete">✓ Der Reise-Entwurf ist vollständig. Die geschützte Reisevorschau kann jetzt geöffnet werden.</div>';
+   if(!data.issues.length)details.innerHTML='<div class="final-check-complete">✓ Der Reise-Entwurf ist vollständig. Vorschau und Veröffentlichung sind jetzt möglich.</div>';
    else details.innerHTML=data.issues.map(i=>`<div class="final-check-issue"><strong>⚠ ${escHtml(i.section)}</strong><div>${escHtml(i.message)}</div><button type="button" class="button ghost jump-to-step" data-target-step="${i.step}">Zu Schritt ${i.step}</button></div>`).join('');
  }
+ if(publish)publish.disabled=!!data.issues.length||!editId;
  document.querySelectorAll('.jump-to-step').forEach(btn=>btn.onclick=()=>showWizardStep(Number(btn.dataset.targetStep)));
 }
 function renderWizardSummary(){
