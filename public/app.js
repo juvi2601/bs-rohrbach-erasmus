@@ -40,7 +40,9 @@ function applySite(site){
   setText("heroEyebrow",site.heroEyebrow);const heroTitle=site.heroTitle||site.tripTitle||"";const heroTitleEl=qs("#heroTitle");if(heroTitleEl){const match=heroTitle.match(/^(.*?)(\s+\d{4})$/);if(match){heroTitleEl.textContent=match[1]+" ";const accent=document.createElement("span");accent.textContent=match[2].trim();heroTitleEl.appendChild(accent)}else{heroTitleEl.textContent=heroTitle}}setText("heroSubtitle",site.subtitle);
   setText("heroPrimaryButton",site.heroPrimaryButton);setText("heroSecondaryButton",site.heroSecondaryButton);
   if(site.hero){const hm=qs("#heroMedia");if(hm)hm.style.backgroundImage=`url('${site.hero.replace(/'/g,"%27")}')`}
-  setText("countdownLabel",site.countdownLabel);setText("countdownDateText",site.countdownDateText);
+  setText("countdownLabel",site.countdownLabel);
+  const prettyDeparture=(value)=>{const s=String(value||"");const m=s.match(/(\d{4})-(\d{2})-(\d{2})(?:\s*[·,-]\s*)?(.*)/);if(!m)return s;const d=new Date(`${m[1]}-${m[2]}-${m[3]}T12:00:00`);const date=new Intl.DateTimeFormat("de-AT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}).format(d);return `${date}${m[4]?` · ${m[4]}`:""}`};
+  setText("countdownDateText",prettyDeparture(site.countdownDateText));
   if(Array.isArray(site.navigation)){qs("#mainNav").innerHTML=site.navigation.map(x=>`<a class="${x.highlight?'nav-upload':''} ${x.emergency?'nav-emergency':''}" href="${esc(x.target||'#')}">${esc(x.label)}</a>`).join("");bindNavLinks()}
   if(Array.isArray(site.quickLinks)){qs("#quickLinks").innerHTML=site.quickLinks.map(x=>`<a href="${esc(x.target||'#')}"><span>${esc(x.icon)}</span><b>${esc(x.title)}</b><small>${esc(x.subtitle)}</small></a>`).join("")}
   const live=site.liveStatus||{};const todayAlert=qs("#todayAlert");
@@ -363,7 +365,8 @@ function renderMap(places){
   let viewSwitch=qs('.map-view-switch',toolbar);
   if(!viewSwitch){
     viewSwitch=document.createElement('div');viewSwitch.className='map-view-switch';
-    viewSwitch.innerHTML='<button class="active" data-view="city" type="button">Brüssel</button><button data-view="trip" type="button">Gesamtreise</button>';
+    const mapCity=site.tripDestination||site.destination||site.sections?.map?.city||site.brandSubtitle?.split("·")[0]?.trim()||"Reiseziel";
+    viewSwitch.innerHTML=`<button class="active" data-view="city" type="button">${esc(mapCity)}</button><button data-view="trip" type="button">Gesamtreise</button>`;
     reset?.replaceWith(viewSwitch);toolbar?.appendChild(viewSwitch);
   }
 
@@ -372,7 +375,7 @@ function renderMap(places){
   let activeCategory='Alle';
 
   const bboxAround=(lat,lng,spanLat=.045,spanLng=.075)=>[lng-spanLng,lat-spanLat,lng+spanLng,lat+spanLat];
-  const cityBounds=[4.27,50.79,4.48,50.93];
+  const cityBounds=()=>{const lats=validPlaces.map(p=>Number(p.lat)),lngs=validPlaces.map(p=>Number(p.lng));const padLat=Math.max(.035,(Math.max(...lats)-Math.min(...lats))*.22||.035),padLng=Math.max(.055,(Math.max(...lngs)-Math.min(...lngs))*.22||.055);return [Math.min(...lngs)-padLng,Math.min(...lats)-padLat,Math.max(...lngs)+padLng,Math.max(...lats)+padLat]};
   const tripBounds=()=>{
     const lats=validPlaces.map(p=>Number(p.lat)),lngs=validPlaces.map(p=>Number(p.lng));
     const padLat=Math.max(.16,(Math.max(...lats)-Math.min(...lats))*.16);
@@ -392,7 +395,7 @@ function renderMap(places){
     const lat=Number(place.lat),lng=Number(place.lng),zoom=placeZoom(place);
     const c=styleFor(place.category);
     const title=String(place.title||'Ausgewählter Ort').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/</g,'&lt;');
-    return `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#city-map{height:100%;margin:0}body{font-family:Arial,sans-serif;background:#eaf1f8}.leaflet-container{background:#eaf1f8}.leaflet-control-zoom{border:0!important;box-shadow:0 8px 24px rgba(5,34,74,.18)!important}.leaflet-control-zoom a{border:0!important;color:#0a49a5!important;font-weight:800}.place-pin{display:grid;place-items:center;width:42px;height:42px;border-radius:50% 50% 50% 9px;transform:rotate(-45deg);background:${c.color};color:#fff;border:3px solid #fff;box-shadow:0 10px 24px rgba(5,34,74,.3);font-weight:900}.place-pin span{transform:rotate(45deg)}.place-label{background:#fff;border:0;border-radius:12px;box-shadow:0 8px 25px rgba(5,34,74,.18);color:#09204a;font-weight:700;padding:7px 10px}.place-label:before{display:none}</style></head><body><div id="city-map"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script><script>(function(){const map=L.map('city-map',{zoomControl:true,scrollWheelZoom:true,zoomAnimation:true,fadeAnimation:true});map.zoomControl.getContainer().querySelector('.leaflet-control-zoom-in').title='Vergrößern';map.zoomControl.getContainer().querySelector('.leaflet-control-zoom-out').title='Verkleinern';L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-Mitwirkende'}).addTo(map);const pos=[${lat},${lng}];const icon=L.divIcon({className:'',html:'<div class="place-pin"><span>${c.icon}</span></div>',iconSize:[42,42],iconAnchor:[21,42]});L.marker(pos,{icon}).addTo(map).bindTooltip('${title}',{permanent:true,direction:'top',className:'place-label',offset:[0,-40]});map.setView(pos,${zoom},{animate:true});setTimeout(()=>map.invalidateSize(),250)})();<\/script></body></html>`;
+    return `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#city-map{height:100%;margin:0}body{font-family:Arial,sans-serif;background:#eaf1f8}.leaflet-container{background:#eaf1f8}.leaflet-control-zoom{border:0!important;box-shadow:0 8px 24px rgba(5,34,74,.18)!important}.leaflet-control-zoom a{border:0!important;color:#0a49a5!important;font-weight:800}.place-pin{display:grid;place-items:center;width:42px;height:42px;border-radius:50% 50% 50% 9px;transform:rotate(-45deg);background:${c.color};color:#fff;border:3px solid #fff;box-shadow:0 10px 24px rgba(5,34,74,.3);font-weight:900}.place-pin span{transform:rotate(45deg)}.place-label{background:#fff;border:0;border-radius:12px;box-shadow:0 8px 25px rgba(5,34,74,.18);color:#09204a;font-weight:700;padding:7px 10px}.place-label:before{display:none}</style></head><body><div id="city-map"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script><script>(function(){const map=L.map('city-map',{zoomControl:true,scrollWheelZoom:true,zoomAnimation:true,fadeAnimation:true});map.zoomControl.getContainer().querySelector('.leaflet-control-zoom-in').title='Vergrößern';map.zoomControl.getContainer().querySelector('.leaflet-control-zoom-out').title='Verkleinern';L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-Mitwirkende'}).addTo(map);const pos=[${lat},${lng}];const icon=L.divIcon({className:'',html:'<div class="place-pin"><span>${c.icon}</span></div>',iconSize:[42,42],iconAnchor:[21,42]});L.marker(pos,{icon}).addTo(map).bindTooltip('${title}',{permanent:true,direction:'top',className:'place-label',offset:[0,-40]});map.setView(pos,${zoom},{animate:true});setTimeout(()=>map.invalidateSize(),250)})();<\/script></body></html>`;
   };
 
   const tripMapDocument=hotel=>{

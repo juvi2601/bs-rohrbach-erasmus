@@ -1348,3 +1348,19 @@ img{content-visibility:auto}
 .map-detail-media.no-image{background:linear-gradient(135deg,#eaf2f6,#d8e7ed)}
 .map-detail-placeholder{width:100%;min-height:100%;display:grid;place-items:center;align-content:center;gap:10px;padding:28px;text-align:center;color:var(--blue)}
 .map-detail-placeholder span{font-size:58px}.map-detail-placeholder strong{font-size:18px;color:var(--ink)}
+
+/* DEV 14.0 Modul 8.3.6 – vollständige dynamische Reise-Farbvererbung */
+.nav-upload,.button-blue,.button-dark,.map-detail-route,.hotel-copy .button,.student-actions .button,
+.admin-actions .button,.download-card .button{background:var(--blue)!important;color:#fff!important;border-color:transparent!important}
+.nav-upload:hover,.button-blue:hover,.button-dark:hover,.map-detail-route:hover,.hotel-copy .button:hover,
+.student-actions .button:hover,.admin-actions .button:hover,.download-card .button:hover{background:var(--theme-dark)!important;color:#fff!important}
+nav a.nav-upload::after{display:none!important}
+.progress-card{background:var(--theme-dark)!important}
+.countdown-card{background:linear-gradient(145deg,color-mix(in srgb,var(--theme-dark) 92%,transparent),color-mix(in srgb,var(--blue) 58%,transparent))!important}
+.day-cover{background:linear-gradient(115deg,var(--theme-dark),color-mix(in srgb,var(--blue) 72%,var(--theme-dark)))!important}
+.day-tabs button.active{background:var(--blue)!important}
+.hero .button-yellow{background:var(--blue)!important;color:#fff!important}
+.hero .button-yellow:hover{background:var(--theme-dark)!important;color:#fff!important}
+.hero .button-glass{background:color-mix(in srgb,var(--theme-dark) 62%,transparent)!important}
+.hotel-copy .button,.map-detail-route{box-shadow:none!important}
+footer{background:var(--theme-dark)!important}
