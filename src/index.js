@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.8.3.8';
+const VERSION = '14.0-dev.8.4.0';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -449,70 +449,130 @@ async function geocodeCacheKey(query){
 async function geocodeQuery(env,query){
   const q=String(query||'').trim();if(!q)return null;
   const key=await geocodeCacheKey(q);
+
   if(env.MEDIA_BUCKET){
-    const cached=await env.MEDIA_BUCKET.get(key);
-    if(cached){try{return JSON.parse(await cached.text())}catch{}}
+    try{
+      const cached=await env.MEDIA_BUCKET.get(key);
+      if(cached){
+        const value=JSON.parse(await cached.text());
+        if(value&&Number.isFinite(Number(value.lat))&&Number.isFinite(Number(value.lng)))return value;
+      }
+    }catch{}
   }
-  const endpoint=new URL('https://nominatim.openstreetmap.org/search');
-  endpoint.searchParams.set('q',q);
-  endpoint.searchParams.set('format','jsonv2');
-  endpoint.searchParams.set('limit','1');
-  endpoint.searchParams.set('addressdetails','1');
-  endpoint.searchParams.set('accept-language','de');
-  const response=await fetch(endpoint.toString(),{
-    headers:{
-      'user-agent':'BS-Rohrbach-Erasmus-Reiseportal/14.0 (+https://erasmus-bsrohrbach.eu)',
-      'accept':'application/json',
-      'referer':'https://erasmus-bsrohrbach.eu/'
+
+  const save=async result=>{
+    if(!result)return null;
+    if(env.MEDIA_BUCKET){
+      try{
+        await env.MEDIA_BUCKET.put(key,JSON.stringify(result),{
+          httpMetadata:{contentType:'application/json; charset=utf-8'},
+          customMetadata:{query:q,createdAt:new Date().toISOString(),source:String(result.source||'')}
+        });
+      }catch{}
     }
-  });
-  if(!response.ok)return null;
-  const rows=await response.json(),row=Array.isArray(rows)?rows[0]:null;
-  if(!row)return null;
-  const result={lat:Number(row.lat),lng:Number(row.lon),displayName:String(row.display_name||'')};
-  if(!Number.isFinite(result.lat)||!Number.isFinite(result.lng))return null;
-  if(env.MEDIA_BUCKET)await env.MEDIA_BUCKET.put(key,JSON.stringify(result),{httpMetadata:{contentType:'application/json; charset=utf-8'},customMetadata:{source:'nominatim',query:q,createdAt:new Date().toISOString()}});
-  return result;
+    return result;
+  };
+
+  // Primär: Nominatim / OpenStreetMap
+  try{
+    const endpoint=new URL('https://nominatim.openstreetmap.org/search');
+    endpoint.searchParams.set('q',q);
+    endpoint.searchParams.set('format','jsonv2');
+    endpoint.searchParams.set('limit','1');
+    endpoint.searchParams.set('addressdetails','1');
+    endpoint.searchParams.set('accept-language','de');
+    const response=await fetch(endpoint.toString(),{headers:{accept:'application/json'}});
+    if(response.ok){
+      const rows=await response.json(),row=Array.isArray(rows)?rows[0]:null;
+      if(row){
+        const result={
+          lat:Number(row.lat),
+          lng:Number(row.lon),
+          displayName:String(row.display_name||''),
+          source:'nominatim'
+        };
+        if(Number.isFinite(result.lat)&&Number.isFinite(result.lng))return await save(result);
+      }
+    }
+  }catch{}
+
+  // Fallback: Photon (OSM-Daten)
+  try{
+    const endpoint=new URL('https://photon.komoot.io/api/');
+    endpoint.searchParams.set('q',q);
+    endpoint.searchParams.set('limit','1');
+    endpoint.searchParams.set('lang','de');
+    const response=await fetch(endpoint.toString(),{headers:{accept:'application/json'}});
+    if(response.ok){
+      const data=await response.json();
+      const feature=Array.isArray(data?.features)?data.features[0]:null;
+      const coords=feature?.geometry?.coordinates;
+      if(Array.isArray(coords)&&coords.length>=2){
+        const result={
+          lat:Number(coords[1]),
+          lng:Number(coords[0]),
+          displayName:String(feature?.properties?.name||q),
+          source:'photon'
+        };
+        if(Number.isFinite(result.lat)&&Number.isFinite(result.lng))return await save(result);
+      }
+    }
+  }catch{}
+
+  return null;
+}
+
+async function geocodePlace(env,place,draft){
+  const destination=String(draft.destination||'').trim();
+  const country=String(draft.country||'').trim();
+
+  const queries=[
+    [place.title,place.address].filter(Boolean).join(', '),
+    [place.address,destination,country].filter(Boolean).join(', '),
+    [place.title,destination,country].filter(Boolean).join(', '),
+    String(place.address||'').trim()
+  ].filter((q,i,a)=>q&&a.indexOf(q)===i);
+
+  for(let i=0;i<queries.length;i++){
+    if(i)await new Promise(resolve=>setTimeout(resolve,1050));
+    const result=await geocodeQuery(env,queries[i]);
+    if(result)return result;
+  }
+  return null;
 }
 async function draftPlacesResource(draft,env){
-  const places=[],ac=draft.accommodation||{},country=draft.country||'',destination=draft.destination||'';
+  const places=[],ac=draft.accommodation||{};
+
   if(ac.name||ac.address){
     places.push({
-      title:ac.name||'Unterkunft',category:'Hotel',address:ac.address||'',walk:'Unterkunft',
-      imageKey:draft.images?.hotel||'',description:ac.notes||'Unsere Unterkunft während der Reise.',
-      maps:ac.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ac.address)}`:'',
-      query:[ac.name,ac.address,destination,country].filter(Boolean).join(', ')
+      title:ac.name||'Unterkunft',
+      category:'Hotel',
+      address:ac.address||'',
+      walk:'Unterkunft',
+      imageKey:draft.images?.hotel||'',
+      description:ac.notes||'Unsere Unterkunft während der Reise.',
+      maps:ac.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ac.address)}`:''
     });
   }
+
   for(const p of (draft.locations?.places||[])){
     places.push({
-      title:p.name||p.address,category:'Sehenswürdigkeit',address:p.address||'',walk:'',
-      image:'',description:p.description||'',
-      maps:p.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`:'',
-      query:[p.name,p.address,destination,country].filter(Boolean).join(', ')
+      title:p.name||p.address,
+      category:'Sehenswürdigkeit',
+      address:p.address||'',
+      walk:'',
+      image:'',
+      description:p.description||'',
+      maps:p.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`:''
     });
   }
-  let lastNetworkAt=0;
+
   for(const place of places){
-    const explicitLat=Number(place.lat),explicitLng=Number(place.lng);
-    if(Number.isFinite(explicitLat)&&Number.isFinite(explicitLng)){place.lat=explicitLat;place.lng=explicitLng;continue}
-    const cacheKey=await geocodeCacheKey(place.query);
-    let cached=null;
-    if(env.MEDIA_BUCKET){
-      const object=await env.MEDIA_BUCKET.get(cacheKey);
-      if(object){try{cached=JSON.parse(await object.text())}catch{}}
-    }
-    let coords=cached;
-    if(!coords){
-      const wait=Math.max(0,1100-(Date.now()-lastNetworkAt));
-      if(wait)await new Promise(resolve=>setTimeout(resolve,wait));
-      coords=await geocodeQuery(env,place.query);
-      lastNetworkAt=Date.now();
-    }
-    if(coords){place.lat=coords.lat;place.lng=coords.lng}
-    else{place.lat=null;place.lng=null}
-    delete place.query;
+    const coords=await geocodePlace(env,place,draft);
+    place.lat=coords?coords.lat:null;
+    place.lng=coords?coords.lng:null;
   }
+
   return {places};
 }
 function draftDownloadsResource(draft){
