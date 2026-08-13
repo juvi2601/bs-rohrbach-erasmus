@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.9.1.0';
+const VERSION = '14.0-dev.9.1.1';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -1269,8 +1269,11 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(meta?.published){
-        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html`,{method:'GET'}));
-        const headers=new Headers(asset.headers);headers.set('cache-control','no-store');
+        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.9.1.1`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+        const headers=new Headers(asset.headers);
+        headers.set('cache-control','no-store, max-age=0');
+        headers.set('pragma','no-cache');
+        headers.set('x-bsr-trip-shell','linz-2027/9.1.1');
         return new Response(asset.body,{status:asset.status,headers});
       }
       return new Response(
