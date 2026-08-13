@@ -29,7 +29,12 @@ function renderSectionHead(prefix,data={}){setText(prefix+"Eyebrow",data.eyebrow
 function applySite(site){
   window.__SITE=site;
   if(site.meta){document.title=site.meta.pageTitle||document.title;const m=qs('meta[name="description"]');if(m&&site.meta.description)m.content=site.meta.description}
-  if(site.theme){const root=document.documentElement;if(site.theme.primary){root.style.setProperty("--blue",site.theme.primary);root.style.setProperty("--blue2",site.theme.primary)}if(site.theme.accent)root.style.setProperty("--yellow",site.theme.accent)}
+  if(site.theme){
+    const root=document.documentElement;
+    const darken=(hex,f=.42)=>{const m=String(hex||"").match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);if(!m)return "#041536";const c=m.slice(1).map(x=>Math.max(0,Math.round(parseInt(x,16)*f)));return "#"+c.map(x=>x.toString(16).padStart(2,"0")).join("")};
+    if(site.theme.primary){root.style.setProperty("--blue",site.theme.primary);root.style.setProperty("--blue2",site.theme.primary);root.style.setProperty("--theme-dark",darken(site.theme.primary))}
+    if(site.theme.accent)root.style.setProperty("--yellow",site.theme.accent)
+  }
   if(site.features){const sections={news:"news",diary:"reisetagebuch",gallery:"galerie",upload:"reisegruppe",map:"karte",downloads:"downloads",emergency:"notfall"};Object.entries(sections).forEach(([key,id])=>{const el=qs("#"+id);if(el)el.hidden=site.features[key]===false})}
   setText("brandTitle",site.school);setText("brandSubtitle",site.brandSubtitle);
   setText("heroEyebrow",site.heroEyebrow);const heroTitle=site.heroTitle||site.tripTitle||"";const heroTitleEl=qs("#heroTitle");if(heroTitleEl){const match=heroTitle.match(/^(.*?)(\s+\d{4})$/);if(match){heroTitleEl.textContent=match[1]+" ";const accent=document.createElement("span");accent.textContent=match[2].trim();heroTitleEl.appendChild(accent)}else{heroTitleEl.textContent=heroTitle}}setText("heroSubtitle",site.subtitle);
@@ -352,7 +357,7 @@ function renderMap(places){
 
   list.innerHTML=`<section class="map-detail" id="mapDetail" aria-live="polite"></section><div class="place-list-items" id="placeListItems"></div>`;
   const detail=qs("#mapDetail",list),items=qs("#placeListItems",list);
-  items.innerHTML=validPlaces.map((p,i)=>{const c=styleFor(p.category);return `<article class="place-card" data-place="${i}" data-category="${esc(p.category)}" tabindex="0" role="button" aria-label="${esc(p.title)} auf der Karte anzeigen"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async"><div class="place-card-copy"><span class="place-category" style="--category:${c.color}">${esc(p.category)}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
+  items.innerHTML=validPlaces.map((p,i)=>{const c=styleFor(p.category),media=p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async">`:`<div class="place-card-placeholder" aria-hidden="true">${esc(c.icon||"•")}</div>`;return `<article class="place-card" data-place="${i}" data-category="${esc(p.category)}" tabindex="0" role="button" aria-label="${esc(p.title)} auf der Karte anzeigen">${media}<div class="place-card-copy"><span class="place-category" style="--category:${c.color}">${esc(p.category)}</span><h3>${esc(p.title)}</h3><small>${esc(p.walk||p.address||"")}</small></div><span class="place-arrow" aria-hidden="true">›</span></article>`}).join("");
 
   const toolbar=legend.closest('.map-toolbar');
   let viewSwitch=qs('.map-view-switch',toolbar);
@@ -414,7 +419,7 @@ function renderMap(places){
   function renderDetail(index){
     const p=validPlaces[index],c=styleFor(p.category);if(!p)return;
     const route=p.maps||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address||p.title)}`;
-    detail.innerHTML=`<div class="map-detail-media"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async"><span class="map-detail-badge" style="--detail:${c.color}">${esc(p.category)}</span>${p.imageCredit?`<small class="map-image-credit">${esc(p.imageCredit)}</small>`:""}</div><div class="map-detail-copy"><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}<div class="map-detail-meta">${p.address?`<span><b>Adresse</b>${esc(p.address)}</span>`:""}${p.walk?`<span><b>Entfernung</b>${esc(p.walk)}</span>`:""}</div><a class="map-detail-route" href="${esc(route)}" target="_blank" rel="noopener">Navigation öffnen <span>↗</span></a></div>`;
+    detail.innerHTML=`<div class="map-detail-media ${p.image?'':'no-image'}">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" decoding="async">`:`<div class="map-detail-placeholder" aria-hidden="true"><span>${esc(c.icon||"•")}</span><strong>${esc(p.title)}</strong></div>`}<span class="map-detail-badge" style="--detail:${c.color}">${esc(p.category)}</span>${p.imageCredit?`<small class="map-image-credit">${esc(p.imageCredit)}</small>`:""}</div><div class="map-detail-copy"><h3>${esc(p.title)}</h3>${p.description?`<p>${esc(p.description)}</p>`:""}<div class="map-detail-meta">${p.address?`<span><b>Adresse</b>${esc(p.address)}</span>`:""}${p.walk?`<span><b>Entfernung</b>${esc(p.walk)}</span>`:""}</div><a class="map-detail-route" href="${esc(route)}" target="_blank" rel="noopener">Navigation öffnen <span>↗</span></a></div>`;
   }
 
   function setActive(index,{refreshMap=true}={}){

@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.8.3.4';
+const VERSION = '14.0-dev.8.3.5';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -1247,6 +1247,27 @@ export default {async fetch(request,env){
   }
   if(url.pathname==='/api/cms-status'){
     const {clientId,clientSecret}=getOAuthConfig(env);return json({ready:Boolean(clientId&&clientSecret),clientIdConfigured:Boolean(clientId),clientSecretConfigured:Boolean(clientSecret),repo:REPO,branch:'main',version:VERSION});
+  }
+  if(request.method==='GET'&&['/favicon.ico','/images/favicon.ico'].includes(url.pathname)){
+    const assetPath=url.pathname==='/favicon.ico'?'/images/favicon.ico':url.pathname;
+    const asset=await env.ASSETS.fetch(new Request(`${url.origin}${assetPath}`,{method:'GET'}));
+    if(!asset.ok)return asset;
+    const headers=new Headers(asset.headers);
+    headers.set('content-type','image/x-icon');
+    headers.set('content-disposition','inline; filename="favicon.ico"');
+    headers.set('cache-control','public, max-age=86400');
+    headers.set('x-content-type-options','nosniff');
+    return new Response(asset.body,{status:asset.status,headers});
+  }
+  if(request.method==='GET'&&['/images/favicon-32x32.png','/images/apple-touch-icon.png'].includes(url.pathname)){
+    const asset=await env.ASSETS.fetch(request);
+    if(!asset.ok)return asset;
+    const headers=new Headers(asset.headers);
+    headers.set('content-type','image/png');
+    headers.delete('content-disposition');
+    headers.set('cache-control','public, max-age=86400');
+    headers.set('x-content-type-options','nosniff');
+    return new Response(asset.body,{status:asset.status,headers});
   }
   return env.ASSETS.fetch(request);
 }};
