@@ -1364,3 +1364,8 @@ nav a.nav-upload::after{display:none!important}
 .hero .button-glass{background:color-mix(in srgb,var(--theme-dark) 62%,transparent)!important}
 .hotel-copy .button,.map-detail-route{box-shadow:none!important}
 footer{background:var(--theme-dark)!important}
+
+/* DEV 14.0 Modul 8.3.6a – Reiseverlauf vollständig thematisiert */
+.progress-bar > span,.progress-fill,.journey-progress-fill,.trip-progress-fill{
+  background:linear-gradient(90deg,var(--blue),var(--yellow))!important;
+}
