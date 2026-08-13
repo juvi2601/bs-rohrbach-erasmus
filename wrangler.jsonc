@@ -12,7 +12,9 @@
     "run_worker_first": [
       "/auth",
       "/callback",
-      "/api/*"
+      "/api/*",
+      "/bruessel-2026",
+      "/bruessel-2026/"
     ]
   },
   "r2_buckets": [
