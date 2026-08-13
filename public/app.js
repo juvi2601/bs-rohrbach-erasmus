@@ -350,7 +350,7 @@ function renderMap(places){
     "Antwerpen":{color:"#0f766e",icon:"A"},"Luxemburg":{color:"#2563eb",icon:"L"}
   };
   const styleFor=cat=>categories[cat]||{color:"#334155",icon:"•"};
-  const validPlaces=places.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)));
+  const validPlaces=places.filter(p=>p.lat!==null&&p.lat!==undefined&&p.lng!==null&&p.lng!==undefined&&p.lat!==''&&p.lng!==''&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)));
   if(!validPlaces.length){canvas.innerHTML='<div class="empty-state">Für die Karte fehlen gültige Koordinaten.</div>';return}
 
   const categoryOrder=[...new Set(validPlaces.map(p=>p.category))];

@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.8.3.6b';
+const VERSION = '14.0-dev.8.3.7';
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -416,7 +416,7 @@ function draftSiteResource(draft){
   const a=draft.accommodation||{},f=draft.features||{},year=draftDateParts(draft.startDate).year,range=draftDateRange(draft),depTime=draft.website?.departureTime||'20:00';
   return {
     meta:{pageTitle:`${draft.title} · BS Rohrbach Erasmus+`,description:draft.website?.intro||draft.subtitle||''},
-    tripTitle:draft.title,tripYear:year,school:'BS Rohrbach Erasmus+',brandSubtitle:`${draft.destination} · ${range}`,
+    tripTitle:draft.title,tripYear:year,tripDestination:draft.destination,destination:draft.destination,school:'BS Rohrbach Erasmus+',brandSubtitle:`${draft.destination} · ${range}`,
     subtitle:draft.website?.intro||draft.subtitle||'',departure:`${draft.startDate}T${depTime}:00`,returnDate:`${draft.endDate}T${draft.website?.returnTime||'23:59'}:00`,
     heroKey:draft.images?.hero||'',heroEyebrow:'Berufsschule Rohrbach unterwegs',heroTitle:draft.title,heroPrimaryButton:'Reiseprogramm',heroSecondaryButton:'Internen Bereich öffnen',
     countdownLabel:`🚌 Abfahrt nach ${draft.destination}`,countdownDateText:`${draft.startDate} · ${depTime} Uhr`,
@@ -441,8 +441,79 @@ function draftSiteResource(draft){
     notice:draft.website?.notice||'',liveStatus:{enabled:false,mode:'automatic'}
   };
 }
-function draftPlacesResource(draft){
-  return {places:(draft.locations?.places||[]).map(p=>({title:p.name||p.address,category:'Sehenswürdigkeit',address:p.address||'',walk:'',image:'',description:p.description||'',maps:p.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`:'',lat:Number(p.lat)||null,lng:Number(p.lng)||null}))};
+async function geocodeCacheKey(query){
+  const bytes=new TextEncoder().encode(String(query||'').trim().toLowerCase());
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  return `__system/trips/geocode/${[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}.json`;
+}
+async function geocodeQuery(env,query){
+  const q=String(query||'').trim();if(!q)return null;
+  const key=await geocodeCacheKey(q);
+  if(env.MEDIA_BUCKET){
+    const cached=await env.MEDIA_BUCKET.get(key);
+    if(cached){try{return JSON.parse(await cached.text())}catch{}}
+  }
+  const endpoint=new URL('https://nominatim.openstreetmap.org/search');
+  endpoint.searchParams.set('q',q);
+  endpoint.searchParams.set('format','jsonv2');
+  endpoint.searchParams.set('limit','1');
+  endpoint.searchParams.set('addressdetails','1');
+  endpoint.searchParams.set('accept-language','de');
+  const response=await fetch(endpoint.toString(),{
+    headers:{
+      'user-agent':'BS-Rohrbach-Erasmus-Reiseportal/14.0 (+https://erasmus-bsrohrbach.eu)',
+      'accept':'application/json',
+      'referer':'https://erasmus-bsrohrbach.eu/'
+    }
+  });
+  if(!response.ok)return null;
+  const rows=await response.json(),row=Array.isArray(rows)?rows[0]:null;
+  if(!row)return null;
+  const result={lat:Number(row.lat),lng:Number(row.lon),displayName:String(row.display_name||'')};
+  if(!Number.isFinite(result.lat)||!Number.isFinite(result.lng))return null;
+  if(env.MEDIA_BUCKET)await env.MEDIA_BUCKET.put(key,JSON.stringify(result),{httpMetadata:{contentType:'application/json; charset=utf-8'},customMetadata:{source:'nominatim',query:q,createdAt:new Date().toISOString()}});
+  return result;
+}
+async function draftPlacesResource(draft,env){
+  const places=[],ac=draft.accommodation||{},country=draft.country||'',destination=draft.destination||'';
+  if(ac.name||ac.address){
+    places.push({
+      title:ac.name||'Unterkunft',category:'Hotel',address:ac.address||'',walk:'Unterkunft',
+      imageKey:draft.images?.hotel||'',description:ac.notes||'Unsere Unterkunft während der Reise.',
+      maps:ac.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ac.address)}`:'',
+      query:[ac.name,ac.address,destination,country].filter(Boolean).join(', ')
+    });
+  }
+  for(const p of (draft.locations?.places||[])){
+    places.push({
+      title:p.name||p.address,category:'Sehenswürdigkeit',address:p.address||'',walk:'',
+      image:'',description:p.description||'',
+      maps:p.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`:'',
+      query:[p.name,p.address,destination,country].filter(Boolean).join(', ')
+    });
+  }
+  let lastNetworkAt=0;
+  for(const place of places){
+    const explicitLat=Number(place.lat),explicitLng=Number(place.lng);
+    if(Number.isFinite(explicitLat)&&Number.isFinite(explicitLng)){place.lat=explicitLat;place.lng=explicitLng;continue}
+    const cacheKey=await geocodeCacheKey(place.query);
+    let cached=null;
+    if(env.MEDIA_BUCKET){
+      const object=await env.MEDIA_BUCKET.get(cacheKey);
+      if(object){try{cached=JSON.parse(await object.text())}catch{}}
+    }
+    let coords=cached;
+    if(!coords){
+      const wait=Math.max(0,1100-(Date.now()-lastNetworkAt));
+      if(wait)await new Promise(resolve=>setTimeout(resolve,wait));
+      coords=await geocodeQuery(env,place.query);
+      lastNetworkAt=Date.now();
+    }
+    if(coords){place.lat=coords.lat;place.lng=coords.lng}
+    else{place.lat=null;place.lng=null}
+    delete place.query;
+  }
+  return {places};
 }
 function draftDownloadsResource(draft){
   const d=draft.documents||{},isLink=v=>/^https?:\/\//i.test(String(v||''))||String(v||'').startsWith('/');
@@ -465,10 +536,10 @@ function draftJourneyResource(draft){
   const dep=draft.website?.departureTime||'20:00',ret=draft.website?.returnTime||'23:59';
   return {enabled:draft.features?.smartJourney!==false,automaticStatus:true,timezone:'Europe/Vienna',trip:{name:draft.title,start:`${draft.startDate}T${dep}:00`,end:`${draft.endDate}T${ret}:00`},before:{emoji:'⏳',title:`${draft.title} rückt näher`,text:`Die Reise startet am ${draft.startDate}.`},after:{emoji:'🎉',title:`${draft.title} ist abgeschlossen`,text:'Reisetagebuch, Galerie und Reiseinformationen bleiben weiterhin erreichbar.'},days:(draft.program?.days||[]).map(day=>({date:day.date,programId:day.id,emoji:'📍',title:day.title,status:day.subtitle||'',place:draft.destination}))};
 }
-function draftResource(draft,resource){
+async function draftResource(draft,resource,env){
   if(resource==='site')return draftSiteResource(draft);
   if(resource==='program')return draftProgramResource(draft);
-  if(resource==='places')return draftPlacesResource(draft);
+  if(resource==='places')return await draftPlacesResource(draft,env);
   if(resource==='downloads')return draftDownloadsResource(draft);
   if(resource==='faq')return draftFaqResource(draft);
   if(resource==='journey')return draftJourneyResource(draft);
@@ -1042,7 +1113,7 @@ export default {async fetch(request,env){
         const id=normalizeTripId(url.searchParams.get('id')),resource=String(url.searchParams.get('resource')||'');
         const draft=await getTripDraft(env,id);
         if(!draft)throw Object.assign(new Error('Entwurf wurde nicht gefunden.'),{status:404});
-        const data=draftResource(draft,resource);
+        const data=await draftResource(draft,resource,env);
         if(!data)throw Object.assign(new Error('Unbekannte Vorschau-Ressource.'),{status:400});
         return json(data);
       }catch(error){return mediaError(error)}

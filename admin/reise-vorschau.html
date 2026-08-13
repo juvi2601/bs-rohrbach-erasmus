@@ -157,6 +157,7 @@ window.TRAVEL_PREVIEW_MODE=true;
  async function hydrate(resource,data){
    if(resource==='site'){if(data.heroKey)data.hero=await image(data.heroKey);if(data.hotel?.imageKey)data.hotel.image=await image(data.hotel.imageKey);return data}
    if(resource==='program'){for(const day of data.days||[]){if(day.coverKey)day.cover=await image(day.coverKey);day.gallery=[];for(const key of day.galleryKeys||[]){const u=await image(key);if(u)day.gallery.push(u)}for(const ev of day.events||[]){ev.images=[];for(const key of ev.imageKeys||[]){const u=await image(key);if(u)ev.images.push(u)}}}return data}
+   if(resource==='places'){for(const place of data.places||[]){if(place.imageKey)place.image=await image(place.imageKey)}return data}
    return data;
  }
  window.TRAVEL_DATA_PROVIDER=async url=>{
