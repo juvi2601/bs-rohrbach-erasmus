@@ -1,15 +1,21 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.9.1.1';
+const VERSION = '14.0-dev.9.1.3';
 
+function normalizeHttpStatus(value,fallback=200){
+  const n=Number(value);
+  return Number.isInteger(n)&&n>=200&&n<=599?n:fallback;
+}
 function json(data, status = 200, extraHeaders = {}) {
+  const safeStatus=normalizeHttpStatus(status,200);
+  const safeHeaders=extraHeaders&&typeof extraHeaders==='object'&&!Array.isArray(extraHeaders)?extraHeaders:{};
   return new Response(JSON.stringify(data), {
-    status,
+    status:safeStatus,
     headers: {
       'content-type': 'application/json; charset=utf-8',
       'cache-control': 'no-store',
-      ...extraHeaders
+      ...safeHeaders
     }
   });
 }
@@ -815,7 +821,7 @@ async function r2Usage(bucket){
 }
 
 function mediaError(error){
-  const status=Number(error?.status)||500;
+  const status=normalizeHttpStatus(error?.status,500);
   return json({ok:false,message:error?.message||String(error)},status);
 }
 
@@ -1269,7 +1275,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(meta?.published){
-        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.9.1.1`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.9.1.3`,{method:'GET',headers:{'cache-control':'no-cache'}}));
         const headers=new Headers(asset.headers);
         headers.set('cache-control','no-store, max-age=0');
         headers.set('pragma','no-cache');
@@ -1295,6 +1301,10 @@ export default {async fetch(request,env){
       const id=resolveTripId(request,url);
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
+    if(url.pathname==='/api/trips/public-health'&&request.method==='GET'){
+      return json({ok:true,version:'14.0-dev.9.1.3',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
+    }
+
     if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){
       try{
         const trip=normalizeTripId(url.searchParams.get('trip')),resource=String(url.searchParams.get('resource')||'');
@@ -1305,7 +1315,7 @@ export default {async fetch(request,env){
         const object=await env.MEDIA_BUCKET.get(publishedResourceKey(trip,resource));
         if(!object)throw Object.assign(new Error('Veröffentlichte Reiseressource fehlt.'),{status:404});
         const data=JSON.parse(await object.text());
-        return json(data,{headers:{'cache-control':'public, max-age=60'}});
+        return json(data,200,{'cache-control':'public, max-age=60','x-bsr-public-trip':trip,'x-bsr-public-resource':resource});
       }catch(error){return mediaError(error)}
     }
 
