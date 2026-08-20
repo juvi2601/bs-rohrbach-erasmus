@@ -18,7 +18,7 @@
 <link href="https://tile.openstreetmap.de" rel="preconnect"/>
 <link href="https://api.open-meteo.com" rel="preconnect"/>
 <link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3Vt8cF5B6T4Y7YQWl9xY7X3p+zv0M=" rel="stylesheet"/>
-<link href="/styles-dynamic.css?v=14.0-dev.9.1.3" rel="stylesheet"/>
+<link href="/styles-dynamic.css?v=14.0-dev.9.1.5" rel="stylesheet"/>
 </head>
 <body>
 <a class="skip-link" href="#main">Zum Inhalt</a>
@@ -157,6 +157,7 @@ if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then
     if(resource==='site'){
       if(data.heroKey)data.hero=await publicImage(data.heroKey);
       if(data.hotel?.imageKey)data.hotel.image=await publicImage(data.hotel.imageKey);
+      if(data.studentArea)data.studentArea.uploadUrl=`/${encodeURIComponent(routeId)}/upload/`;
       return data;
     }
     if(resource==='program'){
@@ -193,10 +194,10 @@ if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then
     }
     if(raw.includes('/api/media/gallery'))return {items:[]};
     if(/(?:^|\/)legal\.json/.test(raw)){const r=await nativeFetch('/content/legal.json',{cache:'no-store'});return r.json()}
-    if(/(?:^|\/)version\.json/.test(raw))return {version:'14.0-dev.9.1.3',updated:'13.08.2026'};
+    if(/(?:^|\/)version\.json/.test(raw))return {version:'14.0-dev.9.1.5',updated:'13.08.2026'};
     return undefined;
   };
   addEventListener('beforeunload',()=>blobUrls.forEach(URL.revokeObjectURL));
 })();
-</script><script src="/app-dynamic.js?v=14.0-dev.9.1.3"></script>
+</script><script src="/app-dynamic.js?v=14.0-dev.9.1.5"></script>
 </body></html>

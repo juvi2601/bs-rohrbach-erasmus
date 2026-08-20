@@ -1,4 +1,8 @@
 const $ = id => document.getElementById(id);
+const uploadPathMatch = location.pathname.match(/^\/([a-z0-9][a-z0-9-]*)\/upload\/?$/i);
+const uploadTrip = (uploadPathMatch?.[1] || new URLSearchParams(location.search).get('trip') || 'bruessel-2026').toLowerCase();
+const tripQuery = `trip=${encodeURIComponent(uploadTrip)}`;
+const withTrip = path => `${path}${path.includes('?')?'&':'?'}${tripQuery}`;
 let config = null;
 let msalApp = null;
 let account = null;
@@ -26,10 +30,25 @@ function showMessage(text, type = 'error') {
 function clearMessage(){ $('formMessage').hidden = true; }
 function setLoginMessage(text){ $('loginMessage').textContent = text || ''; }
 
+function applyTripContext(){
+  if(!config)return;
+  const label=config.tripLabel||config.tripTitle||'Brüssel 2026';
+  const back=config.backUrl||'/';
+  if($('uploadTripLabel'))$('uploadTripLabel').textContent=label;
+  if($('uploadBrandLink'))$('uploadBrandLink').href=back;
+  if($('uploadBackLink'))$('uploadBackLink').href=back;
+  if($('uploadLead'))$('uploadLead').textContent=`Fotos und kurze Videos unserer ${config.destination||'Reise'}-Reise sicher hochladen. Erst nach Prüfung und Freigabe durch die Redaktion können Medien in der Galerie oder im Reisetagebuch erscheinen.`;
+  document.title=`Foto- & Video-Upload · ${label}`;
+  const root=document.documentElement,theme=config.theme||{};
+  if(theme.primary){root.style.setProperty('--blue',theme.primary);root.style.setProperty('--ink',theme.primary)}
+  if(theme.accent){root.style.setProperty('--blue2',theme.accent);root.style.setProperty('--yellow',theme.accent)}
+  if(config.heroUrl)document.body.style.setProperty('--upload-hero-image',`url("${config.heroUrl}")`);
+}
 async function loadConfig(){
-  const response = await fetch('/api/media/config',{cache:'no-store'});
+  const response = await fetch(withTrip('/api/media/config'),{cache:'no-store'});
   if(!response.ok) throw new Error('Upload-Konfiguration konnte nicht geladen werden.');
   config = await response.json();
+  applyTripContext();
   if(!config.configured) throw new Error('Microsoft-Konfiguration ist noch nicht vollständig.');
   if(typeof window.msal === 'undefined') throw new Error('Microsoft-Anmeldung konnte nicht geladen werden. Bitte Seite neu laden.');
   msalApp = new msal.PublicClientApplication({auth:{clientId:config.clientId,authority:`https://login.microsoftonline.com/${config.tenantId}`,redirectUri:config.redirectUri,postLogoutRedirectUri:config.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});
@@ -58,7 +77,7 @@ async function getGraphToken(interactive=false){
 
 async function fetchStatus(){
   const token = await getGraphToken(true);
-  const response = await fetch('/api/media/status',{headers:{authorization:`Bearer ${token}`},cache:'no-store'});
+  const response = await fetch(withTrip('/api/media/status'),{headers:{authorization:`Bearer ${token}`},cache:'no-store'});
   const data = await response.json().catch(()=>({}));
   if(!response.ok) throw new Error(data.message || 'Schulkonto konnte nicht geprüft werden.');
   return data;
@@ -105,7 +124,8 @@ function updateStorage(used, limit){
 
 async function loadProgram(){
   try{
-    const response=await fetch('/content/program.json',{cache:'no-store'}); if(!response.ok) throw new Error();
+    const programUrl=uploadTrip==='bruessel-2026'?'/content/program.json':withTrip('/api/trips/public-resource')+'&resource=program';
+    const response=await fetch(programUrl,{cache:'no-store'}); if(!response.ok) throw new Error();
     const data=await response.json(),days=Array.isArray(data.days)?data.days:[];
     $('daySelect').insertAdjacentHTML('beforeend',days.map((day,index)=>`<option value="${index}">${day.short||''} ${day.date||''} · ${day.title||''}</option>`).join(''));
     $('daySelect').dataset.days=JSON.stringify(days);
@@ -166,7 +186,7 @@ function refreshState(){
 function base64UrlJson(value){const bytes=new TextEncoder().encode(JSON.stringify(value));let binary='';bytes.forEach(b=>binary+=String.fromCharCode(b));return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 async function uploadOne(item,meta){
   const token=await getGraphToken(true);
-  const response=await fetch('/api/media/upload',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':item.file.type||'application/octet-stream','x-file-name':encodeURIComponent(item.file.name),'x-file-size':String(item.file.size),'x-video-duration':item.kind==='video'?String(item.duration):'0','x-media-meta':base64UrlJson(meta)},body:item.file});
+  const response=await fetch(withTrip('/api/media/upload'),{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':item.file.type||'application/octet-stream','x-file-name':encodeURIComponent(item.file.name),'x-file-size':String(item.file.size),'x-video-duration':item.kind==='video'?String(item.duration):'0','x-media-meta':base64UrlJson(meta),'x-erasmus-trip':uploadTrip},body:item.file});
   const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||`${item.file.name}: Upload fehlgeschlagen.`);return data;
 }
 async function performUpload(){
