@@ -22,10 +22,10 @@ main{width:min(1180px,calc(100% - 36px));margin:-34px auto 0;position:relative;z
 .panel{background:rgba(255,255,255,.98);border:1px solid rgba(220,230,239,.95);border-radius:26px;padding:clamp(22px,4vw,36px);box-shadow:0 20px 55px rgba(7,29,73,.12)}
 .section-head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:24px}.section-head h2{font-size:clamp(28px,4vw,42px);margin:3px 0 0}.section-head p{margin:0;color:var(--muted);max-width:520px;line-height:1.5}
 .trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:22px}
-.trip-card{position:relative;min-height:410px;border-radius:24px;overflow:hidden;background:#fff;color:var(--ink);display:flex;align-items:flex-end;box-shadow:0 16px 42px rgba(7,29,73,.13);border:1px solid var(--line)}
-.trip-bg{position:absolute;inset:0 0 118px 0;background-size:cover;background-position:center;transition:transform .35s ease;filter:saturate(.88) contrast(.92) brightness(1.03)}.trip-card:hover .trip-bg{transform:scale(1.028)}
-.trip-shade{position:absolute;inset:0 0 118px 0;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(7,29,73,.18))}
-.trip-body{position:relative;z-index:1;padding:20px 22px;width:100%;background:rgba(255,255,255,.97);min-height:128px}.trip-country{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:#0b4f8a}.trip-body h3{font-size:29px;margin:5px 0 6px}.trip-meta{color:var(--muted);line-height:1.45;margin-bottom:14px;font-size:14px}.trip-button{display:inline-flex;align-items:center;gap:7px;background:var(--navy);color:#fff;text-decoration:none;padding:10px 14px;border-radius:10px;font-weight:900;font-size:14px}.trip-button:hover{transform:translateY(-1px)}
+.trip-card{position:relative;height:430px;border-radius:24px;overflow:hidden;background:#10243e;color:#fff;display:flex;align-items:flex-end;box-shadow:0 16px 42px rgba(7,29,73,.16);border:1px solid rgba(7,29,73,.08)}
+.trip-bg{position:absolute;inset:0;background-size:cover;background-position:center center;transition:transform .35s ease;filter:none}.trip-card:hover .trip-bg{transform:scale(1.025)}
+.trip-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,20,44,.08) 0%,rgba(5,20,44,.28) 42%,rgba(5,20,44,.90) 78%,rgba(5,20,44,.97) 100%)}
+.trip-body{position:relative;z-index:3;padding:24px 25px;width:100%;background:transparent;min-height:0}.trip-country{font-size:12px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:#ffd43b}.trip-body h3{font-size:30px;margin:6px 0 7px;color:#fff}.trip-meta{color:rgba(255,255,255,.88);line-height:1.45;margin-bottom:18px;font-size:14px}.trip-button{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#10243e;text-decoration:none;padding:10px 14px;border-radius:10px;font-weight:900;font-size:14px}.trip-button:hover{transform:translateY(-1px)}
 .empty{padding:28px;border:1px dashed #b9c8d7;border-radius:18px;color:var(--muted);grid-column:1/-1}
 .eu-funding{margin-top:22px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px 28px;box-shadow:0 10px 28px rgba(7,29,73,.06)}
 .eu-funding-head{display:flex;align-items:center;justify-content:space-between;gap:28px;padding-bottom:20px;border-bottom:1px solid var(--line)}
@@ -34,7 +34,7 @@ main{width:min(1180px,calc(100% - 36px));margin:-34px auto 0;position:relative;z
 .eu-funding-note{margin:18px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
 @media(max-width:720px){.eu-funding-head{align-items:flex-start;flex-direction:column}.eu-funding img{width:min(310px,80vw)}}
 footer{background:var(--navy);color:#fff;padding:30px max(20px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}footer small{opacity:.7}
-@media(max-width:720px){.topbar{padding:16px 18px}.brand img{width:46px;height:46px}.brand small{display:none}.hero{min-height:62vh}.hero-copy{padding:52px 0 74px}.section-head{display:block}.section-head p{margin-top:8px}.trip-card{min-height:390px}}
+@media(max-width:720px){.topbar{padding:16px 18px}.brand img{width:46px;height:46px}.brand small{display:none}.hero{min-height:62vh}.hero-copy{padding:52px 0 74px}.section-head{display:block}.section-head p{margin-top:8px}.trip-card{height:390px}}
 </style>
 </head>
 <body>
@@ -84,11 +84,11 @@ async function init(){
     const trips=Array.isArray(d.trips)?d.trips:[];
     document.getElementById('tripGrid').innerHTML=trips.length?trips.map(t=>`
       <article class="trip-card">
-        <a href="${esc(t.path)}" aria-label="${esc(t.title)} öffnen" style="position:absolute;inset:0 0 118px 0;z-index:2"></a>
+        <a href="${esc(t.path)}" aria-label="${esc(t.title)} öffnen" style="position:absolute;inset:0;z-index:2"></a>
         <div class="trip-bg" style="background-image:url('${esc(t.heroUrl||'/images/hero.jpg')}')"></div><div class="trip-shade"></div>
         <div class="trip-body"><span class="trip-country">${esc(t.country||t.destination||'Erasmus+')}</span><h3>${esc(t.title)}</h3>
         <div class="trip-meta">${esc(t.destination||'')}${t.startDate?`<br>${esc(fmtDate(t.startDate))}${t.endDate?` – ${esc(fmtDate(t.endDate))}`:''}`:''}</div>
-        <a class="trip-button" href="${esc(t.path)}">Reise ansehen →</a></div>
+        <a class="trip-button" href="${esc(t.path)}" style="position:relative;z-index:4">Reise ansehen →</a></div>
       </article>`).join(''):'<div class="empty">Derzeit sind keine Reisen veröffentlicht.</div>';
   }catch(e){document.getElementById('tripGrid').innerHTML=`<div class="empty">${esc(e.message)}</div>`}
 }
