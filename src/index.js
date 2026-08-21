@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.9.1.7';
+const VERSION = '14.0-dev.10.0.1';
 
 function normalizeHttpStatus(value,fallback=200){
   const n=Number(value);
@@ -996,10 +996,75 @@ async function saveStudentAccess(env,students,admin){
   });
   return payload.students;
 }
+function tripRosterKey(project=MEDIA_PROJECT){return `__system/access/${project}/roster.json`}
+function normalizeRosterRole(value){
+  const role=String(value||'student').trim().toLowerCase();
+  return ['admin','teacher','student'].includes(role)?role:'student';
+}
+function cleanRosterEntry(entry={}){
+  const email=String(entry.email||'').trim().toLowerCase();
+  if(!email||!email.endsWith(`@${MEDIA_ALLOWED_DOMAIN}`))return null;
+  return {email,name:cleanText(entry.name||email,120),role:normalizeRosterRole(entry.role)};
+}
+async function loadTripRoster(env,project=MEDIA_PROJECT){
+  if(!env.MEDIA_BUCKET)return [];
+  const object=await env.MEDIA_BUCKET.get(tripRosterKey(project));
+  if(!object)return [];
+  try{
+    const data=JSON.parse(await object.text());
+    return (Array.isArray(data?.users)?data.users:[]).map(cleanRosterEntry).filter(Boolean);
+  }catch{return []}
+}
+async function saveTripRoster(env,project,users,updatedBy=''){
+  if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+  const map=new Map();
+  for(const row of Array.isArray(users)?users:[]){
+    const clean=cleanRosterEntry(row);
+    if(clean)map.set(clean.email,clean);
+  }
+  const normalized=[...map.values()].sort((a,b)=>a.email.localeCompare(b.email));
+  await env.MEDIA_BUCKET.put(tripRosterKey(project),JSON.stringify({
+    project,users:normalized,updatedAt:new Date().toISOString(),updatedBy:String(updatedBy||'')
+  },null,2),{httpMetadata:{contentType:'application/json; charset=utf-8'}});
+  return normalized;
+}
+function tripLabelForProject(project){
+  if(project===DEFAULT_TRIP_ID)return TRIP_REGISTRY[DEFAULT_TRIP_ID]?.title||'Brüssel 2026';
+  return DRAFT_ROUTE_REGISTRY[project]?.title||project;
+}
+async function handleAccessRosterGet(request,env){
+  try{
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyTripRole(request,env,['admin'],project);
+    const dynamic=await loadTripRoster(env,project);
+    const fixed=Object.entries(TRIP_ACCESS[project]||{}).map(([email,x])=>({
+      email,name:x.name||email,role:x.role,source:'fixed',locked:true
+    }));
+    const fixedEmails=new Set(fixed.map(x=>x.email));
+    const users=[...fixed,...dynamic.filter(x=>!fixedEmails.has(x.email)).map(x=>({...x,source:'roster',locked:false}))];
+    users.sort((a,b)=>a.role.localeCompare(b.role)||a.email.localeCompare(b.email));
+    return json({ok:true,project,tripLabel:tripLabelForProject(project),user,users,roles:['admin','teacher','student']});
+  }catch(error){return mediaError(error)}
+}
+async function handleAccessRosterPut(request,env){
+  try{
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyTripRole(request,env,['admin'],project);
+    const body=await request.json().catch(()=>{throw Object.assign(new Error('Ungültige Teilnehmerdaten.'),{status:400})});
+    const fixedEmails=new Set(Object.keys(TRIP_ACCESS[project]||{}).map(x=>x.toLowerCase()));
+    const dynamic=(Array.isArray(body?.users)?body.users:[])
+      .map(cleanRosterEntry).filter(Boolean).filter(x=>!fixedEmails.has(x.email));
+    const users=await saveTripRoster(env,project,dynamic,user.email);
+    return json({ok:true,project,tripLabel:tripLabelForProject(project),users,count:users.length,updatedAt:new Date().toISOString()});
+  }catch(error){return mediaError(error)}
+}
+
 async function tripAccessFor(env,email,project=MEDIA_PROJECT){
   const normalized=String(email||'').trim().toLowerCase();
   const fixed=staticTripAccessFor(normalized,project);
   if(fixed)return fixed;
+  const roster=(await loadTripRoster(env,project)).find(x=>x.email===normalized);
+  if(roster)return {project,email:normalized,role:roster.role,name:roster.name||normalized,permissions:ROLE_PERMISSIONS[roster.role]||[]};
   const student=(await loadStudentAccess(env,project)).find(x=>x.email===normalized);
   return student?{project,email:normalized,role:'student',name:student.name||normalized,permissions:ROLE_PERMISSIONS.student}:null;
 }
@@ -1315,7 +1380,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027/upload'||url.pathname==='/linz-2027/upload/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(!meta?.published)return new Response('Reise ist noch nicht veröffentlicht.',{status:404});
-      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-dev.9.1.7`,{
+      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-dev.10.0.1`,{
         method:'GET',headers:{'cache-control':'no-cache'}
       }));
       const headers=new Headers(asset.headers);
@@ -1329,7 +1394,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(meta?.published){
-        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.9.1.7`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.10.0.1`,{method:'GET',headers:{'cache-control':'no-cache'}}));
         const headers=new Headers(asset.headers);
         headers.set('cache-control','no-store, max-age=0');
         headers.set('pragma','no-cache');
@@ -1356,7 +1421,7 @@ export default {async fetch(request,env){
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
     if(url.pathname==='/api/trips/public-health'&&request.method==='GET'){
-      return json({ok:true,version:'14.0-dev.9.1.7',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
+      return json({ok:true,version:'14.0-dev.10.0.1',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
     }
 
     if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){
@@ -1566,6 +1631,8 @@ export default {async fetch(request,env){
   if(url.pathname==='/auth')return handleAuth(url,env);
   if(url.pathname==='/callback')return handleCallback(url,env);
   if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
+    if(url.pathname==='/api/access/roster'&&request.method==='GET')return handleAccessRosterGet(request,env);
+    if(url.pathname==='/api/access/roster'&&request.method==='PUT')return handleAccessRosterPut(request,env);
     if(url.pathname==='/api/access/users'&&request.method==='GET')return handleAccessUsers(request,env);
     if(url.pathname==='/api/access/students'&&request.method==='GET')return handleStudentAccessGet(request,env);
     if(url.pathname==='/api/access/students'&&request.method==='PUT')return handleStudentAccessPut(request,env);

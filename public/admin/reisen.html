@@ -118,6 +118,7 @@ function render(trips,defaultTrip){
       <div class="trip-actions">
         <a class="button primary" href="/">Website öffnen</a>
         <a class="button ghost" href="/admin/redaktion.html">Reise-Redaktion</a>
+        <a class="button ghost" href="/admin/teilnehmer.html?trip=${encodeURIComponent(t.id)}">Teilnehmer & Rollen</a>
         ${t.id===defaultTrip?'<span class="badge">Standardreise</span>':''}
       </div>
     </article>`).join('');
@@ -136,7 +137,7 @@ function renderDrafts(drafts,tk){
       <span>${t.team?.teachers?.length?'Lehrkräfte ✓':'Lehrkräfte offen'}</span>
       <span>${t.images?.hero?'Titelbild ✓':'Titelbild offen'}</span><span>${t.program?.days?.length?'Tagesprogramm ✓':'Tagesprogramm offen'}</span>
     </div>
-    <div class="trip-actions"><a class="button primary" href="/admin/reise-neu.html?id=${encodeURIComponent(t.id)}">Bearbeiten</a><button class="danger-link" data-delete="${t.id}" type="button">Löschen</button><span class="badge">Nicht öffentlich</span></div>
+    <div class="trip-actions"><a class="button primary" href="/admin/reise-neu.html?id=${encodeURIComponent(t.id)}">Bearbeiten</a>${t.id==='testreise-2027'?'<a class="button ghost" href="/admin/teilnehmer.html?trip=linz-2027">Teilnehmer & Rollen</a>':''}<button class="danger-link" data-delete="${t.id}" type="button">Löschen</button><span class="badge">Nicht öffentlich</span></div>
   </article>`).join('');
   document.querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=async()=>{
     const id=btn.dataset.delete;if(!confirm(`Entwurf „${id}“ wirklich löschen?`))return;
