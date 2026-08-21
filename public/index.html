@@ -23,13 +23,18 @@ main{width:min(1180px,calc(100% - 36px));margin:-34px auto 0;position:relative;z
 .section-head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:24px}.section-head h2{font-size:clamp(28px,4vw,42px);margin:3px 0 0}.section-head p{margin:0;color:var(--muted);max-width:520px;line-height:1.5}
 .trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:22px}
 .trip-card{position:relative;min-height:410px;border-radius:24px;overflow:hidden;background:#fff;color:var(--ink);display:flex;align-items:flex-end;box-shadow:0 16px 42px rgba(7,29,73,.13);border:1px solid var(--line)}
-.trip-bg{position:absolute;inset:0 0 118px 0;background-size:cover;background-position:center;transition:transform .35s ease}.trip-card:hover .trip-bg{transform:scale(1.035)}
-.trip-shade{position:absolute;inset:0 0 118px 0;background:linear-gradient(180deg,rgba(5,20,44,.03),rgba(5,20,44,.32))}
+.trip-bg{position:absolute;inset:0 0 118px 0;background-size:cover;background-position:center;transition:transform .35s ease;filter:saturate(.88) contrast(.92) brightness(1.03)}.trip-card:hover .trip-bg{transform:scale(1.028)}
+.trip-shade{position:absolute;inset:0 0 118px 0;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(7,29,73,.18))}
 .trip-body{position:relative;z-index:1;padding:20px 22px;width:100%;background:rgba(255,255,255,.97);min-height:128px}.trip-country{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:#0b4f8a}.trip-body h3{font-size:29px;margin:5px 0 6px}.trip-meta{color:var(--muted);line-height:1.45;margin-bottom:14px;font-size:14px}.trip-button{display:inline-flex;align-items:center;gap:7px;background:var(--navy);color:#fff;text-decoration:none;padding:10px 14px;border-radius:10px;font-weight:900;font-size:14px}.trip-button:hover{transform:translateY(-1px)}
 .empty{padding:28px;border:1px dashed #b9c8d7;border-radius:18px;color:var(--muted);grid-column:1/-1}
-.about{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}.about article{background:#fff;border:1px solid var(--line);border-radius:20px;padding:21px 22px;box-shadow:0 10px 28px rgba(7,29,73,.06)}.about h3{margin:0 0 7px;font-size:18px}.about p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
-footer{background:var(--navy);color:#fff;padding:30px max(20px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}footer small{opacity:.7}.footer-logo{height:34px;filter:brightness(0) invert(1)}
-@media(max-width:720px){.topbar{padding:16px 18px}.brand img{width:46px;height:46px}.brand small{display:none}.hero{min-height:62vh}.hero-copy{padding:52px 0 74px}.section-head{display:block}.section-head p{margin-top:8px}.about{grid-template-columns:1fr}.trip-card{min-height:390px}}
+.eu-funding{margin-top:22px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px 28px;box-shadow:0 10px 28px rgba(7,29,73,.06)}
+.eu-funding-head{display:flex;align-items:center;justify-content:space-between;gap:28px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.eu-funding-copy .eyebrow{color:#0b67c2;margin-bottom:10px}.eu-funding-copy h3{font-size:clamp(26px,3vw,38px);margin:0;letter-spacing:-.03em}
+.eu-funding img{width:min(330px,38vw);height:auto;display:block}
+.eu-funding-note{margin:18px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+@media(max-width:720px){.eu-funding-head{align-items:flex-start;flex-direction:column}.eu-funding img{width:min(310px,80vw)}}
+footer{background:var(--navy);color:#fff;padding:30px max(20px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}footer small{opacity:.7}
+@media(max-width:720px){.topbar{padding:16px 18px}.brand img{width:46px;height:46px}.brand small{display:none}.hero{min-height:62vh}.hero-copy{padding:52px 0 74px}.section-head{display:block}.section-head p{margin-top:8px}.trip-card{min-height:390px}}
 </style>
 </head>
 <body>
@@ -51,15 +56,20 @@ footer{background:var(--navy);color:#fff;padding:30px max(20px,calc((100vw - 118
     <div class="section-head"><div><p class="eyebrow" style="color:#0b4f8a">Reiseübersicht</p><h2>Aktuelle & veröffentlichte Reisen</h2></div><p>Wähle eine Reise aus, um Programm, Unterkunft, Karte, Galerie und weitere Informationen zu öffnen.</p></div>
     <div class="trip-grid" id="tripGrid"><div class="empty">Reisen werden geladen …</div></div>
   </section>
-  <section class="about">
-    <article><h3>🌍 Lernen über Grenzen hinweg</h3><p>Erasmus+ ermöglicht unseren Schüler*innen und Lehrkräften internationale Erfahrungen, neue Perspektiven und Begegnungen mit Europa.</p></article>
-    <article><h3>🔐 Geschützte Bereiche</h3><p>Foto-Upload und interne Funktionen sind nur für freigeschaltete Schulkonten der jeweiligen Reise zugänglich.</p></article>
+  <section class="eu-funding" aria-labelledby="euFundingTitle">
+    <div class="eu-funding-head">
+      <div class="eu-funding-copy">
+        <p class="eyebrow">Erasmus+ · Europäische Union</p>
+        <h3 id="euFundingTitle">Gemeinsam Europa erleben.</h3>
+      </div>
+      <img src="/images/eu-cofunded-de.svg" alt="Kofinanziert von der Europäischen Union">
+    </div>
+    <p class="eu-funding-note">„Von der Europäischen Union finanziert. Die geäußerten Ansichten und Meinungen entsprechen jedoch ausschließlich denen des Autors bzw. der Autoren und spiegeln nicht zwingend die der Europäischen Union oder der OeAD-GmbH wider. Weder die Europäische Union noch die OeAD-GmbH können dafür verantwortlich gemacht werden.“</p>
   </section>
 </main>
 
 <footer>
-  <div><strong>© Berufsschule Rohrbach · Erasmus+</strong><br><small>STABLE 14.0 Basis · Plattform DEV 14.1.1</small></div>
-  <img class="footer-logo" src="/images/eu-cofunded-de.svg" alt="Kofinanziert von der Europäischen Union">
+  <div><strong>© 2026 Berufsschule Rohrbach · Erasmus+</strong><br><small>Projektleitung und technische Umsetzung: Jürgen Vierlinger</small></div>
 </footer>
 
 <script>
@@ -74,6 +84,7 @@ async function init(){
     const trips=Array.isArray(d.trips)?d.trips:[];
     document.getElementById('tripGrid').innerHTML=trips.length?trips.map(t=>`
       <article class="trip-card">
+        <a href="${esc(t.path)}" aria-label="${esc(t.title)} öffnen" style="position:absolute;inset:0 0 118px 0;z-index:2"></a>
         <div class="trip-bg" style="background-image:url('${esc(t.heroUrl||'/images/hero.jpg')}')"></div><div class="trip-shade"></div>
         <div class="trip-body"><span class="trip-country">${esc(t.country||t.destination||'Erasmus+')}</span><h3>${esc(t.title)}</h3>
         <div class="trip-meta">${esc(t.destination||'')}${t.startDate?`<br>${esc(fmtDate(t.startDate))}${t.endDate?` – ${esc(fmtDate(t.endDate))}`:''}`:''}</div>
