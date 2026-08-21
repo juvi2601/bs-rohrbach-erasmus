@@ -37,6 +37,7 @@ function applyTripContext(){
   if($('uploadTripLabel'))$('uploadTripLabel').textContent=label;
   if($('uploadBrandLink'))$('uploadBrandLink').href=back;
   if($('uploadBackLink'))$('uploadBackLink').href=back;
+  if($('successBackLink'))$('successBackLink').href=back;
   if($('uploadLead'))$('uploadLead').textContent=`Fotos und kurze Videos unserer ${config.destination||'Reise'}-Reise sicher hochladen. Erst nach Prüfung und Freigabe durch die Redaktion können Medien in der Galerie oder im Reisetagebuch erscheinen.`;
   document.title=`Foto- & Video-Upload · ${label}`;
   const root=document.documentElement,theme=config.theme||{};

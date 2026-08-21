@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.9.1.5';
+const VERSION = '14.0-dev.9.1.6';
 
 function normalizeHttpStatus(value,fallback=200){
   const n=Number(value);
@@ -1311,7 +1311,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027/upload'||url.pathname==='/linz-2027/upload/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(!meta?.published)return new Response('Reise ist noch nicht veröffentlicht.',{status:404});
-      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-dev.9.1.5`,{
+      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-dev.9.1.6`,{
         method:'GET',headers:{'cache-control':'no-cache'}
       }));
       const headers=new Headers(asset.headers);
@@ -1325,7 +1325,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(meta?.published){
-        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.9.1.5`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.9.1.6`,{method:'GET',headers:{'cache-control':'no-cache'}}));
         const headers=new Headers(asset.headers);
         headers.set('cache-control','no-store, max-age=0');
         headers.set('pragma','no-cache');
@@ -1352,7 +1352,7 @@ export default {async fetch(request,env){
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
     if(url.pathname==='/api/trips/public-health'&&request.method==='GET'){
-      return json({ok:true,version:'14.0-dev.9.1.5',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
+      return json({ok:true,version:'14.0-dev.9.1.6',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
     }
 
     if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){
