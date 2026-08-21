@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-stable';
+const VERSION = '14.1.0-dev';
 
 function normalizeHttpStatus(value,fallback=200){
   const n=Number(value);
@@ -1367,6 +1367,36 @@ async function handleEditorReset(request,env,url,kind){
 export default {async fetch(request,env){
   const url=new URL(request.url);
 
+    // --- DEV 14.1: öffentliche Multi-Reise-Startseite ---
+    if(url.pathname==='/api/platform/trips'&&request.method==='GET'){
+      const trips=[];
+      const brussels=TRIP_REGISTRY[DEFAULT_TRIP_ID];
+      trips.push({
+        id:brussels.id,title:brussels.title,destination:brussels.destination,country:brussels.country,
+        startDate:brussels.startDate,endDate:brussels.endDate,path:'/bruessel-2026/',
+        heroUrl:'/images/hero.jpg',published:true
+      });
+      for(const route of Object.values(DRAFT_ROUTE_REGISTRY)){
+        const meta=await getPublishedMeta(env,route.id);
+        if(!meta?.published)continue;
+        let site={};
+        try{
+          const object=await env.MEDIA_BUCKET.get(publishedResourceKey(route.id,'site'));
+          if(object)site=JSON.parse(await object.text());
+        }catch{}
+        trips.push({
+          id:route.id,title:site.tripTitle||meta.title||route.title,
+          destination:site.destination||meta.destination||route.destination,
+          country:site.country||'',startDate:site.startDate||'',endDate:site.endDate||'',
+          path:tripPublicPath(route.id),
+          heroUrl:site.heroKey?`${url.origin}/api/trips/public-image?trip=${encodeURIComponent(route.id)}&key=${encodeURIComponent(site.heroKey)}`:'',
+          published:true
+        });
+      }
+      trips.sort((a,b)=>String(a.startDate||'9999').localeCompare(String(b.startDate||'9999')));
+      return json({ok:true,mode:'platform-home',trips},200,{'cache-control':'public, max-age=60'});
+    }
+
     // --- DEV 14.0 Modul 9.0.1: Multi-Reise-Routing-Grundlage ---
     if(url.pathname==='/api/trips/routes'&&request.method==='GET'){
       const draftRoutes=[];
@@ -1380,7 +1410,7 @@ export default {async fetch(request,env){
       }
       return json({
         ok:true,
-        homepage:{path:'/',mode:'legacy-brussels',message:'Die Hauptadresse bleibt vorerst unverändert.'},
+        homepage:{path:'/',mode:'platform-overview',message:'Die Hauptadresse zeigt die Erasmus+ Reiseübersicht.'},
         routes:[
           ...Object.values(TRIP_REGISTRY).map(trip=>({
             id:trip.id,title:trip.title,path:tripPublicPath(trip.id),status:trip.status||'active',published:true
@@ -1395,7 +1425,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027/upload'||url.pathname==='/linz-2027/upload/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(!meta?.published)return new Response('Reise ist noch nicht veröffentlicht.',{status:404});
-      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-stable`,{
+      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.1.0-dev`,{
         method:'GET',headers:{'cache-control':'no-cache'}
       }));
       const headers=new Headers(asset.headers);
@@ -1409,7 +1439,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(meta?.published){
-        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-stable`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.1.0-dev`,{method:'GET',headers:{'cache-control':'no-cache'}}));
         const headers=new Headers(asset.headers);
         headers.set('cache-control','no-store, max-age=0');
         headers.set('pragma','no-cache');
@@ -1422,10 +1452,14 @@ export default {async fetch(request,env){
       );
     }
 
-    // Der künftige Brüssel-Pfad ist bereits reserviert, ohne die aktuelle Hauptseite umzubauen.
-    // Vorerst Weiterleitung auf die bestehende, bestätigte Brüssel-Seite.
+    // Brüssel 2026 ist ab DEV 14.1 eine eigenständige Reise unter /bruessel-2026/.
     if((url.pathname==='/bruessel-2026'||url.pathname==='/bruessel-2026/')&&request.method==='GET'){
-      return Response.redirect(`${url.origin}/`,302);
+      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/bruessel.html?v=14.1.0`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+      const headers=new Headers(asset.headers);
+      headers.set('cache-control','no-store, max-age=0');
+      headers.set('pragma','no-cache');
+      headers.set('x-bsr-trip-shell','bruessel-2026/14.1.0');
+      return new Response(asset.body,{status:asset.status,headers});
     }
 
     if(url.pathname==='/api/trips'&&request.method==='GET'){
@@ -1436,7 +1470,7 @@ export default {async fetch(request,env){
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
     if(url.pathname==='/api/trips/public-health'&&request.method==='GET'){
-      return json({ok:true,version:'14.0-stable',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
+      return json({ok:true,version:'14.1.0-dev',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
     }
 
     if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){

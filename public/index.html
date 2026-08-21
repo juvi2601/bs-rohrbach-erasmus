@@ -1,141 +1,86 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<meta content="#071d49" name="theme-color"/>
-<meta content="Digitaler Reisebegleiter der Berufsschule Rohrbach für die Brüsselreise 2026." name="description"/>
-<title>Brüssel 2026 · BS Rohrbach Erasmus+</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071d49">
+<meta name="description" content="Erasmus+ Reisen der Berufsschule Rohrbach – aktuelle und vergangene Mobilitäten auf einen Blick.">
+<title>BS Rohrbach Erasmus+ · Unsere Reisen</title>
 <link rel="icon" href="/images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-<link href="manifest.webmanifest" rel="manifest"/>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://tile.openstreetmap.org" rel="preconnect"/>
-<link href="https://tile.openstreetmap.de" rel="preconnect"/>
-<link href="https://api.open-meteo.com" rel="preconnect"/>
-<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3Vt8cF5B6T4Y7YQWl9xY7X3p+zv0M=" rel="stylesheet"/>
-<link href="styles.css?v=11.1.2" rel="stylesheet"/>
+<style>
+:root{--navy:#071d49;--blue:#0b4f8a;--paper:#f4f7fb;--ink:#10243e;--muted:#66778b;--white:#fff;--line:#dce6ef;--shadow:0 24px 70px rgba(7,29,73,.16)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper)}
+.hero{min-height:68vh;position:relative;display:flex;flex-direction:column;color:#fff;background-image:linear-gradient(100deg,rgba(5,25,58,.90),rgba(5,35,78,.60) 52%,rgba(5,35,78,.24)),url('/images/schule-startseite.png');background-size:cover;background-position:center}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px clamp(20px,5vw,72px);position:relative;z-index:2}
+.brand{display:flex;align-items:center;gap:13px;color:#fff;text-decoration:none}.brand img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:14px;padding:6px}.brand strong,.brand small{display:block}.brand strong{font-size:17px}.brand small{opacity:.78;margin-top:2px}
+.admin-link{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.45);border-radius:12px;padding:10px 14px;font-weight:800;font-size:13px;background:rgba(0,0,0,.12);backdrop-filter:blur(8px)}
+.hero-copy{width:min(1120px,calc(100% - 40px));margin:auto;padding:70px 0 90px;position:relative;z-index:1}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:900;margin:0 0 14px}.hero h1{font-size:clamp(44px,7vw,82px);line-height:.96;max-width:830px;margin:0 0 22px;letter-spacing:-.045em}.hero h1 span{display:block;color:#ffd43b}.hero-text{max-width:690px;font-size:clamp(18px,2vw,23px);line-height:1.55;color:rgba(255,255,255,.9);margin:0}
+.eu-chip{display:inline-flex;align-items:center;gap:10px;margin-top:28px;padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(10px);font-size:13px;font-weight:800}.eu-chip img{height:24px;max-width:130px}
+main{width:min(1180px,calc(100% - 36px));margin:-42px auto 0;position:relative;z-index:3;padding-bottom:64px}
+.panel{background:#fff;border:1px solid rgba(220,230,239,.9);border-radius:28px;padding:clamp(22px,4vw,38px);box-shadow:var(--shadow)}
+.section-head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:24px}.section-head h2{font-size:clamp(28px,4vw,42px);margin:3px 0 0}.section-head p{margin:0;color:var(--muted);max-width:520px;line-height:1.5}
+.trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:22px}
+.trip-card{position:relative;min-height:430px;border-radius:24px;overflow:hidden;background:#10243e;color:#fff;display:flex;align-items:flex-end;box-shadow:0 16px 42px rgba(7,29,73,.16)}
+.trip-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .35s ease}.trip-card:hover .trip-bg{transform:scale(1.035)}
+.trip-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,20,44,.06),rgba(5,20,44,.88) 72%,rgba(5,20,44,.97))}
+.trip-body{position:relative;z-index:1;padding:25px;width:100%}.trip-country{font-size:12px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:#ffd43b}.trip-body h3{font-size:31px;margin:7px 0 8px}.trip-meta{opacity:.9;line-height:1.5;margin-bottom:20px}.trip-button{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#10243e;text-decoration:none;padding:11px 15px;border-radius:11px;font-weight:900}.trip-button:hover{transform:translateY(-1px)}
+.empty{padding:28px;border:1px dashed #b9c8d7;border-radius:18px;color:var(--muted);grid-column:1/-1}
+.about{display:grid;grid-template-columns:1.4fr .8fr;gap:22px;margin-top:24px}.about article{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px}.about h3{margin:0 0 8px}.about p{margin:0;color:var(--muted);line-height:1.6}
+footer{background:var(--navy);color:#fff;padding:30px max(20px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}footer small{opacity:.7}.footer-logo{height:34px;filter:brightness(0) invert(1)}
+@media(max-width:720px){.topbar{padding:16px 18px}.brand img{width:46px;height:46px}.brand small{display:none}.hero{min-height:62vh}.hero-copy{padding:52px 0 74px}.section-head{display:block}.section-head p{margin-top:8px}.about{grid-template-columns:1fr}.trip-card{min-height:390px}}
+</style>
 </head>
 <body>
-<a class="skip-link" href="#main">Zum Inhalt</a>
-<header class="site-header" id="siteHeader">
-<a aria-label="Zur Startseite" class="brand" href="#start">
-<span class="brand-mark"><img src="images/bs-rohrbach-logo.png" alt="Logo der Berufsschule Rohrbach"></span>
-<span><strong id="brandTitle">BS Rohrbach Erasmus+</strong><small id="brandSubtitle">Brüssel · 21.–26. November 2026</small></span>
-</a>
-<div class="header-actions">
-<button aria-label="App installieren" class="icon-button" hidden="" id="installButton">＋</button>
-<button aria-expanded="false" aria-label="Navigation öffnen" class="icon-button nav-toggle" id="navToggle">☰</button>
-</div>
-<nav aria-label="Hauptnavigation" id="mainNav">
-<a href="#heute">Heute</a><a href="#news">News</a><a href="#programm">Programm</a><a href="#karte">Karte</a><a href="#galerie">Galerie</a><a href="#downloads">Downloads</a><a class="nav-emergency" href="#notfall" id="emergencyNavButton">Hilfe</a><a class="nav-upload" href="#reisegruppe">Interner Bereich 🔒</a>
-</nav>
-</header>
-<main id="main">
-<section class="hero" id="start">
-<div aria-hidden="true" class="hero-media" id="heroMedia"></div><div class="hero-shade"></div>
-<div class="hero-content reveal">
-<p class="eyebrow light" id="heroEyebrow">Berufsschule Rohrbach unterwegs</p>
-<h1 id="heroTitle">Brüssel <span>2026</span></h1>
-<p class="hero-text" id="heroSubtitle">Europa erleben, Antwerpen entdecken und gemeinsame Erinnerungen festhalten.</p>
-<div class="hero-actions"><a class="button button-yellow" href="#programm" id="heroPrimaryButton">Reiseprogramm</a><a class="button button-glass" href="#reisegruppe" id="heroSecondaryButton">Internen Bereich öffnen</a></div>
-</div>
-<aside aria-label="Countdown zur Abfahrt" class="countdown-card reveal">
-<p class="countdown-label" id="countdownLabel">🚌 Abfahrt in Rohrbach</p><h2 id="countdownDateText">Samstag, 21. November · 20:00 Uhr</h2><div class="countdown" id="countdown"></div>
-</aside>
-</section>
-<section class="quick-grid-wrap">
-<div class="quick-grid" id="quickLinks">
-<a href="#programm"><span>📅</span><b>Programm</b><small>Tag für Tag</small></a>
-<a href="#karte"><span>🗺️</span><b>Karte</b><small>Alle Reiseziele</small></a>
-<a href="#wetter"><span>🌤️</span><b>Wetter</b><small>Brüssel &amp; Ausflüge</small></a>
-<a href="#reisegruppe"><span>🔒</span><b>Interner Bereich</b><small>Geschützte Inhalte</small></a>
-</div>
-</section>
-<section class="section today-section" id="heute">
-<div class="today-card reveal">
-<div class="today-copy"><p class="eyebrow" id="todayEyebrow">Heute auf unserer Reise</p><h2 id="todayTitle">Die Reise beginnt bald</h2><p id="todayText">Hier erscheint während der Reise automatisch das aktuelle Tagesprogramm.</p><div class="today-alert" id="todayAlert" hidden role="status" aria-live="polite"><span class="today-alert-icon" id="todayAlertIcon" aria-hidden="true">📢</span><div><strong id="todayAlertTitle">Wichtige Information</strong><p id="todayAlertText"></p><small id="todayAlertUpdated"></small></div></div></div>
-<div class="progress-card"><div class="progress-top"><span id="progressLabel">Reisephase</span><strong id="progressValue">Vor der Reise</strong></div><div class="progress-track" hidden><span id="progressBar"></span></div><small id="progressDate">21.–26. November 2026</small></div>
-</div>
-<div class="today-schedule" id="todaySchedule"></div>
-</section>
-<section class="section" id="news">
-<div class="section-title reveal"><p class="eyebrow" id="newsEyebrow">Aktuelles zur Reise</p><h2 id="newsTitle">News &amp; Hinweise</h2><p id="newsIntro">Neue Informationen werden hier laufend ergänzt.</p></div>
-<div class="news-grid" id="newsGrid"><article class="news-card loading"><p>News werden geladen …</p></article></div>
-</section>
-<section class="section program-section" id="programm">
-<div class="section-title reveal"><p class="eyebrow" id="programEyebrow">Tag für Tag</p><h2 id="programTitle">Unser Reiseprogramm</h2><p id="programNotice">Noch nicht endgültig bestätigte Punkte sind entsprechend markiert.</p></div>
-<div class="day-tabs" id="dayTabs" role="tablist"></div><div class="day-panels" id="dayPanels"></div>
-</section>
-<section class="section diary-section" id="reisetagebuch">
-<div class="section-title reveal"><p class="eyebrow">Unterwegs in Belgien</p><h2>Unser Reisetagebuch</h2><p>Hier veröffentlichen wir während der Reise ausgewählte Fotos, Eindrücke und kurze Tagesberichte.</p></div>
-<div class="diary-latest" id="diaryLatest" hidden></div>
-<div class="diary-timeline" id="diaryTimeline"><div class="empty-state">Noch keine Tagebucheinträge veröffentlicht.</div></div>
-</section>
-<section class="section map-section" id="karte">
-<div class="section-title reveal"><p class="eyebrow" id="mapEyebrow">Orientierung vor Ort</p><h2 id="mapTitle">Interaktive Reisekarte</h2><p id="mapIntro">Klicke auf einen Pin für Adresse, Beschreibung und Navigation.</p></div>
-<div class="map-shell reveal"><div class="map-toolbar"><div class="map-legend" id="mapLegend" aria-label="Legende der Kartenkategorien"></div><button class="map-reset" id="mapReset" type="button">Brüssel anzeigen</button></div><div class="map-layout"><div aria-label="Karte der Reiseziele" class="map-canvas" id="map"></div><aside class="place-sidebar" aria-label="Liste der Reiseziele"><div class="place-list" id="placeList"></div></aside></div></div>
-</section>
-<section class="section weather-section" id="wetter">
-<div class="section-title reveal"><p class="eyebrow" id="weatherEyebrow">Aktuelle Vorschau</p><h2 id="weatherTitle">Wetter an unseren Reisezielen</h2><p id="weatherIntro">Die Wetterdaten werden automatisch aktualisiert.</p></div>
-<div class="weather-current" id="weatherCurrent"><article class="weather-card loading">Wetter wird geladen …</article></div><div class="weather-forecast" id="weatherForecast"></div>
-</section>
-<section class="section gallery-section" id="galerie">
-<div class="section-title reveal"><p class="eyebrow" id="galleryEyebrow">Vorfreude in Bildern</p><h2 id="galleryTitle">Unsere Reiseziele</h2><p id="galleryIntro">Die öffentliche Galerie zeigt allgemeine Reisemotive. Fotos mit Schüler*innen werden nur nach Freigabe veröffentlicht.</p></div>
-<div class="filter-row" id="galleryFilters"></div><div class="gallery-grid" id="galleryGrid"></div>
-</section>
-<section class="section hotel-section" id="hotel">
-<div class="hotel-photo reveal"><img alt="ibis Brussels City Centre" id="hotelImage" src="images/hotel-ibis.jpg"/></div>
-<div class="hotel-copy reveal"><p class="eyebrow" id="hotelEyebrow">Unser Zuhause in Brüssel</p><h2 id="hotelTitle">ibis Brussels City Centre</h2><address id="hotelAddress">Rue Joseph Plateau 2<br/>1000 Bruxelles, Belgien</address>
-<div class="hotel-details" id="hotelDetails"></div>
-<a class="button button-blue" href="https://www.google.com/maps/search/?api=1&amp;query=ibis+Brussels+City+Centre" id="hotelMapsButton" rel="noopener" target="_blank">In Google Maps öffnen</a>
-</div>
-</section>
-<section class="section downloads-section" id="downloads">
-<div class="section-title reveal"><p class="eyebrow" id="downloadsEyebrow">Wichtige Unterlagen</p><h2 id="downloadsTitle">Downloads</h2><p id="downloadsIntro">Hier erscheinen nur Dokumente, die ausdrücklich öffentlich freigegeben wurden.</p></div><div class="downloads-grid" id="downloadsGrid"></div>
-</section>
-<section class="section faq-section" id="faq"><div class="section-title reveal"><p class="eyebrow" id="faqEyebrow">Kurz erklärt</p><h2 id="faqTitle">Häufige Fragen</h2></div><div class="faq-list" id="faqList"></div></section>
-<section class="section group-section" id="reisegruppe">
-<div class="group-card reveal">
-  <div class="group-icon" id="groupIcon">🔒</div>
-  <div class="group-main">
-    <p class="eyebrow" id="groupEyebrow">Nur mit Schulkonto</p>
-    <h2 id="groupTitle">Interner Bereich</h2>
-    <p id="groupIntro">Lade ausgewählte Fotos und kurze Videos direkt über unsere Reisewebsite hoch. Nach der Prüfung durch die Redaktion können freigegebene Medien in der Galerie und im Reisetagebuch erscheinen.</p>
-    <div class="student-actions"><a class="button button-blue" href="/upload.html" id="uploadButton">🔐 Zum Foto-Upload</a></div>
-    <small id="uploadNote">Anmeldung mit dem Microsoft-365-Schulkonto erforderlich.</small>
+<section class="hero">
+  <header class="topbar">
+    <a class="brand" href="/"><img src="/images/bs-rohrbach-logo.png" alt="BS Rohrbach"><span><strong>BS Rohrbach Erasmus+</strong><small>Europa erleben · gemeinsam lernen</small></span></a>
+    <a class="admin-link" href="/admin/">Administrator</a>
+  </header>
+  <div class="hero-copy">
+    <p class="eyebrow">Berufsschule Rohrbach · Erasmus+</p>
+    <h1>Unsere Reisen.<span>Europa erleben.</span></h1>
+    <p class="hero-text">Hier findest du die Erasmus+-Reisen der Berufsschule Rohrbach – mit Reiseprogramm, Eindrücken und allen wichtigen Informationen.</p>
+    <div class="eu-chip"><img src="/images/eu-cofunded-de.svg" alt="Kofinanziert von der Europäischen Union"><span>Erasmus+ Mobilitäten</span></div>
   </div>
-  <aside class="group-info" aria-label="Hinweise zum Foto-Upload">
-    <h3>So funktioniert’s</h3>
-    <ul>
-      <li><span>✓</span> Ausgewählte Fotos hochladen</li>
-      <li><span>✓</span> Sicher mit Schulkonto anmelden</li>
-      <li><span>✓</span> Prüfung durch die Redaktion</li>
-      <li><span>✓</span> Freigabe für Galerie &amp; Reisetagebuch</li>
-    </ul>
-  </aside>
-</div>
 </section>
-<section class="section emergency-section" id="notfall">
-<div class="emergency-card reveal">
-<div class="emergency-heading"><span class="emergency-symbol">🛟</span><div><p class="eyebrow" id="emergencyEyebrow">Hilfe unterwegs</p><h2 id="emergencyTitle">Wichtige Kontakte</h2><p id="emergencyIntro">Nur für den Fall, dass unterwegs rasch Hilfe benötigt wird.</p></div></div>
-<div class="emergency-grid" id="emergencyGrid"></div>
-</div>
-</section>
+
+<main>
+  <section class="panel">
+    <div class="section-head"><div><p class="eyebrow" style="color:#0b4f8a">Reiseübersicht</p><h2>Aktuelle & veröffentlichte Reisen</h2></div><p>Wähle eine Reise aus, um Programm, Unterkunft, Karte, Galerie und weitere Informationen zu öffnen.</p></div>
+    <div class="trip-grid" id="tripGrid"><div class="empty">Reisen werden geladen …</div></div>
+  </section>
+  <section class="about">
+    <article><h3>🌍 Lernen über Grenzen hinweg</h3><p>Erasmus+ ermöglicht unseren Schüler*innen und Lehrkräften internationale Erfahrungen, neue Perspektiven und Begegnungen mit Europa.</p></article>
+    <article><h3>🔐 Geschützte Bereiche</h3><p>Foto-Upload und interne Funktionen sind nur für freigeschaltete Schulkonten der jeweiligen Reise zugänglich.</p></article>
+  </section>
 </main>
-<div aria-labelledby="legalTitle" aria-modal="true" class="legal-modal" hidden id="legalModal" role="dialog">
-  <div class="legal-dialog">
-    <button aria-label="Rechtliche Informationen schließen" class="legal-close" id="legalClose">×</button>
-    <div class="legal-dialog-head"><p class="eyebrow" id="legalEyebrow">Rechtliche Informationen</p><h2 id="legalTitle">Impressum</h2><p id="legalIntro"></p></div>
-    <nav aria-label="Rechtliche Bereiche" class="legal-tabs" id="legalTabs"></nav>
-    <div class="legal-content" id="legalContent"></div>
-  </div>
-</div>
-<div aria-label="Bildansicht" aria-modal="true" class="lightbox" hidden="" id="lightbox" role="dialog"><button aria-label="Schließen" class="lightbox-close" id="lightboxClose">×</button><button aria-label="Vorheriges Bild" class="lightbox-nav prev" id="lightboxPrev">‹</button><figure><img alt="" id="lightboxImage"/><figcaption><strong id="lightboxTitle"></strong><span id="lightboxCaption"></span></figcaption></figure><button aria-label="Nächstes Bild" class="lightbox-nav next" id="lightboxNext">›</button></div>
-<section class="eu-funding" aria-label="Erasmus+ Förderhinweis"><div class="eu-funding-inner"><div class="eu-funding-head"><div><p class="eu-funding-kicker">ERASMUS+ · EUROPÄISCHE UNION</p><h2>Gemeinsam Europa erleben.</h2></div><img src="images/eu-cofunded-de.svg" alt="Kofinanziert von der Europäischen Union" class="eu-funding-logo"></div><p class="eu-funding-disclaimer">„Von der Europäischen Union finanziert. Die geäußerten Ansichten und Meinungen entsprechen jedoch ausschließlich denen des Autors bzw. der Autoren und spiegeln nicht zwingend die der Europäischen Union oder der OeAD-GmbH wider. Weder die Europäische Union noch die OeAD-GmbH können dafür verantwortlich gemacht werden.“</p></div></section><footer><div class="footer-brand"><strong id="footerTitle">© 2026 Berufsschule Rohrbach · Erasmus+</strong><span id="footerSubtitle">Projektleitung und technische Umsetzung: Jürgen Vierlinger</span><span class="footer-build"><span id="footerVersion">Version 14.0-stable</span><span aria-hidden="true">·</span><span id="footerUpdated">Letzte Aktualisierung: 12.08.2026</span></span></div><div class="footer-meta"><div class="footer-legal-links" id="footerLegalLinks"></div><div class="footer-note"><a href="#start" id="footerTopLink">Nach oben ↑</a><span id="footerPrivacy">Keine personenbezogenen Reisedaten öffentlich</span></div></div></footer>
-<script src="config.js"></script><script crossorigin="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="app.js?v=11.1.2"></script>
+
+<footer>
+  <div><strong>© Berufsschule Rohrbach · Erasmus+</strong><br><small>STABLE 14.0 Basis · Plattform DEV 14.1.0</small></div>
+  <img class="footer-logo" src="/images/eu-cofunded-de.svg" alt="Kofinanziert von der Europäischen Union">
+</footer>
+
+<script>
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate=v=>{if(!v)return'';try{return new Intl.DateTimeFormat('de-AT',{day:'2-digit',month:'long',year:'numeric'}).format(new Date(v+'T12:00:00'))}catch{return v}};
+async function init(){
+  // Entfernt alte Brüssel-Root-Service-Worker, damit / dauerhaft die Plattformübersicht bleibt.
+  if('serviceWorker' in navigator){try{for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch{}}
+  try{
+    const r=await fetch('/api/platform/trips',{cache:'no-store'}),d=await r.json();
+    if(!r.ok)throw new Error(d.message||'Reisen konnten nicht geladen werden.');
+    const trips=Array.isArray(d.trips)?d.trips:[];
+    document.getElementById('tripGrid').innerHTML=trips.length?trips.map(t=>`
+      <article class="trip-card">
+        <div class="trip-bg" style="background-image:url('${esc(t.heroUrl||'/images/hero.jpg')}')"></div><div class="trip-shade"></div>
+        <div class="trip-body"><span class="trip-country">${esc(t.country||t.destination||'Erasmus+')}</span><h3>${esc(t.title)}</h3>
+        <div class="trip-meta">${esc(t.destination||'')}${t.startDate?`<br>${esc(fmtDate(t.startDate))}${t.endDate?` – ${esc(fmtDate(t.endDate))}`:''}`:''}</div>
+        <a class="trip-button" href="${esc(t.path)}">Reise ansehen →</a></div>
+      </article>`).join(''):'<div class="empty">Derzeit sind keine Reisen veröffentlicht.</div>';
+  }catch(e){document.getElementById('tripGrid').innerHTML=`<div class="empty">${esc(e.message)}</div>`}
+}
+init();
+</script>
 </body></html>
