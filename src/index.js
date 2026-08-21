@@ -841,7 +841,7 @@ async function handleMediaConfig(url,env){
   const tenantId=String(env.MS_TENANT_ID||'').trim();
   const clientId=String(env.MS_CLIENT_ID||'').trim();
   const project=mediaProjectFromUrl(url);
-  let tripTitle='Brüssel 2026',destination='Brüssel',theme={primary:'#0b4f8a',accent:'#f2c94c'},heroUrl='',backUrl='/';
+  let tripTitle='Brüssel 2026',destination='Brüssel',theme={primary:'#0b4f8a',accent:'#f2c94c'},heroUrl='',backUrl='/',startDate=TRIP_REGISTRY[DEFAULT_TRIP_ID]?.startDate||'',endDate=TRIP_REGISTRY[DEFAULT_TRIP_ID]?.endDate||'';
   if(project!==DEFAULT_TRIP_ID){
     const meta=await getPublishedMeta(env,project);
     if(meta?.published){
@@ -852,6 +852,8 @@ async function handleMediaConfig(url,env){
           tripTitle=String(site.tripTitle||meta.title||project);
           destination=String(site.destination||meta.destination||'Reise');
           theme=site.theme||theme;
+          startDate=String(site.startDate||site.departureDate||site.departure||'').slice(0,10);
+          endDate=String(site.endDate||site.returnDate||'').slice(0,10);
           backUrl=tripPublicPath(project);
           if(site.heroKey)heroUrl=`${url.origin}/api/trips/public-image?trip=${encodeURIComponent(project)}&key=${encodeURIComponent(site.heroKey)}`;
         }catch{}
@@ -862,7 +864,7 @@ async function handleMediaConfig(url,env){
     configured:Boolean(tenantId&&clientId),tenantId,clientId,
     redirectUri:`${url.origin}/upload.html`,project,
     tripTitle,tripLabel:project===DEFAULT_TRIP_ID?'Brüssel 2026':tripTitle,destination,theme,heroUrl,backUrl,
-    publicUrl:project===DEFAULT_TRIP_ID?'/bruessel-2026/':backUrl,
+    publicUrl:project===DEFAULT_TRIP_ID?'/bruessel-2026/':backUrl,startDate,endDate,
     schoolDomain:MEDIA_ALLOWED_DOMAIN,
     maxFiles:MEDIA_MAX_FILES_PER_BATCH,
     maxImageBytes:MEDIA_MAX_IMAGE_BYTES,
@@ -1226,7 +1228,7 @@ async function handleMediaGallery(env,url){
       const m=o.customMetadata||{},type=m.mediaType==='video'||String(o.httpMetadata?.contentType||'').startsWith('video/')?'video':'image';
       items.push({
         id:o.key,mediaType:type,
-        image:`${url.origin}/api/media/gallery/file?key=${encodeURIComponent(o.key)}`,
+        image:`${url.origin}/api/media/gallery/file?trip=${encodeURIComponent(project)}&key=${encodeURIComponent(o.key)}`,
         title:m.program||m.day||'Reiseerinnerung',day:m.day||'Reise',program:m.program||'',description:m.description||'',
         alt:type==='image'?`${m.program||m.day||'Reisefoto'} – Erasmus+ BS Rohrbach`:'',uploadedAt:m.uploadedAt||'',approvedAt:m.approvedAt||''
       });
@@ -1335,12 +1337,12 @@ function cleanLiveStatus(input){
   const type=allowedTypes.has(input?.type)?input.type:'info';
   return {
     mode,
-    enabled:Boolean(input?.enabled),
+    enabled:mode==='manual',
     type,
     emoji:cleanText(input?.emoji,12)||'📢',
     title:cleanText(input?.title,120)||'Aktueller Reisestatus',
     text:cleanText(input?.text,800),
-    updated:cleanText(input?.updated,80)
+    updated:mode==='manual'?new Date().toISOString():''
   };
 }
 async function handleEditorGet(request,env,url,kind){
