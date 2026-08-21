@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Hilfe & Tutorials – BS Rohrbach Erasmus+</title>
+<link rel="icon" href="/images/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/admin/admin.css?v=14.0-dev.11.0.0">
+<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<style>
+.help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}
+.help-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow)}
+.help-card h2,.help-card h3{margin-top:0}.help-card p,.help-card li{color:var(--muted);line-height:1.55}
+.help-card ol,.help-card ul{padding-left:22px}
+.help-card .badge{display:inline-flex;padding:5px 9px;border-radius:999px;background:#eef4f8;font-size:12px;font-weight:800;margin-bottom:12px}
+.help-card.admin-only{border-color:#d7c6ff;background:linear-gradient(180deg,#fff,#fbf9ff)}
+.help-card.teacher{border-color:#bfe0cd;background:linear-gradient(180deg,#fff,#fbfffc)}
+.quick-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.quick-links a{ text-decoration:none }
+.notice-protected{display:flex;gap:12px;align-items:flex-start;padding:15px 17px;border-radius:16px;background:#eef7f2;border:1px solid #b8dfc8;margin:18px 0}
+.notice-protected span{font-size:24px}
+.topic{padding:14px 0;border-top:1px solid var(--line)}.topic:first-of-type{border-top:0}
+.topic strong{display:block;margin-bottom:4px}
+@media(max-width:800px){.help-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" id="backLink" href="/admin/">
+    <span class="brand-mark">E+</span>
+    <span><strong>BS Rohrbach Erasmus+</strong><small>Hilfe & Tutorials</small></span>
+  </a>
+  <div class="top-actions">
+    <a class="button ghost" id="editorLink" href="/admin/redaktion.html">Reise-Redaktion</a>
+    <a class="button ghost" id="adminLink" href="/admin/" hidden>Admin</a>
+    <button class="button ghost" id="logout" hidden>Abmelden</button>
+  </div>
+</header>
+
+<main class="shell">
+<section class="welcome">
+  <div>
+    <p class="eyebrow">DEV 14.0 · MODUL 11.0.0</p>
+    <h1>Hilfe & Tutorials</h1>
+    <p id="tripLabel">Reise wird geladen …</p>
+  </div>
+  <div class="status-card">
+    <span class="status-dot"></span>
+    <div><strong id="state">Anmeldung erforderlich</strong><small id="detail">Nur Admin & Reise-Redaktion</small></div>
+  </div>
+</section>
+
+<section id="loginBox" class="preflight">
+  <h2>Geschützter Hilfebereich</h2>
+  <p>Diese Anleitungen sind ausschließlich für Administratoren und Lehrkräfte/Reise-Redaktion der jeweiligen Reise sichtbar.</p>
+  <button class="button primary" id="login">Mit Microsoft-Schulkonto anmelden</button>
+  <p id="message"></p>
+</section>
+
+<section id="app" hidden>
+  <div class="notice-protected"><span>🔐</span><div><strong>Nicht öffentlich</strong><p>Dieser Bereich wird serverseitig über die reisebezogene Rolle geprüft. Schüler*innen und nicht freigeschaltete Konten erhalten keinen Zugriff.</p></div></div>
+
+  <div class="help-grid">
+    <article class="help-card teacher">
+      <span class="badge">Für Lehrkräfte & Admin</span>
+      <h2>Unterwegs mit der Reise-Redaktion</h2>
+      <div class="topic"><strong>📷 Medien freigeben</strong><p>Neue Fotos und Videos prüfen, freigeben oder löschen. Es werden nur Medien der aktuell ausgewählten Reise angezeigt.</p></div>
+      <div class="topic"><strong>📖 Reisetagebuch</strong><p>Einträge erstellen, ergänzen und veröffentlichen. Ideal für kurze Tagesrückblicke direkt unterwegs.</p></div>
+      <div class="topic"><strong>📣 Live-Status</strong><p>Wichtige Hinweise auf der Startseite aktualisieren, etwa Treffpunkte, Verspätungen oder kurzfristige Programmänderungen.</p></div>
+      <div class="topic"><strong>📸 Galerie</strong><p>Freigegebene Reisemotive verwalten und für die öffentliche Galerie auswählen.</p></div>
+      <div class="quick-links">
+        <a class="button primary" id="mediaLink" href="/admin/media-inbox.html">Medienfreigabe</a>
+        <a class="button ghost" id="redaktionLink" href="/admin/redaktion.html">Reise-Redaktion</a>
+      </div>
+    </article>
+
+    <article class="help-card admin-only" id="adminHelp">
+      <span class="badge">Nur Admin</span>
+      <h2>Neue Reise vorbereiten</h2>
+      <ol>
+        <li>In <strong>Reisen verwalten</strong> eine neue Reise als Entwurf anlegen.</li>
+        <li>Grunddaten, Design, Unterkunft, An-/Abreise, Bilder und Tagesprogramm pflegen.</li>
+        <li>Vorschau öffnen und alle Inhalte kontrollieren.</li>
+        <li>Unter <strong>Teilnehmer & Rollen</strong> Lehrkräfte und Schüler*innen zuordnen oder per CSV importieren.</li>
+        <li>Die Reise veröffentlichen. Sie erhält eine eigene URL.</li>
+        <li>Spätere Änderungen bewusst erneut veröffentlichen.</li>
+      </ol>
+      <div class="quick-links">
+        <a class="button primary" href="/admin/reisen.html">Reisen verwalten</a>
+        <a class="button ghost" id="participantsLink" href="/admin/teilnehmer.html">Teilnehmer & Rollen</a>
+      </div>
+    </article>
+
+    <article class="help-card">
+      <span class="badge">Kurz erklärt</span>
+      <h2>Rollen & Rechte</h2>
+      <ul>
+        <li><strong>Admin:</strong> Reise anlegen, Teilnehmer/Rollen, Veröffentlichung und Redaktion.</li>
+        <li><strong>Lehrkraft / Reise-Redaktion:</strong> Medienfreigabe, Reisetagebuch, Live-Status und Galerie.</li>
+        <li><strong>Schüler*in:</strong> geschützter Reisebereich und Medienupload, sofern für diese Reise freigeschaltet.</li>
+      </ul>
+    </article>
+
+    <article class="help-card">
+      <span class="badge">Medien</span>
+      <h2>Was passiert mit Uploads?</h2>
+      <p>Fotos und Videos werden privat in Cloudflare R2 gespeichert und nach Reise getrennt. Neue Uploads landen zuerst im Bereich <strong>pending</strong>. Erst nach Freigabe können sie öffentlich erscheinen.</p>
+      <p id="storageExample" class="help">Beispiel: <code>reise-id/pending/…</code></p>
+    </article>
+  </div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const trip=(new URLSearchParams(location.search).get('trip')||'bruessel-2026').toLowerCase();
+let cfg,msalApp,account,tokenValue='';
+
+async function init(){
+  cfg=await fetch(`/api/media/config?trip=${encodeURIComponent(trip)}`,{cache:'no-store'}).then(r=>r.json());
+  $('tripLabel').textContent=cfg.tripLabel||cfg.tripTitle||trip;
+  msalApp=new msal.PublicClientApplication({
+    auth:{clientId:cfg.clientId,authority:`https://login.microsoftonline.com/${cfg.tenantId}`,redirectUri:`${location.origin}/admin/microsoft.html`,navigateToLoginRequestUrl:false},
+    cache:{cacheLocation:'sessionStorage'}
+  });
+  await msalApp.initialize?.();
+  account=msalApp.getAllAccounts()[0]||null;
+  if(account)await load();
+}
+async function token(){
+  if(tokenValue)return tokenValue;
+  if(!account){const x=await msalApp.loginPopup({scopes:['User.Read'],prompt:'select_account'});account=x.account||msalApp.getAllAccounts()[0]}
+  try{tokenValue=(await msalApp.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}
+  catch{tokenValue=(await msalApp.acquireTokenPopup({scopes:['User.Read'],account})).accessToken}
+  return tokenValue;
+}
+async function load(){
+  try{
+    $('state').textContent='Berechtigung wird geprüft';
+    const r=await fetch(`/api/help/access?trip=${encodeURIComponent(trip)}`,{headers:{authorization:`Bearer ${await token()}`},cache:'no-store'});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.message||'Kein Zugriff.');
+    $('loginBox').hidden=true;$('app').hidden=false;$('logout').hidden=false;
+    $('tripLabel').textContent=d.tripLabel||cfg.tripLabel||trip;
+    const isAdmin=d.role==='admin';
+    $('adminHelp').hidden=!isAdmin;$('adminLink').hidden=!isAdmin;
+    $('state').textContent='Hilfe freigeschaltet';
+    $('detail').textContent=isAdmin?'Admin':`Lehrkraft / Reise-Redaktion`;
+    const tq=`?trip=${encodeURIComponent(trip)}`;
+    $('mediaLink').href=`/admin/media-inbox.html${tq}`;
+    $('redaktionLink').href=`/admin/redaktion.html${tq}`;
+    $('editorLink').href=`/admin/redaktion.html${tq}`;
+    $('participantsLink').href=`/admin/teilnehmer.html${tq}`;
+    $('storageExample').innerHTML=`Beispiel: <code>${trip}/pending/…</code>`;
+  }catch(e){
+    $('loginBox').hidden=false;$('app').hidden=true;
+    $('state').textContent='Kein Zugriff';$('detail').textContent=e.message;$('message').textContent=e.message;
+  }
+}
+$('login').onclick=load;
+$('logout').onclick=async()=>{try{if(account)await msalApp.logoutPopup({account,postLogoutRedirectUri:location.origin+'/admin/'})}catch{}sessionStorage.clear();location.reload()};
+init().catch(e=>{$('state').textContent='Anmeldung nicht verfügbar';$('detail').textContent=e.message});
+</script>
+</body>
+</html>

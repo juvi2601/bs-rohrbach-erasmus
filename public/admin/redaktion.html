@@ -31,6 +31,7 @@
   </a>
   <div class="top-actions">
     <a class="button ghost" href="/" target="_blank" rel="noopener">Website ansehen</a>
+    <a class="button ghost" id="helpLink" href="/admin/hilfe.html">Hilfe & Tutorials</a>
     <button class="button primary" id="loginBtn" type="button">Mit Microsoft anmelden</button>
   </div>
 </header>
@@ -82,6 +83,7 @@ let cfg, msalApp, account;
 const $=id=>document.getElementById(id);
 const redaktionTrip=(new URLSearchParams(location.search).get('trip')||'bruessel-2026').toLowerCase();
 if($('mediaInboxLink'))$('mediaInboxLink').href=`/admin/media-inbox.html?trip=${encodeURIComponent(redaktionTrip)}`;
+if($('helpLink'))$('helpLink').href=`/admin/hilfe.html?trip=${encodeURIComponent(redaktionTrip)}`;
 
 async function init(){
   cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());

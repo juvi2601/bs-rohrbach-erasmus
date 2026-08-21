@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.10.0.4';
+const VERSION = '14.0-dev.11.0.0';
 
 function normalizeHttpStatus(value,fallback=200){
   const n=Number(value);
@@ -1032,6 +1032,21 @@ function tripLabelForProject(project){
   if(project===DEFAULT_TRIP_ID)return TRIP_REGISTRY[DEFAULT_TRIP_ID]?.title||'Brüssel 2026';
   return DRAFT_ROUTE_REGISTRY[project]?.title||project;
 }
+async function handleHelpAccess(request,env){
+  try{
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyTripRole(request,env,['admin','teacher'],project);
+    return json({
+      ok:true,
+      project,
+      tripLabel:tripLabelForProject(project),
+      user,
+      role:user.access?.role||'',
+      permissions:user.access?.permissions||[]
+    });
+  }catch(error){return mediaError(error)}
+}
+
 async function handleAccessRosterGet(request,env){
   try{
     const project=mediaProjectFromRequest(request);
@@ -1380,7 +1395,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027/upload'||url.pathname==='/linz-2027/upload/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(!meta?.published)return new Response('Reise ist noch nicht veröffentlicht.',{status:404});
-      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-dev.10.0.4`,{
+      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-dev.11.0.0`,{
         method:'GET',headers:{'cache-control':'no-cache'}
       }));
       const headers=new Headers(asset.headers);
@@ -1394,7 +1409,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(meta?.published){
-        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.10.0.4`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.11.0.0`,{method:'GET',headers:{'cache-control':'no-cache'}}));
         const headers=new Headers(asset.headers);
         headers.set('cache-control','no-store, max-age=0');
         headers.set('pragma','no-cache');
@@ -1421,7 +1436,7 @@ export default {async fetch(request,env){
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
     if(url.pathname==='/api/trips/public-health'&&request.method==='GET'){
-      return json({ok:true,version:'14.0-dev.10.0.4',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
+      return json({ok:true,version:'14.0-dev.11.0.0',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
     }
 
     if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){
@@ -1631,6 +1646,7 @@ export default {async fetch(request,env){
   if(url.pathname==='/auth')return handleAuth(url,env);
   if(url.pathname==='/callback')return handleCallback(url,env);
   if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
+    if(url.pathname==='/api/help/access'&&request.method==='GET')return handleHelpAccess(request,env);
     if(url.pathname==='/api/access/roster'&&request.method==='GET')return handleAccessRosterGet(request,env);
     if(url.pathname==='/api/access/roster'&&request.method==='PUT')return handleAccessRosterPut(request,env);
     if(url.pathname==='/api/access/users'&&request.method==='GET')return handleAccessUsers(request,env);
