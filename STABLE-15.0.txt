@@ -1,0 +1,23 @@
+STABLE 15.0 – Multi-Reise-Plattform
+Stand: 21.08.2026
+Basis: DEV 14.1.6 – Einheitliche Navigation & Footer-Version
+
+Final getesteter Funktionsumfang:
+- zentrale Multi-Reise-Startseite
+- Brüssel 2026 als eigene Reise unter /bruessel-2026/
+- dynamische veröffentlichte Reisen mit eigener URL
+- einheitliche Reise-Navigation für Brüssel und zukünftige Reisen
+- Reiseübersicht-Button auf dynamischen Reisen
+- korrekte Von-bis-Datumsanzeige auf der Plattform
+- einheitliche Footer-Version und Aktualisierungsdatum
+- Reise-Assistent und Veröffentlichung
+- Teilnehmer- und Rollenverwaltung pro Reise
+- CSV-Import mit deutschen Rollenbezeichnungen
+- Microsoft-365-Login und rollenbasierte Zugriffe
+- reisebezogener Foto-/Video-Upload
+- getrennte R2-Speicherung und Medienfreigabe
+- geschützter Hilfe- und Tutorialbereich für Admin und Lehrkräfte
+
+Keine funktionalen Änderungen gegenüber DEV 14.1.6.
+Dieser Stand gilt als fester Rückkehrpunkt.
+Neue Funktionen wieder als DEV-Version auf Basis von STABLE 15.0 entwickeln.
