@@ -18,7 +18,7 @@
 <link href="https://tile.openstreetmap.de" rel="preconnect"/>
 <link href="https://api.open-meteo.com" rel="preconnect"/>
 <link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3Vt8cF5B6T4Y7YQWl9xY7X3p+zv0M=" rel="stylesheet"/>
-<link href="/styles-dynamic.css?v=14.1.5-dev" rel="stylesheet"/>
+<link href="/styles-dynamic.css?v=14.1.6-dev" rel="stylesheet"/>
 </head>
 <body>
 <a class="skip-link" href="#main">Zum Inhalt</a>
@@ -137,7 +137,7 @@
   </div>
 </div>
 <div aria-label="Bildansicht" aria-modal="true" class="lightbox" hidden="" id="lightbox" role="dialog"><button aria-label="Schließen" class="lightbox-close" id="lightboxClose">×</button><button aria-label="Vorheriges Bild" class="lightbox-nav prev" id="lightboxPrev">‹</button><figure><img alt="" id="lightboxImage"/><figcaption><strong id="lightboxTitle"></strong><span id="lightboxCaption"></span></figcaption></figure><button aria-label="Nächstes Bild" class="lightbox-nav next" id="lightboxNext">›</button></div>
-<section class="eu-funding" aria-label="Erasmus+ Förderhinweis"><div class="eu-funding-inner"><div class="eu-funding-head"><div><p class="eu-funding-kicker">ERASMUS+ · EUROPÄISCHE UNION</p><h2>Gemeinsam Europa erleben.</h2></div><img src="/images/eu-cofunded-de.svg" alt="Kofinanziert von der Europäischen Union" class="eu-funding-logo"></div><p class="eu-funding-disclaimer">„Von der Europäischen Union finanziert. Die geäußerten Ansichten und Meinungen entsprechen jedoch ausschließlich denen des Autors bzw. der Autoren und spiegeln nicht zwingend die der Europäischen Union oder der OeAD-GmbH wider. Weder die Europäische Union noch die OeAD-GmbH können dafür verantwortlich gemacht werden.“</p></div></section><footer><div class="footer-brand"><strong id="footerTitle">© 2026 Berufsschule Rohrbach · Erasmus+</strong><span id="footerSubtitle">Projektleitung und technische Umsetzung: Jürgen Vierlinger</span><span class="footer-build"><span id="footerVersion">Version 14.1.5-dev</span><span aria-hidden="true">·</span><span id="footerUpdated">Letzte Aktualisierung: 12.08.2026</span></span></div><div class="footer-meta"><div class="footer-legal-links" id="footerLegalLinks"></div><div class="footer-note"><a href="#start" id="footerTopLink">Nach oben ↑</a><span id="footerPrivacy">Keine personenbezogenen Reisedaten öffentlich</span></div></div></footer>
+<section class="eu-funding" aria-label="Erasmus+ Förderhinweis"><div class="eu-funding-inner"><div class="eu-funding-head"><div><p class="eu-funding-kicker">ERASMUS+ · EUROPÄISCHE UNION</p><h2>Gemeinsam Europa erleben.</h2></div><img src="/images/eu-cofunded-de.svg" alt="Kofinanziert von der Europäischen Union" class="eu-funding-logo"></div><p class="eu-funding-disclaimer">„Von der Europäischen Union finanziert. Die geäußerten Ansichten und Meinungen entsprechen jedoch ausschließlich denen des Autors bzw. der Autoren und spiegeln nicht zwingend die der Europäischen Union oder der OeAD-GmbH wider. Weder die Europäische Union noch die OeAD-GmbH können dafür verantwortlich gemacht werden.“</p></div></section><footer><div class="footer-brand"><strong id="footerTitle">© 2026 Berufsschule Rohrbach · Erasmus+</strong><span id="footerSubtitle">Projektleitung und technische Umsetzung: Jürgen Vierlinger</span><span class="footer-build"><span id="footerVersion">Version 14.1.6-dev</span><span aria-hidden="true">·</span><span id="footerUpdated">Letzte Aktualisierung: 21.08.2026</span></span></div><div class="footer-meta"><div class="footer-legal-links" id="footerLegalLinks"></div><div class="footer-note"><a href="#start" id="footerTopLink">Nach oben ↑</a><span id="footerPrivacy">Keine personenbezogenen Reisedaten öffentlich</span></div></div></footer>
 <script src="/config.js"></script><script crossorigin="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
 window.TRAVEL_PUBLIC_MODE=true;
 // Eigene Reise-URLs dürfen niemals vom alten Root-Service-Worker mit Brüssel-HTML überschrieben werden.
@@ -195,10 +195,10 @@ if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then
     }
     if(raw.includes('/api/media/gallery'))return {items:[]};
     if(/(?:^|\/)legal\.json/.test(raw)){const r=await nativeFetch('/content/legal.json',{cache:'no-store'});return r.json()}
-    if(/(?:^|\/)version\.json/.test(raw))return {version:'14.1.5-dev',updated:'13.08.2026'};
+    if(/(?:^|\/)version\.json/.test(raw))return {version:'14.1.6-dev',updated:'21.08.2026'};
     return undefined;
   };
   addEventListener('beforeunload',()=>blobUrls.forEach(URL.revokeObjectURL));
 })();
-</script><script src="/app-dynamic.js?v=14.1.5-dev"></script>
+</script><script src="/app-dynamic.js?v=14.1.6-dev"></script>
 </body></html>

@@ -47,7 +47,7 @@ function applySite(site){
   const e=site.emergency||{};setText("emergencyEyebrow",e.eyebrow);setText("emergencyTitle",e.title);setText("emergencyIntro",e.intro);renderEmergency(e.items||[]);
   const a=site.adminArea||{};setText("adminEyebrow",a.eyebrow);setText("adminTitle",a.title);setText("adminIntro",a.text);setText("adminButton",a.button);
   const f=site.footer||{};setText("footerTitle",f.title);setText("footerSubtitle",f.subtitle);setText("footerVersion",f.version);setText("footerUpdated",f.updated);setText("footerTopLink",f.topLink);setText("footerPrivacy",f.privacy);
-  fetchJson("version.json").then(v=>{const updated=v.updated||v.date||"";setText("footerVersion",`Version ${v.version}`);if(updated)setText("footerUpdated",`Letzte Aktualisierung: ${updated}`)}).catch(()=>{});
+  fetchJson("/version.json").then(v=>{const updated=v.updated||v.date||"";setText("footerVersion",`Version ${v.version}`);if(updated)setText("footerUpdated",`Letzte Aktualisierung: ${updated}`)}).catch(()=>{});
   const target=new Date(site.departure||journeyData?.trip?.start||"2026-11-21T20:00:00+01:00").getTime(),tripEnd=new Date(site.returnDate||journeyData?.trip?.end||"2026-11-26T23:59:00+01:00").getTime();
   const tick=()=>{
     const now=getJourneyNow(),nowMs=now.getTime(),el=qs("#countdown");if(!el)return;
