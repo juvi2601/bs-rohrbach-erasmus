@@ -117,7 +117,7 @@ function render(trips,defaultTrip){
       </div>
       <div class="trip-actions">
         <a class="button primary" href="/">Website öffnen</a>
-        <a class="button ghost" href="/admin/redaktion.html">Reise-Redaktion</a>
+        <a class="button ghost" href="/admin/redaktion.html?trip=${encodeURIComponent(t.id)}">Reise-Redaktion</a>
         <a class="button ghost" href="/admin/teilnehmer.html?trip=${encodeURIComponent(t.id)}">Teilnehmer & Rollen</a>
         ${t.id===defaultTrip?'<span class="badge">Standardreise</span>':''}
       </div>

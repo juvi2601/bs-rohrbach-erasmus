@@ -13,10 +13,13 @@
  try{localStorage.removeItem('erasmusPreviewReturn');localStorage.removeItem('erasmusPreviewReturnAt')}catch{}
 })();
 </script>
-</head><body><header class="topbar"><a class="brand" href="/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Geschützter Bereich</small></span></a><div class="top-actions"><a class="button ghost" href="/">Zur Website</a></div></header>
+</head><body><header class="topbar"><a class="brand" href="/"><span class="brand-mark">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Geschützter Bereich</small></span></a><div class="top-actions"><a class="button ghost" id="backWebsite" href="/">Zur Website</a></div></header>
 <main class="gate-wrap"><section class="gate-card"><div class="gate-icon">🔐</div><p class="eyebrow">Administrator & Reise-Redaktion</p><h1>Geschützter Bereich</h1><p>Bitte mit dem Microsoft-365-Schulkonto anmelden. Der passende Bereich wird anschließend automatisch geöffnet.</p><div class="gate-state" id="state">Noch nicht angemeldet.</div><div class="gate-actions"><button class="button primary" id="login">Mit Microsoft anmelden</button></div><div class="account" id="account"></div></section></main>
 <script>
 let cfg,app,acct;const $=id=>document.getElementById(id);
+const loginTrip=(new URLSearchParams(location.search).get('trip')||(()=>{try{return localStorage.getItem('bsr-admin-active-trip')}catch{return''}})()||'bruessel-2026').toLowerCase();
+try{localStorage.setItem('bsr-admin-active-trip',loginTrip)}catch{}
+const withTrip=path=>`${path}${path.includes('?')?'&':'?'}trip=${encodeURIComponent(loginTrip)}`;
 function clearStaleMsalInteraction(){
  for(const store of [sessionStorage,localStorage]){
   try{
@@ -29,11 +32,11 @@ function clearStaleMsalInteraction(){
  try{localStorage.removeItem('erasmusPreviewReturn');localStorage.removeItem('erasmusPreviewReturnAt')}catch{}
 }
 
-async function init(){clearStaleMsalInteraction();cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});await app.initialize();acct=app.getAllAccounts()[0]||null;if(acct)route(false)}
+async function init(){clearStaleMsalInteraction();cfg=await fetch(withTrip('/api/media/config'),{cache:'no-store'}).then(r=>r.json());if($('backWebsite'))$('backWebsite').href=cfg.publicUrl||cfg.backUrl||'/';app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});await app.initialize();acct=app.getAllAccounts()[0]||null;if(acct)route(false)}
 async function token(interactive){if(!acct){if(!interactive)throw new Error('Nicht angemeldet');const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});acct=x.account||app.getAllAccounts()[0]}try{return(await app.acquireTokenSilent({scopes:['User.Read'],account:acct})).accessToken}catch(e){if(!interactive)throw e;return(await app.acquireTokenPopup({scopes:['User.Read'],account:acct})).accessToken}}
-async function route(interactive=true){try{$('state').className='gate-state';$('state').textContent='Berechtigung wird geprüft …';const tk=await token(interactive);const r=await fetch('/api/access/me',{headers:{authorization:'Bearer '+tk},cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.message||'Anmeldung fehlgeschlagen.');$('account').textContent=d.user?.email||acct?.username||'';
+async function route(interactive=true){try{$('state').className='gate-state';$('state').textContent='Berechtigung wird geprüft …';const tk=await token(interactive);const r=await fetch(withTrip('/api/access/me'),{headers:{authorization:'Bearer '+tk},cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.message||'Anmeldung fehlgeschlagen.');$('account').textContent=d.user?.email||acct?.username||'';
  if(d.access?.role==='admin'){ $('state').className='gate-state ok';$('state').textContent='Admin erkannt – Dashboard wird geöffnet …';location.replace('/admin/?verified=1');return}
- if(d.access?.role==='teacher'){ $('state').className='gate-state ok';$('state').textContent='Lehrkraft erkannt – Reise-Redaktion wird geöffnet …';location.replace('/admin/redaktion.html?verified=1');return}
+ if(d.access?.role==='teacher'){ $('state').className='gate-state ok';$('state').textContent='Lehrkraft erkannt – Reise-Redaktion wird geöffnet …';location.replace(withTrip('/admin/redaktion.html?verified=1'));return}
  $('state').className='gate-state denied';$('state').textContent='Sie haben keinen Zugriff auf diesen Bereich.';$('login').textContent='Mit anderem Konto anmelden';
 }catch(e){const msg=e?.message||String(e);if(String(msg).includes('Nicht angemeldet')){$('state').textContent='Noch nicht angemeldet.';return}if(String(msg).includes('interaction_in_progress')){clearStaleMsalInteraction();acct=app?.getAllAccounts?.()[0]||null;$('state').className='gate-state';$('state').textContent='Microsoft-Anmeldung wurde zurückgesetzt. Bitte jetzt nochmals auf „Mit Microsoft anmelden“ klicken.';return}$('state').className='gate-state denied';$('state').textContent=msg||'Anmeldung nicht möglich.'}}
 $('login').onclick=()=>route(true);init().catch(e=>{$('state').className='gate-state denied';$('state').textContent=e.message});

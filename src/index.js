@@ -862,6 +862,7 @@ async function handleMediaConfig(url,env){
     configured:Boolean(tenantId&&clientId),tenantId,clientId,
     redirectUri:`${url.origin}/upload.html`,project,
     tripTitle,tripLabel:project===DEFAULT_TRIP_ID?'Brüssel 2026':tripTitle,destination,theme,heroUrl,backUrl,
+    publicUrl:project===DEFAULT_TRIP_ID?'/bruessel-2026/':backUrl,
     schoolDomain:MEDIA_ALLOWED_DOMAIN,
     maxFiles:MEDIA_MAX_FILES_PER_BATCH,
     maxImageBytes:MEDIA_MAX_IMAGE_BYTES,
@@ -980,7 +981,7 @@ async function loadStudentAccess(env,project=MEDIA_PROJECT){
     throw Object.assign(new Error('Die gespeicherte Schüler*innenliste ist beschädigt.'),{status:500});
   }
 }
-async function saveStudentAccess(env,students,admin){
+async function saveStudentAccess(env,students,admin,project=MEDIA_PROJECT){
   if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
   const unique=new Map();
   for(const item of Array.isArray(students)?students:[]){
@@ -989,10 +990,10 @@ async function saveStudentAccess(env,students,admin){
     unique.set(email,{email,name:cleanText(item?.name,120)});
     if(unique.size>500)throw Object.assign(new Error('Maximal 500 Schüler*innen pro Reise sind zulässig.'),{status:400});
   }
-  const payload={project:MEDIA_PROJECT,updatedAt:new Date().toISOString(),updatedBy:String(admin?.email||''),students:[...unique.values()]};
-  await env.MEDIA_BUCKET.put(studentAccessKey(MEDIA_PROJECT),JSON.stringify(payload,null,2),{
+  const payload={project,updatedAt:new Date().toISOString(),updatedBy:String(admin?.email||''),students:[...unique.values()]};
+  await env.MEDIA_BUCKET.put(studentAccessKey(project),JSON.stringify(payload,null,2),{
     httpMetadata:{contentType:'application/json; charset=utf-8'},
-    customMetadata:{project:MEDIA_PROJECT,updatedAt:payload.updatedAt,updatedBy:payload.updatedBy}
+    customMetadata:{project,updatedAt:payload.updatedAt,updatedBy:payload.updatedBy}
   });
   return payload.students;
 }
@@ -1099,36 +1100,42 @@ async function verifyMediaUploader(request,env,project=mediaProjectFromRequest(r
 }
 async function handleAccessMe(request,env){
   try{
+    const project=mediaProjectFromRequest(request);
     const user=await verifySchoolUser(request,env);
-    const access=await tripAccessFor(env,user.email);
-    return json({ok:true,user,access,project:MEDIA_PROJECT});
+    const access=await tripAccessFor(env,user.email,project);
+    return json({ok:true,user,access,project,tripLabel:tripLabelForProject(project)});
   }catch(error){return mediaError(error)}
 }
 async function handleAccessUsers(request,env){
   try{
-    const user=await verifyTripRole(request,env,['admin']);
-    const fixed=Object.entries(TRIP_ACCESS[MEDIA_PROJECT]||{}).map(([email,x])=>({
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyTripRole(request,env,['admin'],project);
+    const fixed=Object.entries(TRIP_ACCESS[project]||{}).map(([email,x])=>({
       email,name:x.name,role:x.role,permissions:ROLE_PERMISSIONS[x.role]||[]
     }));
-    const students=(await loadStudentAccess(env)).map(x=>({
-      email:x.email,name:x.name||x.email,role:'student',permissions:ROLE_PERMISSIONS.student
+    const roster=await loadTripRoster(env,project);
+    const fixedEmails=new Set(fixed.map(x=>x.email));
+    const dynamic=roster.filter(x=>!fixedEmails.has(x.email)).map(x=>({
+      email:x.email,name:x.name||x.email,role:x.role,permissions:ROLE_PERMISSIONS[x.role]||[]
     }));
-    return json({ok:true,user,project:MEDIA_PROJECT,users:[...fixed,...students]});
+    return json({ok:true,user,project,tripLabel:tripLabelForProject(project),users:[...fixed,...dynamic]});
   }catch(error){return mediaError(error)}
 }
 async function handleStudentAccessGet(request,env){
   try{
-    const user=await verifyTripRole(request,env,['admin']);
-    const students=await loadStudentAccess(env);
-    return json({ok:true,user,project:MEDIA_PROJECT,students});
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyTripRole(request,env,['admin'],project);
+    const students=await loadStudentAccess(env,project);
+    return json({ok:true,user,project,tripLabel:tripLabelForProject(project),students});
   }catch(error){return mediaError(error)}
 }
 async function handleStudentAccessPut(request,env){
   try{
-    const user=await verifyTripRole(request,env,['admin']);
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyTripRole(request,env,['admin'],project);
     const body=await request.json().catch(()=>{throw Object.assign(new Error('Ungültige Importdaten.'),{status:400})});
-    const students=await saveStudentAccess(env,body?.students,user);
-    return json({ok:true,project:MEDIA_PROJECT,students,count:students.length,updatedAt:new Date().toISOString()});
+    const students=await saveStudentAccess(env,body?.students,user,project);
+    return json({ok:true,project,tripLabel:tripLabelForProject(project),students,count:students.length,updatedAt:new Date().toISOString()});
   }catch(error){return mediaError(error)}
 }
 // --- Ende Version 13.5 Rollenbasis ---
@@ -1211,9 +1218,10 @@ async function handleMediaAdminDelete(request,env){
 // --- DEV.11: öffentliche Galerie aus freigegebenen R2-Medien ---
 async function handleMediaGallery(env,url){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'Galerie-Speicher ist derzeit nicht verfügbar.'},503);
+  const project=mediaProjectFromUrl(url);
   let cursor=undefined,items=[];
   do{
-    const page=await env.MEDIA_BUCKET.list({prefix:approvedPrefix(),limit:1000,cursor,include:['httpMetadata','customMetadata']});
+    const page=await env.MEDIA_BUCKET.list({prefix:approvedPrefix(project),limit:1000,cursor,include:['httpMetadata','customMetadata']});
     for(const o of page.objects||[]){
       const m=o.customMetadata||{},type=m.mediaType==='video'||String(o.httpMetadata?.contentType||'').startsWith('video/')?'video':'image';
       items.push({
@@ -1226,12 +1234,13 @@ async function handleMediaGallery(env,url){
     cursor=page.truncated?page.cursor:undefined;
   }while(cursor);
   items.sort((a,b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
-  return json({ok:true,project:MEDIA_PROJECT,items},200,{'cache-control':'public, max-age=60'});
+  return json({ok:true,project,items},200,{'cache-control':'public, max-age=60'});
 }
 async function handleMediaGalleryFile(env,url){
   if(!env.MEDIA_BUCKET)return new Response('Nicht verfügbar',{status:503});
+  const project=mediaProjectFromUrl(url);
   const key=url.searchParams.get('key')||'';
-  if(!validApprovedKey(key))return new Response('Ungültiger Medienpfad',{status:400});
+  if(!validApprovedKey(key,project))return new Response('Ungültiger Medienpfad',{status:400});
   const object=await env.MEDIA_BUCKET.get(key);if(!object)return new Response('Nicht gefunden',{status:404});
   const headers=new Headers();object.writeHttpMetadata(headers);headers.set('etag',object.httpEtag||'');headers.set('cache-control','public, max-age=3600');headers.set('x-content-type-options','nosniff');
   return new Response(object.body,{headers});
@@ -1246,36 +1255,47 @@ const EDITOR_CONTENT = Object.freeze({
   gallery:{file:'gallery.json',permission:'gallery.manage'},
   site:{file:'site.json',permission:'live.manage'}
 });
-function editorKey(name){return `__system/editor/${MEDIA_PROJECT}/${name}`}
+function editorKey(project,name){return `__system/editor/${project}/${name}`}
 
 async function staticContentJson(env,url,file){
   const response=await env.ASSETS.fetch(new Request(`${url.origin}/content/${file}`));
   if(!response.ok)throw Object.assign(new Error(`Inhaltsdatei ${file} konnte nicht geladen werden.`),{status:502});
   return response.json();
 }
-async function effectiveContentJson(env,url,file){
+async function publishedContentJson(env,project,file){
+  if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+  const resource=String(file||'').replace(/\.json$/,'');
+  const object=await env.MEDIA_BUCKET.get(publishedResourceKey(project,resource));
+  if(!object)throw Object.assign(new Error(`Veröffentlichter Inhalt ${file} wurde für diese Reise nicht gefunden.`),{status:404});
+  return JSON.parse(await object.text());
+}
+async function effectiveContentJson(env,url,file,project=DEFAULT_TRIP_ID){
   if(env.MEDIA_BUCKET){
-    const object=await env.MEDIA_BUCKET.get(editorKey(file));
+    const object=await env.MEDIA_BUCKET.get(editorKey(project,file));
     if(object){
       try{return JSON.parse(await object.text())}
       catch{throw Object.assign(new Error(`Redaktionsstand ${file} ist beschädigt.`),{status:500})}
     }
   }
-  return staticContentJson(env,url,file);
+  return project===DEFAULT_TRIP_ID?staticContentJson(env,url,file):publishedContentJson(env,project,file);
 }
-async function saveContentOverride(env,file,data,user){
+async function saveContentOverride(env,project,file,data,user){
   if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
-  await env.MEDIA_BUCKET.put(editorKey(file),JSON.stringify(data,null,2),{
+  await env.MEDIA_BUCKET.put(editorKey(project,file),JSON.stringify(data,null,2),{
     httpMetadata:{contentType:'application/json; charset=utf-8'},
-    customMetadata:{project:MEDIA_PROJECT,updatedAt:new Date().toISOString(),updatedBy:String(user.email||''),role:String(user.access?.role||'')}
+    customMetadata:{project,updatedAt:new Date().toISOString(),updatedBy:String(user.email||''),role:String(user.access?.role||'')}
   });
 }
-async function handlePublicContentOverride(env,url,file){
+async function getEditorOverride(env,project,file){
   if(!env.MEDIA_BUCKET)return null;
-  const object=await env.MEDIA_BUCKET.get(editorKey(file));
+  return env.MEDIA_BUCKET.get(editorKey(project,file));
+}
+async function handlePublicContentOverride(env,url,file){
+  const object=await getEditorOverride(env,DEFAULT_TRIP_ID,file);
   if(!object)return null;
   const headers=new Headers({'content-type':'application/json; charset=utf-8','cache-control':'no-store'});
   headers.set('x-editor-source','r2');
+  headers.set('x-editor-trip',DEFAULT_TRIP_ID);
   return new Response(object.body,{headers});
 }
 function requirePermission(user,permission){
@@ -1325,40 +1345,43 @@ function cleanLiveStatus(input){
 }
 async function handleEditorGet(request,env,url,kind){
   try{
+    const project=mediaProjectFromRequest(request);
     const def=EDITOR_CONTENT[kind];
     if(!def)throw Object.assign(new Error('Unbekannter Redaktionsbereich.'),{status:404});
-    const user=await verifyTripRole(request,env,['admin','teacher']);
+    const user=await verifyTripRole(request,env,['admin','teacher'],project);
     requirePermission(user,def.permission);
-    const data=await effectiveContentJson(env,url,def.file);
-    return json({ok:true,project:MEDIA_PROJECT,user:{email:user.email,name:user.access?.name,role:user.access?.role},data});
+    const data=await effectiveContentJson(env,url,def.file,project);
+    return json({ok:true,project,tripLabel:tripLabelForProject(project),user:{email:user.email,name:user.access?.name,role:user.access?.role},data});
   }catch(error){return mediaError(error)}
 }
 async function handleEditorSave(request,env,url,kind){
   try{
+    const project=mediaProjectFromRequest(request);
     const def=EDITOR_CONTENT[kind];
     if(!def)throw Object.assign(new Error('Unbekannter Redaktionsbereich.'),{status:404});
-    const user=await verifyTripRole(request,env,['admin','teacher']);
+    const user=await verifyTripRole(request,env,['admin','teacher'],project);
     requirePermission(user,def.permission);
     const body=await request.json().catch(()=>{throw Object.assign(new Error('Ungültige JSON-Daten.'),{status:400})});
     let data;
     if(kind==='diary')data=cleanDiary(body,user);
     if(kind==='gallery')data=cleanGallery(body);
     if(kind==='site'){
-      const current=await effectiveContentJson(env,url,def.file);
+      const current=await effectiveContentJson(env,url,def.file,project);
       data={...current,liveStatus:cleanLiveStatus(body?.liveStatus||body)};
     }
-    await saveContentOverride(env,def.file,data,user);
-    return json({ok:true,project:MEDIA_PROJECT,savedAt:new Date().toISOString(),data});
+    await saveContentOverride(env,project,def.file,data,user);
+    return json({ok:true,project,tripLabel:tripLabelForProject(project),savedAt:new Date().toISOString(),data});
   }catch(error){return mediaError(error)}
 }
 async function handleEditorReset(request,env,url,kind){
   try{
+    const project=mediaProjectFromRequest(request);
     const def=EDITOR_CONTENT[kind];
     if(!def)throw Object.assign(new Error('Unbekannter Redaktionsbereich.'),{status:404});
-    const user=await verifyTripRole(request,env,['admin']);
+    const user=await verifyTripRole(request,env,['admin'],project);
     if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
-    await env.MEDIA_BUCKET.delete(editorKey(def.file));
-    return json({ok:true,project:MEDIA_PROJECT,message:'Redaktions-Override wurde entfernt.'});
+    await env.MEDIA_BUCKET.delete(editorKey(project,def.file));
+    return json({ok:true,project,tripLabel:tripLabelForProject(project),message:'Redaktions-Override wurde entfernt.'});
   }catch(error){return mediaError(error)}
 }
 // --- Ende Version 13.7 Reise-Redaktion ---
@@ -1482,10 +1505,12 @@ export default {async fetch(request,env){
         if(!meta?.published)throw Object.assign(new Error('Reise ist nicht veröffentlicht.'),{status:404});
         if(!['site','program','places','downloads','faq','news','gallery','diary','journey'].includes(resource))
           throw Object.assign(new Error('Unbekannte Reiseressource.'),{status:400});
-        const object=await env.MEDIA_BUCKET.get(publishedResourceKey(trip,resource));
+        let object=null;
+        if(['site','gallery','diary'].includes(resource))object=await getEditorOverride(env,trip,`${resource}.json`);
+        if(!object)object=await env.MEDIA_BUCKET.get(publishedResourceKey(trip,resource));
         if(!object)throw Object.assign(new Error('Veröffentlichte Reiseressource fehlt.'),{status:404});
         const data=JSON.parse(await object.text());
-        return json(data,200,{'cache-control':'public, max-age=60','x-bsr-public-trip':trip,'x-bsr-public-resource':resource});
+        return json(data,200,{'cache-control':'public, max-age=60','x-bsr-public-trip':trip,'x-bsr-public-resource':resource,'x-bsr-editor-override':object.key?.startsWith('__system/editor/')?'1':'0'});
       }catch(error){return mediaError(error)}
     }
 

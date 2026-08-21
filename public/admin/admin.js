@@ -72,14 +72,18 @@ const renderPreflight = results => {
       : `<span class="check-icon" aria-hidden="true">✓</span><div><strong>Website ist technisch reisebereit</strong><small>Alle automatischen Prüfungen wurden erfolgreich abgeschlossen.</small></div>`;
 };
 
+const activeTrip=window.AdminTrip?.trip||'bruessel-2026';
+const tripResource=name=>window.AdminTrip?.resource(name)||`/content/${name}.json`;
+const activeTripLabel=()=>document.querySelector('[data-trip-label]')?.textContent||'Reise';
+
 async function loadDashboard() {
   const refresh = document.getElementById('preflightRefresh');
   if (refresh) refresh.disabled = true;
   const [news, program, gallery, downloads, places, faq, diary, legal, site, cms, version, journey, microsoft] = await Promise.all([
-    readJson('/content/news.json'), readJson('/content/program.json'), readJson('/content/gallery.json'),
-    readJson('/content/downloads.json'), readJson('/content/places.json'), readJson('/content/faq.json'),
-    readJson('/content/diary.json'), readJson('/content/legal.json'), readJson('/content/site.json'),
-    readJson('/api/cms-status'), readJson('/version.json'), readJson('/content/journey.json'), readJson('/api/microsoft-status')
+    readJson(tripResource('news')), readJson(tripResource('program')), readJson(tripResource('gallery')),
+    readJson(tripResource('downloads')), readJson(tripResource('places')), readJson(tripResource('faq')),
+    readJson(tripResource('diary')), readJson('/content/legal.json'), readJson(tripResource('site')),
+    readJson('/api/cms-status'), readJson('/version.json'), readJson(tripResource('journey')), readJson('/api/microsoft-status')
   ]);
 
   setCount('count-news', itemCount(news, 'items', 'news'));
@@ -101,12 +105,13 @@ async function loadDashboard() {
     if (values[1] && version.updated) values[1].textContent = version.updated;
   }
 
-  const departure = new Date(site?.departure || '2026-11-21T20:00:00+01:00');
-  const returnDate = new Date(site?.returnDate || '2026-11-26T23:59:00+01:00');
+  const departure = new Date(site?.departure||site?.departureDate||site?.startDate||journey?.trip?.start||'');
+  const returnDate = new Date(site?.returnDate||site?.endDate||journey?.trip?.end||'');
   const now = new Date();
-  let phase = 'Vor der Reise', phaseDetail = `${Math.max(0, Math.ceil((departure-now)/86400000))} Tage bis zur Abfahrt`;
-  if (now >= departure && now <= returnDate) { const day = Math.max(1, Math.min(6, Math.floor((now-departure)/86400000)+1)); phase = `Tag ${day} von 6`; phaseDetail = 'Die Brüsselreise läuft.'; }
-  if (now > returnDate) { phase = 'Reise abgeschlossen'; phaseDetail = 'Das Reisetagebuch und die Galerie bleiben erreichbar.'; }
+  const validDates=Number.isFinite(departure.getTime())&&Number.isFinite(returnDate.getTime());
+  let phase = validDates?'Vor der Reise':'Reisezeitraum prüfen', phaseDetail = validDates?`${Math.max(0, Math.ceil((departure-now)/86400000))} Tage bis zur Abfahrt`:'Abfahrts- oder Rückreisedatum fehlt.';
+  if (validDates&&now >= departure && now <= returnDate) { const total=Math.max(1,Math.ceil((returnDate-departure)/86400000)+1);const day = Math.max(1, Math.min(total, Math.floor((now-departure)/86400000)+1)); phase = `Tag ${day} von ${total}`; phaseDetail = `${activeTripLabel()} läuft.`; }
+  if (validDates&&now > returnDate) { phase = 'Reise abgeschlossen'; phaseDetail = 'Das Reisetagebuch und die Galerie bleiben erreichbar.'; }
   const phaseEl=document.getElementById('journey-phase'),phaseDetailEl=document.getElementById('journey-detail');if(phaseEl)phaseEl.textContent=phase;if(phaseDetailEl)phaseDetailEl.textContent=phaseDetail;
   const live=site?.liveStatus||{};const autoMode=live.mode!=="manual";const journeyDay=(journey?.days||[]).find(item=>item.date===new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Vienna',year:'numeric',month:'2-digit',day:'2-digit'}).format(now));const liveTitle=document.getElementById('dashboard-live-title'),liveText=document.getElementById('dashboard-live-text');if(liveTitle)liveTitle.textContent=autoMode?`🤖 Smart Journey: ${journeyDay?.title||phase}`:(live.enabled?`${live.emoji||'📢'} ${live.title||'Aktueller Status'}`:'Manueller Status aus');if(liveText)liveText.textContent=autoMode?(journeyDay?.status||'Der Status wird automatisch aus dem Reiseverlauf erzeugt.'):(live.enabled?(live.text||'Keine Meldung eingetragen.'):'Der manuelle Status ist derzeit ausgeblendet.');
   const latest=[...diaryPublished].sort((a,b)=>`${b.date||''} ${b.time||''}`.localeCompare(`${a.date||''} ${a.time||''}`))[0];const lastTitle=document.getElementById('last-diary-title'),lastDate=document.getElementById('last-diary-date');if(lastTitle)lastTitle.textContent=latest?.title||'Noch keiner';if(lastDate)lastDate.textContent=latest?.date?`Veröffentlicht am ${latest.date}`:'Kein veröffentlichter Eintrag';
@@ -115,11 +120,12 @@ async function loadDashboard() {
   const title = card?.querySelector('strong');
   const text = card?.querySelector('small');
   const notice = document.querySelector('.notice p');
-  if (cms?.ready) {
+  const editorialReady=activeTrip==='bruessel-2026'?Boolean(cms?.ready):true;
+  if (editorialReady) {
     card?.classList.add('ready');
     if (title) title.textContent = 'Redaktion bereit';
-    if (text) text.textContent = 'GitHub-Anmeldung ist eingerichtet';
-    if (notice) notice.textContent = 'Die Redaktion ist verbunden. Änderungen werden als GitHub-Commit gespeichert und anschließend automatisch über Cloudflare veröffentlicht.';
+    if (text) text.textContent = activeTrip==='bruessel-2026'?'GitHub-Anmeldung ist eingerichtet':'Microsoft-/R2-Redaktion ist reisebezogen aktiv';
+    if (notice) notice.textContent = activeTrip==='bruessel-2026'?'Die Redaktion ist verbunden. Änderungen werden als GitHub-Commit gespeichert und anschließend automatisch über Cloudflare veröffentlicht.':'Die Reise-Redaktion speichert Änderungen ausschließlich im Datenbereich der aktiven Reise.';
   } else {
     card?.classList.add('setup');
     if (title) title.textContent = 'Einrichtung erforderlich';
@@ -144,7 +150,7 @@ async function loadDashboard() {
 
   setText('system-version', version?.version || '–');
   setText('system-updated', version?.updated || version?.date || '–');
-  setText('system-status', cms?.ready && files.every(Boolean) ? 'Einsatzbereit' : 'Kontrolle nötig');
+  setText('system-status', editorialReady && files.every(Boolean) ? 'Einsatzbereit' : 'Kontrolle nötig');
   setText('system-diary-published', publishedDiary);
   setText('system-diary-drafts', draftDiary);
   setText('system-gallery', galleryRows.length);
@@ -154,7 +160,7 @@ async function loadDashboard() {
 
   renderPreflight([
     preflightResult('Inhaltsdateien erreichbar', files.every(Boolean) ? 'ok' : 'fail', files.every(Boolean) ? 'Alle zentralen JSON-Dateien konnten geladen werden.' : 'Mindestens eine Inhaltsdatei ist nicht erreichbar oder fehlerhaft.'),
-    preflightResult('Redaktionszugang', cms?.ready ? 'ok' : 'fail', cms?.ready ? 'GitHub OAuth und CMS-Verbindung sind eingerichtet.' : 'Die CMS-Verbindung ist noch nicht vollständig eingerichtet.'),
+    preflightResult('Redaktionszugang', editorialReady ? 'ok' : 'fail', editorialReady ? (activeTrip==='bruessel-2026'?'GitHub OAuth und CMS-Verbindung sind eingerichtet.':'Microsoft-/R2-Reise-Redaktion ist für diese Reise verfügbar.') : 'Die Redaktion ist noch nicht vollständig eingerichtet.'),
     preflightResult('Programm', programDays.length >= 6 ? 'ok' : programDays.length ? 'warn' : 'fail', programDays.length ? `${programDays.length} Reisetage sind eingetragen.` : 'Es wurden keine Reisetage gefunden.'),
     preflightResult('Karte und Marker', placeRows.length && placeRows.every(hasCoordinates) ? 'ok' : placeRows.length ? 'warn' : 'fail', placeRows.length ? `${placeRows.filter(hasCoordinates).length} von ${placeRows.length} Orten besitzen gültige Koordinaten.` : 'Es wurden keine Kartenorte gefunden.'),
     preflightResult('Galerie und Alternativtexte', galleryRows.length && missingAlt === 0 ? 'ok' : galleryRows.length ? 'warn' : 'fail', galleryRows.length ? (missingAlt ? `${galleryRows.length} Fotos geprüft; bei ${missingAlt} Foto${missingAlt === 1 ? '' : 's'} fehlt ein Alternativtext.` : `${galleryRows.length} Fotos geprüft; alle besitzen einen Alternativtext.`) : 'Die Galerie enthält noch keine Fotos.'),
@@ -184,7 +190,7 @@ function setJourneyPreviewStatus(preview){
 async function initJourneySimulator(){
   const enabled=document.getElementById('journeyPreviewEnabled'),date=document.getElementById('journeyPreviewDate'),preset=document.getElementById('journeyPreviewPreset');
   if(!enabled||!date||!preset)return;
-  const journey=await readJson('/content/journey.json');if(!journey)return;
+  const journey=await readJson(tripResource('journey'));if(!journey)return;
   const start=String(journey.trip?.start||'').slice(0,10),end=String(journey.trip?.end||'').slice(0,10);
   const dayBefore=start?new Date(`${start}T12:00:00`):null;if(dayBefore)dayBefore.setDate(dayBefore.getDate()-1);
   const dayAfter=end?new Date(`${end}T12:00:00`):null;if(dayAfter)dayAfter.setDate(dayAfter.getDate()+1);

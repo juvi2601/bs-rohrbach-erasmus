@@ -8,7 +8,7 @@
   <title>Reise-Redaktion – BS Rohrbach Erasmus+</title>
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="stylesheet" href="/admin/admin.css?v=13.6">
-  <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+  <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script><script src="/admin/admin-trip.js?v=15.0.2-dev"></script>
   <style>
     .editor-identity{margin:18px 0 26px;padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:#fff;display:flex;justify-content:space-between;gap:18px;align-items:center}
     .editor-identity strong,.editor-identity small{display:block}.editor-identity small{color:var(--muted);margin-top:3px}
@@ -25,12 +25,12 @@
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="/" aria-label="Zur Website">
+  <a class="brand" data-trip-website href="/" aria-label="Zur Website">
     <span class="brand-mark">E+</span>
     <span><strong>BS Rohrbach Erasmus+</strong><small>Reise-Redaktion</small></span>
   </a>
   <div class="top-actions">
-    <a class="button ghost" href="/" target="_blank" rel="noopener">Website ansehen</a>
+    <a class="button ghost" data-trip-website href="/" target="_blank" rel="noopener">Website ansehen</a>
     <a class="button ghost" id="helpLink" href="/admin/hilfe.html">Hilfe & Tutorials</a>
     <button class="button primary" id="loginBtn" type="button">Mit Microsoft anmelden</button>
   </div>
@@ -39,7 +39,7 @@
 <main class="shell">
   <section class="welcome">
     <div>
-      <p class="eyebrow">Brüssel 2026</p>
+      <p class="eyebrow">Aktive Reise · <span data-trip-label>Reise wird geladen …</span></p>
       <h1>Reise-Redaktion</h1>
       <p>Der Arbeitsbereich für die mitreisenden Lehrkräfte. Es werden nur Funktionen angezeigt, die zur jeweiligen Rolle gehören.</p>
     </div>
@@ -54,23 +54,23 @@
   <section class="preflight" id="gate">
     <div class="login-gate">
       <strong>Zugriff geschützt</strong>
-      <p>Bitte mit dem BS-Rohrbach-Microsoft-Konto anmelden. Nur für Brüssel 2026 freigeschaltete Admins und Lehrkräfte erhalten Zugriff.</p>
+      <p>Bitte mit dem BS-Rohrbach-Microsoft-Konto anmelden. Nur für die aktuell ausgewählte Reise freigeschaltete Admins und Lehrkräfte erhalten Zugriff.</p>
     </div>
   </section>
 
   <section id="editorContent" hidden>
     <div class="section-heading"><div><p class="eyebrow">Deine Werkzeuge</p><h2>Reise verwalten</h2></div></div>
     <div class="permission-grid">
-      <a class="permission-card active" href="/admin/media-inbox.html" id="mediaInboxLink" data-permission="media.moderate">
+      <a class="permission-card active" href="/admin/media-inbox.html" id="mediaInboxLink" data-trip-link="/admin/media-inbox.html" data-permission="media.moderate">
         <span class="icon">📷</span><div><h3>Medienfreigabe</h3><p>Neue Fotos und Videos prüfen, freigeben oder löschen.</p></div><span class="status">Verfügbar</span>
       </a>
-      <a class="permission-card active" href="/admin/tagebuch.html" data-permission="diary.manage">
+      <a class="permission-card active" href="/admin/tagebuch.html" data-trip-link="/admin/tagebuch.html" data-permission="diary.manage">
         <span class="icon">📖</span><div><h3>Reisetagebuch</h3><p>Einträge erstellen und veröffentlichen.</p></div><span class="status">Verfügbar</span>
       </a>
-      <a class="permission-card active" href="/admin/live-status.html" data-permission="live.manage">
+      <a class="permission-card active" href="/admin/live-status.html" data-trip-link="/admin/live-status.html" data-permission="live.manage">
         <span class="icon">📣</span><div><h3>Live-Status</h3><p>Aktuelle Meldung auf der Startseite ändern.</p></div><span class="status">Verfügbar</span>
       </a>
-      <a class="permission-card active" href="/admin/galerie.html" data-permission="gallery.manage">
+      <a class="permission-card active" href="/admin/galerie.html" data-trip-link="/admin/galerie.html" data-permission="gallery.manage">
         <span class="icon">📸</span><div><h3>Galerie</h3><p>Öffentliche Reisemotive pflegen.</p></div><span class="status">Verfügbar</span>
       </a>
     </div>
@@ -81,12 +81,12 @@
 <script>
 let cfg, msalApp, account;
 const $=id=>document.getElementById(id);
-const redaktionTrip=(new URLSearchParams(location.search).get('trip')||'bruessel-2026').toLowerCase();
-if($('mediaInboxLink'))$('mediaInboxLink').href=`/admin/media-inbox.html?trip=${encodeURIComponent(redaktionTrip)}`;
+const redaktionTrip=AdminTrip.trip;
+AdminTrip.apply().catch(console.error);
 if($('helpLink'))$('helpLink').href=`/admin/hilfe.html?trip=${encodeURIComponent(redaktionTrip)}`;
 
 async function init(){
-  cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
+  cfg=await fetch(`/api/media/config?trip=${encodeURIComponent(redaktionTrip)}`,{cache:'no-store'}).then(r=>r.json());
   msalApp=new msal.PublicClientApplication({
     auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,postLogoutRedirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},
     cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},
@@ -108,9 +108,9 @@ async function token(){
 async function loadAccess(){
   try{
     $('accessState').textContent='Berechtigung wird geprüft';
-    $('accessDetail').textContent='Brüssel 2026';
+    $('accessDetail').textContent=cfg.tripLabel||cfg.tripTitle||redaktionTrip;
     const tk=await token();
-    const r=await fetch('/api/access/me',{headers:{authorization:'Bearer '+tk},cache:'no-store'});
+    const r=await fetch(`/api/access/me?trip=${encodeURIComponent(redaktionTrip)}`,{headers:{authorization:'Bearer '+tk},cache:'no-store'});
     const d=await r.json();
     if(!r.ok) throw new Error(d.message||'Zugriff nicht möglich.');
     if(!d.access || !['admin','teacher'].includes(d.access.role)) throw new Error('Dieses Konto ist nicht für die Reise-Redaktion freigeschaltet.');
@@ -119,7 +119,7 @@ async function loadAccess(){
     $('identityMail').textContent=d.access.email||d.user?.email||'–';
     $('identityRole').textContent=d.access.role==='admin'?'Admin':'Lehrkraft';
     $('accessState').textContent='Redaktion freigeschaltet';
-    $('accessDetail').textContent=d.access.role==='admin'?'Admin':'Lehrkraft · Brüssel 2026';
+    $('accessDetail').textContent=d.access.role==='admin'?`Admin · ${cfg.tripLabel||cfg.tripTitle}`:`Lehrkraft · ${cfg.tripLabel||cfg.tripTitle}`;
   }catch(e){
     $('gate').hidden=false;$('editorContent').hidden=true;$('identity').hidden=true;
     $('accessState').textContent='Kein Zugriff';$('accessDetail').textContent=e.message;

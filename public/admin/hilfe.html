@@ -32,7 +32,7 @@
   </a>
   <div class="top-actions">
     <a class="button ghost" id="editorLink" href="/admin/redaktion.html">Reise-Redaktion</a>
-    <a class="button ghost" id="adminLink" href="/admin/" hidden>Admin</a>
+    <a class="button ghost" id="adminLink" href="/admin/" hidden>Admin-Dashboard</a>
     <button class="button ghost" id="logout" hidden>Abmelden</button>
   </div>
 </header>
@@ -151,6 +151,8 @@ async function load(){
     $('redaktionLink').href=`/admin/redaktion.html${tq}`;
     $('editorLink').href=`/admin/redaktion.html${tq}`;
     $('participantsLink').href=`/admin/teilnehmer.html${tq}`;
+    $('adminLink').href=`/admin/${tq}`;
+    if($('helpBack'))$('helpBack').href=isAdmin?`/admin/${tq}`:`/admin/redaktion.html${tq}`;
     $('storageExample').innerHTML=`Beispiel: <code>${trip}/pending/…</code>`;
   }catch(e){
     $('loginBox').hidden=false;$('app').hidden=true;

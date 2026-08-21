@@ -11,19 +11,20 @@
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="stylesheet" href="/admin/admin.css?v=13.1">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<script src="/admin/admin-trip.js?v=15.0.2-dev"></script>
 <script>
 document.documentElement.style.visibility='hidden';
 (async()=>{
  try{
-  const cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
+  const trip=AdminTrip.trip;const cfg=await fetch(`/api/media/config?trip=${encodeURIComponent(trip)}`,{cache:'no-store'}).then(r=>r.json());
   const app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});
-  await app.initialize();const account=app.getAllAccounts()[0];if(!account){location.replace('/admin/login.html');return}
-  let token;try{token=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}catch{location.replace('/admin/login.html');return}
-  const r=await fetch('/api/access/me',{headers:{authorization:'Bearer '+token},cache:'no-store'});const d=await r.json();
-  if(d.access?.role==='teacher'){location.replace('/admin/redaktion.html?verified=1');return}
-  if(d.access?.role!=='admin'){location.replace('/admin/login.html?denied=1');return}
+  await app.initialize();const account=app.getAllAccounts()[0];if(!account){location.replace(AdminTrip.q('/admin/login.html'));return}
+  let token;try{token=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}catch{location.replace(AdminTrip.q('/admin/login.html'));return}
+  const r=await fetch(AdminTrip.q('/api/access/me'),{headers:{authorization:'Bearer '+token},cache:'no-store'});const d=await r.json();
+  if(d.access?.role==='teacher'){location.replace(AdminTrip.q('/admin/redaktion.html?verified=1'));return}
+  if(d.access?.role!=='admin'){location.replace(AdminTrip.q('/admin/login.html?denied=1'));return}
   document.documentElement.style.visibility='';
- }catch(e){location.replace('/admin/login.html')}
+ }catch(e){location.replace(AdminTrip.q('/admin/login.html'))}
 })();
 </script>
 </head>
@@ -31,26 +32,32 @@ document.documentElement.style.visibility='hidden';
   <header class="topbar">
     <a class="brand" href="/" aria-label="Zur öffentlichen Website">
       <span class="brand-mark">E+</span>
-      <span><strong>BS Rohrbach Erasmus+</strong><small>Reiseredaktion</small></span>
+      <span><strong>BS Rohrbach Erasmus+</strong><small>Admin · <span data-trip-label>Reise</span></small></span>
     </a>
     <div class="top-actions">
-      <a class="button ghost" href="/" target="_blank" rel="noopener">Website ansehen</a><a class="button ghost" href="/admin/hilfe.html?trip=bruessel-2026">Hilfe & Tutorials</a>
-      <a class="button ghost" href="/admin/redaktion.html">Reise-Redaktion</a>
-      <a class="button primary" href="/admin/cms.html">Vollständige Redaktion</a>
+      <a class="button ghost" data-trip-website href="/" target="_blank" rel="noopener">Website ansehen</a>
+      <a class="button ghost" data-trip-link="/admin/hilfe.html" href="/admin/hilfe.html">Hilfe & Tutorials</a>
+      <a class="button ghost" data-trip-link="/admin/redaktion.html" href="/admin/redaktion.html">Reise-Redaktion</a>
+      <a class="button primary" href="/admin/reisen.html">Reise wechseln</a>
     </div>
   </header>
 
   <main class="shell">
     <section class="welcome">
       <div>
-        <p class="eyebrow">Brüssel 2026</p>
+        <p class="eyebrow">Aktive Reise · <span data-trip-label>Reise wird geladen …</span></p>
         <h1>Admin-Dashboard</h1>
-        <p>Inhalte, Karten und neue Foto-Uploads werden zentral verwaltet.</p>
+        <p>Alle reisebezogenen Funktionen auf dieser Seite gelten ausschließlich für die oben ausgewählte Reise.</p>
       </div>
       <div class="status-card">
         <span class="status-dot"></span>
         <div><strong>Portal wird geprüft</strong><small>Verbindungsstatus wird geladen</small></div>
       </div>
+    </section>
+
+    <section class="active-trip-bar" aria-label="Aktive Reise">
+      <div><span>Du verwaltest gerade</span><strong data-trip-label>Reise wird geladen …</strong></div>
+      <label>Reise wechseln<select id="activeTripSelect"><option>Wird geladen …</option></select></label>
     </section>
 
     <section class="system-strip" aria-label="Systeminformationen">
@@ -126,13 +133,13 @@ document.documentElement.style.visibility='hidden';
         <article><span>News</span><strong id="count-news">–</strong><small>Beiträge</small></article>
       </div>
       <div class="quick-actions" aria-label="Schnellaktionen">
-        <a href="/admin/media-inbox.html"><span>📷</span><strong>Medienfreigabe</strong><small>Neue Fotos und Videos prüfen, freigeben oder löschen</small></a>
-        <a href="/admin/access.html"><span>👥</span><strong>Benutzer & Rollen</strong><small>Reisebezogene Zugriffe und Rollen ansehen</small></a>
-        <a href="/admin/cms.html#/collections/diary/entries/diary"><span>➕</span><strong>Neuer Tagebucheintrag</strong><small>Tagebuch öffnen und „Tagebucheintrag hinzufügen“ wählen</small></a>
-        <a href="/admin/cms.html#/collections/diary"><span>📖</span><strong>Tagebucheinträge verwalten</strong><small>Entwürfe und veröffentlichte Berichte bearbeiten</small></a>
-        <a href="/admin/cms.html#/collections/site/entries/site"><span>📢</span><strong>Live-Status ändern</strong><small>Aktuelle Meldung auf der Startseite</small></a>
-        <a href="/admin/cms.html#/collections/gallery"><span>📸</span><strong>Galerie bearbeiten</strong><small>Öffentliche Reisemotive pflegen</small></a>
-        <a href="/admin/cms.html#/collections/places"><span>📍</span><strong>Kartenorte bearbeiten</strong><small>Marker und Orte verwalten</small></a>
+        <a data-trip-link="/admin/media-inbox.html" href="/admin/media-inbox.html"><span>📷</span><strong>Medienfreigabe</strong><small>Neue Fotos und Videos prüfen, freigeben oder löschen</small></a>
+        <a data-trip-link="/admin/teilnehmer.html" href="/admin/teilnehmer.html"><span>👥</span><strong>Benutzer & Rollen</strong><small>Reisebezogene Zugriffe und Rollen ansehen</small></a>
+        <a data-trip-link="/admin/tagebuch.html" href="/admin/tagebuch.html"><span>➕</span><strong>Neuer Tagebucheintrag</strong><small>Tagebuch öffnen und „Tagebucheintrag hinzufügen“ wählen</small></a>
+        <a data-trip-link="/admin/tagebuch.html" href="/admin/tagebuch.html"><span>📖</span><strong>Tagebucheinträge verwalten</strong><small>Entwürfe und veröffentlichte Berichte bearbeiten</small></a>
+        <a data-trip-link="/admin/live-status.html" href="/admin/live-status.html"><span>📢</span><strong>Live-Status ändern</strong><small>Aktuelle Meldung auf der Startseite</small></a>
+        <a data-trip-link="/admin/galerie.html" href="/admin/galerie.html"><span>📸</span><strong>Galerie bearbeiten</strong><small>Öffentliche Reisemotive pflegen</small></a>
+        
         <a href="/admin/cms.html#/collections/downloads"><span>📥</span><strong>Downloads bearbeiten</strong><small>Dokumente veröffentlichen</small></a>
       </div>
     </section>
@@ -170,7 +177,7 @@ document.documentElement.style.visibility='hidden';
       </div>
       <div class="grid">
         <a class="tile" href="/admin/cms.html#/collections/program"><span class="icon">📅</span><div><h3>Programm</h3><p>Reisetage, Uhrzeiten und Programmpunkte verwalten.</p></div><b>→</b></a>
-        <a class="tile" href="/admin/cms.html#/collections/gallery"><span class="icon">📷</span><div><h3>Galerie</h3><p>Fotos, Titel und Beschreibungen pflegen.</p></div><b>→</b></a>
+        <a class="tile" data-trip-link="/admin/galerie.html" href="/admin/galerie.html"><span class="icon">📷</span><div><h3>Galerie</h3><p>Fotos, Titel und Beschreibungen pflegen.</p></div><b>→</b></a>
         <a class="tile" href="/admin/cms.html#/collections/places"><span class="icon">📍</span><div><h3>Karte & Orte</h3><p>Orte, Adressen, Bilder und Kartenlinks ändern.</p></div><b>→</b></a>
         <a class="tile" href="/admin/cms.html#/collections/site"><span class="icon">⚙️</span><div><h3>Startseite & Einstellungen</h3><p>Texte, Bilder, Countdown, Hotel und Notfallinfos.</p></div><b>→</b></a>
         <a class="tile" href="/admin/cms.html#/collections/legal"><span class="icon">⚖️</span><div><h3>Rechtliches & Kontakt</h3><p>Impressum, Datenschutz, Kontakt und Bildnachweise.</p></div><b>→</b></a>
@@ -183,7 +190,7 @@ document.documentElement.style.visibility='hidden';
       <div><strong>Hinweis zum Speichern</strong><p>Nach dem Speichern legt das CMS die Änderung in GitHub ab. Cloudflare veröffentlicht den neuen Stand anschließend automatisch. Das kann kurz dauern.</p></div>
     </section>
 </main>
-  <script src="/admin/admin.js?v=13.1"></script>
+  <script>AdminTrip.apply().catch(console.error);</script><script src="/admin/admin.js?v=13.1"></script>
 <script src="/version-display.js?v=13.1"></script>
 </body>
 </html>
