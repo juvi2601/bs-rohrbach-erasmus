@@ -1,0 +1,21 @@
+STABLE 14.0 – Multi-Reise-Plattform
+Stand: 21.08.2026
+
+Dieser Stand wurde aus DEV 14.0 Modul 11.0.0 erzeugt.
+Es wurden keine neuen Funktionen ergänzt.
+
+Enthalten und getestet:
+- Brüssel 2026 als bestehende Reise
+- Multi-Reise-Veröffentlichung mit eigener Reise-URL
+- Testreise Linz 2027
+- Reisebezogener Foto-/Video-Upload
+- Getrennte R2-Speicherung je Reise
+- Reisebezogene Medienfreigabe
+- Teilnehmer- und Rollenverwaltung je Reise
+- CSV-Import mit deutschen Rollenbezeichnungen
+- Geschützter Hilfe-/Tutorialbereich für Admin & Lehrkräfte
+- Microsoft-365-Anmeldung und Rollenprüfung
+
+STABLE-Prinzip:
+Dieser Stand gilt als Rückkehrpunkt und sollte nicht direkt weiterentwickelt werden.
+Neue Funktionen wieder ausgehend von diesem Stand als DEV-Version entwickeln.
