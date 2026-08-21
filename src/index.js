@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.0-dev.9.1.6';
+const VERSION = '14.0-dev.9.1.7';
 
 function normalizeHttpStatus(value,fallback=200){
   const n=Number(value);
@@ -1011,8 +1011,8 @@ async function verifyTripRole(request,env,allowedRoles=[],project=mediaProjectFr
   }
   return {...user,access};
 }
-async function verifyMediaAdmin(request,env){
-  return verifyTripRole(request,env,['admin','teacher']);
+async function verifyMediaAdmin(request,env,project=mediaProjectFromRequest(request)){
+  return verifyTripRole(request,env,['admin','teacher'],project);
 }
 async function verifyMediaUploader(request,env,project=mediaProjectFromRequest(request)){
   return verifyTripRole(request,env,['admin','teacher','student'],project);
@@ -1052,17 +1052,18 @@ async function handleStudentAccessPut(request,env){
   }catch(error){return mediaError(error)}
 }
 // --- Ende Version 13.5 Rollenbasis ---
-function pendingPrefix(){return `${MEDIA_PROJECT}/pending/`}
-function approvedPrefix(){return `${MEDIA_PROJECT}/approved/`}
+function pendingPrefix(project=MEDIA_PROJECT){return `${project}/pending/`}
+function approvedPrefix(project=MEDIA_PROJECT){return `${project}/approved/`}
 function approvedKeyFor(key){return String(key).replace(`/${'pending'}/`,`/approved/`)}
-function validPendingKey(key){return String(key||'').startsWith(pendingPrefix()) && !String(key).includes('..')}
-function validApprovedKey(key){return String(key||'').startsWith(approvedPrefix()) && !String(key).includes('..')}
-function validAdminMediaKey(key){return validPendingKey(key)||validApprovedKey(key)}
+function validPendingKey(key,project=MEDIA_PROJECT){return String(key||'').startsWith(pendingPrefix(project)) && !String(key).includes('..')}
+function validApprovedKey(key,project=MEDIA_PROJECT){return String(key||'').startsWith(approvedPrefix(project)) && !String(key).includes('..')}
+function validAdminMediaKey(key,project=MEDIA_PROJECT){return validPendingKey(key,project)||validApprovedKey(key,project)}
 
 async function handleMediaAdminList(request,env){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
   try{
-    const user=await verifyMediaAdmin(request,env);
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyMediaAdmin(request,env,project);
     async function collect(prefix){
       let cursor=undefined,rows=[];
       do{
@@ -1076,18 +1077,19 @@ async function handleMediaAdminList(request,env){
       rows.sort((a,b)=>String(b.metadata?.uploadedAt||b.uploaded).localeCompare(String(a.metadata?.uploadedAt||a.uploaded)));
       return rows;
     }
-    const [items,approvedItems]=await Promise.all([collect(pendingPrefix()),collect(approvedPrefix())]);
+    const [items,approvedItems]=await Promise.all([collect(pendingPrefix(project)),collect(approvedPrefix(project))]);
     const usage=await r2Usage(env.MEDIA_BUCKET);
-    return json({ok:true,user,items,approvedItems,usage,limitBytes:MEDIA_STORAGE_LIMIT_BYTES,project:MEDIA_PROJECT});
+    return json({ok:true,user,items,approvedItems,usage,limitBytes:MEDIA_STORAGE_LIMIT_BYTES,project});
   }catch(error){return mediaError(error)}
 }
 
 async function handleMediaAdminFile(request,env,url){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
   try{
-    await verifyMediaAdmin(request,env);
+    const project=mediaProjectFromRequest(request);
+    await verifyMediaAdmin(request,env,project);
     const key=url.searchParams.get('key')||'';
-    if(!validAdminMediaKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
+    if(!validAdminMediaKey(key,project))throw Object.assign(new Error('Ungültiger Medienpfad für diese Reise.'),{status:400});
     const object=await env.MEDIA_BUCKET.get(key);
     if(!object)throw Object.assign(new Error('Medium wurde nicht gefunden.'),{status:404});
     const headers=new Headers(); object.writeHttpMetadata(headers); headers.set('etag',object.httpEtag||''); headers.set('cache-control','private, no-store'); headers.set('x-content-type-options','nosniff');
@@ -1098,28 +1100,30 @@ async function handleMediaAdminFile(request,env,url){
 async function handleMediaAdminApprove(request,env){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
   try{
-    const user=await verifyMediaAdmin(request,env);
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyMediaAdmin(request,env,project);
     const body=await request.json().catch(()=>({})),key=String(body.key||'');
-    if(!validPendingKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
+    if(!validPendingKey(key,project))throw Object.assign(new Error('Ungültiger Medienpfad für diese Reise.'),{status:400});
     const object=await env.MEDIA_BUCKET.get(key);
     if(!object)throw Object.assign(new Error('Medium wurde nicht gefunden.'),{status:404});
-    const target=approvedKeyFor(key),meta={...(object.customMetadata||{}),status:'approved',approvedAt:new Date().toISOString(),approvedBy:user.email};
+    const target=approvedKeyFor(key),meta={...(object.customMetadata||{}),project,status:'approved',approvedAt:new Date().toISOString(),approvedBy:user.email};
     await env.MEDIA_BUCKET.put(target,object.body,{httpMetadata:object.httpMetadata,customMetadata:meta});
     await env.MEDIA_BUCKET.delete(key);
-    return json({ok:true,key:target,status:'approved'});
+    return json({ok:true,key:target,status:'approved',project});
   }catch(error){return mediaError(error)}
 }
 
 async function handleMediaAdminDelete(request,env){
   if(!env.MEDIA_BUCKET)return json({ok:false,message:'R2-Binding MEDIA_BUCKET fehlt.'},503);
   try{
-    await verifyMediaAdmin(request,env);
+    const project=mediaProjectFromRequest(request);
+    await verifyMediaAdmin(request,env,project);
     const body=await request.json().catch(()=>({})),key=String(body.key||'');
-    if(!validAdminMediaKey(key))throw Object.assign(new Error('Ungültiger Medienpfad.'),{status:400});
+    if(!validAdminMediaKey(key,project))throw Object.assign(new Error('Ungültiger Medienpfad für diese Reise.'),{status:400});
     const head=await env.MEDIA_BUCKET.head(key);
     if(!head)throw Object.assign(new Error('Medium wurde nicht gefunden.'),{status:404});
     await env.MEDIA_BUCKET.delete(key);
-    return json({ok:true,deleted:key,freedBytes:Number(head.size||0)});
+    return json({ok:true,deleted:key,freedBytes:Number(head.size||0),project});
   }catch(error){return mediaError(error)}
 }
 // --- Ende DEV.10 Admin-Medienfreigabe ---
@@ -1311,7 +1315,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027/upload'||url.pathname==='/linz-2027/upload/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(!meta?.published)return new Response('Reise ist noch nicht veröffentlicht.',{status:404});
-      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-dev.9.1.6`,{
+      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.0-dev.9.1.7`,{
         method:'GET',headers:{'cache-control':'no-cache'}
       }));
       const headers=new Headers(asset.headers);
@@ -1325,7 +1329,7 @@ export default {async fetch(request,env){
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
       const meta=await getPublishedMeta(env,'linz-2027');
       if(meta?.published){
-        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.9.1.6`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+        const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.0-dev.9.1.7`,{method:'GET',headers:{'cache-control':'no-cache'}}));
         const headers=new Headers(asset.headers);
         headers.set('cache-control','no-store, max-age=0');
         headers.set('pragma','no-cache');
@@ -1352,7 +1356,7 @@ export default {async fetch(request,env){
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
     if(url.pathname==='/api/trips/public-health'&&request.method==='GET'){
-      return json({ok:true,version:'14.0-dev.9.1.6',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
+      return json({ok:true,version:'14.0-dev.9.1.7',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
     }
 
     if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){

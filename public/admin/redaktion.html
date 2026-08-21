@@ -60,7 +60,7 @@
   <section id="editorContent" hidden>
     <div class="section-heading"><div><p class="eyebrow">Deine Werkzeuge</p><h2>Reise verwalten</h2></div></div>
     <div class="permission-grid">
-      <a class="permission-card active" href="/admin/media-inbox.html" data-permission="media.moderate">
+      <a class="permission-card active" href="/admin/media-inbox.html" id="mediaInboxLink" data-permission="media.moderate">
         <span class="icon">📷</span><div><h3>Medienfreigabe</h3><p>Neue Fotos und Videos prüfen, freigeben oder löschen.</p></div><span class="status">Verfügbar</span>
       </a>
       <a class="permission-card active" href="/admin/tagebuch.html" data-permission="diary.manage">
@@ -80,6 +80,8 @@
 <script>
 let cfg, msalApp, account;
 const $=id=>document.getElementById(id);
+const redaktionTrip=(new URLSearchParams(location.search).get('trip')||'bruessel-2026').toLowerCase();
+if($('mediaInboxLink'))$('mediaInboxLink').href=`/admin/media-inbox.html?trip=${encodeURIComponent(redaktionTrip)}`;
 
 async function init(){
   cfg=await fetch('/api/media/config',{cache:'no-store'}).then(r=>r.json());
