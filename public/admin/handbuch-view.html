@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Lehrkräfte-Handbuch · BS Rohrbach Erasmus+</title>
+<link rel="stylesheet" href="/admin/admin.css?v=15.0.5-dev">
+<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<script src="/admin/admin-trip.js?v=15.0.5-dev"></script>
+<style>
+.viewer-shell{max-width:1280px;margin:0 auto;padding:18px}
+.viewer-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.viewer-frame{width:100%;height:calc(100vh - 120px);min-height:680px;border:1px solid #d9e4ee;border-radius:16px;background:#f5f8fb}
+.viewer-state{padding:28px;border:1px solid #d9e4ee;border-radius:16px;background:#fff}
+.viewer-state strong{display:block;font-size:18px;color:#071d49;margin-bottom:6px}
+</style>
+</head>
+<body>
+<main class="viewer-shell">
+  <div class="viewer-top">
+    <div>
+      <strong style="color:#071d49">📘 Lehrkräfte-Handbuch</strong>
+      <div id="tripLabel" style="font-size:13px;color:#64778a;margin-top:2px">Reise wird geladen …</div>
+    </div>
+    <a class="button ghost" id="backLink" href="/admin/redaktion.html">← Zur Reise-Redaktion</a>
+  </div>
+  <div class="viewer-state" id="state">
+    <strong>Handbuch wird geladen …</strong>
+    <span id="detail">Microsoft-Anmeldung wird geprüft.</span>
+  </div>
+  <iframe class="viewer-frame" id="pdfFrame" title="Lehrkräfte-Handbuch" hidden></iframe>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const trip=AdminTrip.trip;
+$('backLink').href=AdminTrip.q('/admin/redaktion.html');
+let cfg,app,account,tokenValue='';
+async function token(){
+  if(tokenValue)return tokenValue;
+  if(!account){
+    const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});
+    account=x.account||app.getAllAccounts()[0]||null;
+  }
+  if(!account)throw new Error('Microsoft-Konto konnte nicht ermittelt werden.');
+  try{tokenValue=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}
+  catch{tokenValue=(await app.acquireTokenPopup({scopes:['User.Read'],account})).accessToken}
+  return tokenValue;
+}
+async function init(){
+  cfg=await fetch(`/api/media/config?trip=${encodeURIComponent(trip)}`,{cache:'no-store'}).then(r=>r.json());
+  $('tripLabel').textContent=cfg.tripLabel||cfg.tripTitle||trip;
+  app=new msal.PublicClientApplication({
+    auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},
+    cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},
+    system:{allowNativeBroker:false}
+  });
+  await app.initialize();
+  account=app.getAllAccounts()[0]||null;
+  const tk=await token();
+  $('detail').textContent='PDF wird geladen …';
+  const r=await fetch(`/api/docs/teacher-handbook?trip=${encodeURIComponent(trip)}`,{
+    headers:{authorization:'Bearer '+tk},cache:'no-store'
+  });
+  if(!r.ok){
+    let d={};try{d=await r.json()}catch{}
+    throw new Error(d.message||`Handbuch konnte nicht geladen werden (HTTP ${r.status}).`);
+  }
+  const blob=await r.blob();
+  const url=URL.createObjectURL(blob);
+  $('pdfFrame').src=url;
+  $('pdfFrame').hidden=false;
+  $('state').hidden=true;
+}
+init().catch(e=>{
+  $('state').hidden=false;
+  $('state').querySelector('strong').textContent='Handbuch konnte nicht geöffnet werden';
+  $('detail').textContent=e.message;
+});
+</script>
+</body>
+</html>

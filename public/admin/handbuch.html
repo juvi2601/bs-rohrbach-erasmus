@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Lehrkräfte-Handbuch verwalten · BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=15.0.4-dev">
+<link rel="stylesheet" href="/admin/admin.css?v=15.0.5-dev">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
-<script src="/admin/admin-trip.js?v=15.0.4-dev"></script></head>
+<script src="/admin/admin-trip.js?v=15.0.5-dev"></script></head>
 <body><main class="admin-shell">
 <header class="topbar"><a class="brand" id="dashBrand" href="/admin/"><span class="brand-icon">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Lehrkräfte-Handbuch</small></span></a>
 <div class="top-actions"><a class="button ghost" id="dashButton" href="/admin/">Dashboard</a></div></header>
@@ -51,7 +51,7 @@ async function refresh(){
   $('fileName').textContent=m.filename||'–';
   $('updatedAt').textContent=m.updatedAt?new Date(m.updatedAt).toLocaleString('de-AT'):'–';
   $('fileSize').textContent=m.size?`${(m.size/1024/1024).toFixed(2)} MB`:'–';
-  $('openCurrent').href=withTrip('/api/docs/teacher-handbook');
+  $('openCurrent').href=withTrip('/admin/handbuch-view.html');
 }
 $('uploadButton').onclick=async()=>{
   const f=$('pdfFile').files?.[0];if(!f){$('saveStatus').textContent='Bitte zuerst eine PDF auswählen.';return}

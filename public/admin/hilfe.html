@@ -167,6 +167,6 @@ $('logout').onclick=async()=>{try{if(account)await msalApp.logoutPopup({account,
 init().catch(e=>{$('state').textContent='Anmeldung nicht verfügbar';$('detail').textContent=e.message});
 </script>
 <script>
-(()=>{const a=document.getElementById('teacherHandbookHelpLink');if(a){const t=new URLSearchParams(location.search).get('trip')||'bruessel-2026';a.href=`/api/docs/teacher-handbook?trip=${encodeURIComponent(t)}`;}})();
+(()=>{const a=document.getElementById('teacherHandbookHelpLink');if(a){const t=new URLSearchParams(location.search).get('trip')||'bruessel-2026';a.href=`/admin/handbuch-view.html?trip=${encodeURIComponent(t)}`;}})();
 </script></body>
 </html>
