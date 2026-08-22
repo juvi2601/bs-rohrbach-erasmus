@@ -8,7 +8,7 @@
   <title>Reise-Redaktion – BS Rohrbach Erasmus+</title>
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="stylesheet" href="/admin/admin.css?v=13.6">
-  <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script><script src="/admin/admin-trip.js?v=15.0.3-dev"></script>
+  <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script><script src="/admin/admin-trip.js?v=15.0.4-dev"></script>
   <style>
     .editor-identity{margin:18px 0 26px;padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:#fff;display:flex;justify-content:space-between;gap:18px;align-items:center}
     .editor-identity strong,.editor-identity small{display:block}.editor-identity small{color:var(--muted);margin-top:3px}
@@ -32,6 +32,7 @@
   <div class="top-actions">
     <a class="button ghost" data-trip-website href="/" target="_blank" rel="noopener">Website ansehen</a>
     <a class="button ghost" id="helpLink" href="/admin/hilfe.html">Hilfe & Tutorials</a>
+<a class="button ghost" id="teacherHandbookLink" href="#">📘 Lehrkräfte-Handbuch</a>
     <button class="button primary" id="loginBtn" type="button">Mit Microsoft anmelden</button>
   </div>
 </header>
@@ -82,6 +83,8 @@
 let cfg, msalApp, account;
 const $=id=>document.getElementById(id);
 const redaktionTrip=AdminTrip.trip;
+const teacherHandbookLink=document.getElementById('teacherHandbookLink');
+if(teacherHandbookLink){teacherHandbookLink.href=`/api/docs/teacher-handbook?trip=${encodeURIComponent(redaktionTrip)}`;teacherHandbookLink.target='_blank';teacherHandbookLink.rel='noopener';}
 AdminTrip.apply().catch(console.error);
 if($('helpLink'))$('helpLink').href=`/admin/hilfe.html?trip=${encodeURIComponent(redaktionTrip)}`;
 

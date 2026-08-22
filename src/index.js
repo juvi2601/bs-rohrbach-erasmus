@@ -959,6 +959,78 @@ const TRIP_ACCESS = Object.freeze({
     'j.vierlinger@bs-rohrbach.ac.at': {role:'admin', name:'Jürgen Vierlinger'}
   })
 });
+
+const TEACHER_HANDBOOK_KEY='__system/docs/teacher-handbook/current.pdf';
+const TEACHER_HANDBOOK_META_KEY='__system/docs/teacher-handbook/meta.json';
+const TEACHER_HANDBOOK_BACKUP_PREFIX='__system/docs/teacher-handbook/backups/';
+
+async function teacherHandbookMeta(env){
+  if(!env.MEDIA_BUCKET)return {exists:false};
+  const obj=await env.MEDIA_BUCKET.get(TEACHER_HANDBOOK_META_KEY);
+  if(!obj)return {exists:false};
+  try{return JSON.parse(await obj.text())}catch{return {exists:false}}
+}
+async function handleTeacherHandbookGet(request,env){
+  try{
+    const project=mediaProjectFromRequest(request);
+    await verifyTripRole(request,env,['admin','teacher'],project);
+    if(!env.MEDIA_BUCKET)throw Object.assign(new Error('Dokumentenspeicher ist nicht verfügbar.'),{status:503});
+    const obj=await env.MEDIA_BUCKET.get(TEACHER_HANDBOOK_KEY);
+    if(!obj){
+      const seed=await env.ASSETS.fetch(new Request(new URL('/docs/lehrkraefte-handbuch-seed.pdf',request.url)));
+      if(!seed.ok)throw Object.assign(new Error('Noch kein Lehrkräfte-Handbuch hinterlegt.'),{status:404});
+      return new Response(seed.body,{headers:{
+        'content-type':'application/pdf','cache-control':'no-store',
+        'content-disposition':'inline; filename="BS-Rohrbach-Erasmus-Lehrkraefte-Handbuch.pdf"',
+        'x-handbook-source':'seed'
+      }});
+    }
+    return new Response(obj.body,{headers:{
+      'content-type':'application/pdf','cache-control':'no-store',
+      'content-disposition':'inline; filename="BS-Rohrbach-Erasmus-Lehrkraefte-Handbuch.pdf"',
+      'x-handbook-source':'r2'
+    }});
+  }catch(error){return mediaError(error)}
+}
+async function handleTeacherHandbookMeta(request,env){
+  try{
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyTripRole(request,env,['admin','teacher'],project);
+    let meta=await teacherHandbookMeta(env);
+    if(!meta?.exists)meta={exists:true,source:'seed',filename:'BS-Rohrbach-Erasmus-Lehrkraefte-Handbuch.pdf',updatedAt:'2026-08-21T00:00:00.000Z',size:1009433};
+    return json({ok:true,project,user:{email:user.email,name:user.access?.name,role:user.access?.role},meta});
+  }catch(error){return mediaError(error)}
+}
+async function handleTeacherHandbookUpload(request,env){
+  try{
+    const project=mediaProjectFromRequest(request);
+    const user=await verifyTripRole(request,env,['admin'],project);
+    if(!env.MEDIA_BUCKET)throw Object.assign(new Error('Dokumentenspeicher ist nicht verfügbar.'),{status:503});
+    const ct=String(request.headers.get('content-type')||'').toLowerCase();
+    if(!ct.includes('application/pdf'))throw Object.assign(new Error('Es sind nur PDF-Dateien erlaubt.'),{status:415});
+    const data=await request.arrayBuffer();
+    if(data.byteLength<4||data.byteLength>25*1024*1024)throw Object.assign(new Error('PDF-Datei ist leer oder größer als 25 MB.'),{status:400});
+    if(new TextDecoder().decode(data.slice(0,4))!=='%PDF')throw Object.assign(new Error('Die hochgeladene Datei ist keine gültige PDF-Datei.'),{status:400});
+    const now=new Date().toISOString();
+    const current=await env.MEDIA_BUCKET.get(TEACHER_HANDBOOK_KEY);
+    const oldMeta=await teacherHandbookMeta(env);
+    if(current){
+      const stamp=(oldMeta?.updatedAt||now).replace(/[:.]/g,'-');
+      await env.MEDIA_BUCKET.put(`${TEACHER_HANDBOOK_BACKUP_PREFIX}${stamp}.pdf`,await current.arrayBuffer(),{
+        httpMetadata:{contentType:'application/pdf'},
+        customMetadata:{backupOf:'teacher-handbook',createdAt:now}
+      });
+    }
+    await env.MEDIA_BUCKET.put(TEACHER_HANDBOOK_KEY,data,{
+      httpMetadata:{contentType:'application/pdf'},
+      customMetadata:{updatedAt:now,updatedBy:String(user.email||''),filename:'BS-Rohrbach-Erasmus-Lehrkraefte-Handbuch.pdf'}
+    });
+    const meta={exists:true,source:'r2',updatedAt:now,updatedBy:String(user.email||''),size:data.byteLength,filename:'BS-Rohrbach-Erasmus-Lehrkraefte-Handbuch.pdf',previousAvailable:Boolean(current)};
+    await env.MEDIA_BUCKET.put(TEACHER_HANDBOOK_META_KEY,JSON.stringify(meta,null,2),{httpMetadata:{contentType:'application/json; charset=utf-8'}});
+    return json({ok:true,meta});
+  }catch(error){return mediaError(error)}
+}
+
 const ROLE_PERMISSIONS = Object.freeze({
   admin:['media.moderate','diary.manage','live.manage','gallery.manage','users.manage','technical.manage'],
   teacher:['media.moderate','diary.manage','live.manage','gallery.manage'],
@@ -1708,7 +1780,10 @@ export default {async fetch(request,env){
 
   if(url.pathname==='/auth')return handleAuth(url,env);
   if(url.pathname==='/callback')return handleCallback(url,env);
-  if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
+  if(url.pathname==='/api/docs/teacher-handbook'&&request.method==='GET')return handleTeacherHandbookGet(request,env);
+    if(url.pathname==='/api/docs/teacher-handbook/meta'&&request.method==='GET')return handleTeacherHandbookMeta(request,env);
+    if(url.pathname==='/api/docs/teacher-handbook'&&request.method==='PUT')return handleTeacherHandbookUpload(request,env);
+    if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
     if(url.pathname==='/api/help/access'&&request.method==='GET')return handleHelpAccess(request,env);
     if(url.pathname==='/api/access/roster'&&request.method==='GET')return handleAccessRosterGet(request,env);
     if(url.pathname==='/api/access/roster'&&request.method==='PUT')return handleAccessRosterPut(request,env);

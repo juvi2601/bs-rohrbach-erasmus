@@ -38,6 +38,9 @@
 </header>
 
 <main class="shell">
+<section class="panel handbook-download"><p class="eyebrow">PDF-HANDBUCH</p><h2>📘 Lehrkräfte-Handbuch</h2>
+<p>Kompakte Anleitung für Reise-Redaktion, Medienfreigabe, Reisetagebuch, Live-Status und Galerie.</p>
+<a class="button primary" id="teacherHandbookHelpLink" href="#" target="_blank" rel="noopener">Handbuch als PDF öffnen</a></section>
 <section class="welcome">
   <div>
     <p class="eyebrow">STABLE 14.0</p>
@@ -163,5 +166,7 @@ $('login').onclick=load;
 $('logout').onclick=async()=>{try{if(account)await msalApp.logoutPopup({account,postLogoutRedirectUri:location.origin+'/admin/'})}catch{}sessionStorage.clear();location.reload()};
 init().catch(e=>{$('state').textContent='Anmeldung nicht verfügbar';$('detail').textContent=e.message});
 </script>
-</body>
+<script>
+(()=>{const a=document.getElementById('teacherHandbookHelpLink');if(a){const t=new URLSearchParams(location.search).get('trip')||'bruessel-2026';a.href=`/api/docs/teacher-handbook?trip=${encodeURIComponent(t)}`;}})();
+</script></body>
 </html>

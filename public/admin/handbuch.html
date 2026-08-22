@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Lehrkräfte-Handbuch verwalten · BS Rohrbach Erasmus+</title>
+<link rel="stylesheet" href="/admin/admin.css?v=15.0.4-dev">
+<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<script src="/admin/admin-trip.js?v=15.0.4-dev"></script></head>
+<body><main class="admin-shell">
+<header class="topbar"><a class="brand" id="dashBrand" href="/admin/"><span class="brand-icon">E+</span><span><strong>BS Rohrbach Erasmus+</strong><small>Lehrkräfte-Handbuch</small></span></a>
+<div class="top-actions"><a class="button ghost" id="dashButton" href="/admin/">Dashboard</a></div></header>
+
+<section class="dashboard-hero"><div><p class="eyebrow">PLATTFORMWEITE HILFE</p><h1>Lehrkräfte-Handbuch verwalten</h1>
+<p>Hier kannst du eine neue PDF-Version hochladen. Alle Reisen verwenden danach automatisch die aktuelle Datei.</p></div>
+<div class="status-card"><span class="status-dot"></span><div><strong id="statusTitle">Wird geprüft …</strong><small id="statusDetail"></small></div></div></section>
+
+<section class="panel"><h2>Aktuelles Handbuch</h2>
+<div class="system-strip"><div><span>Datei</span><strong id="fileName">–</strong></div><div><span>Letzte Aktualisierung</span><strong id="updatedAt">–</strong></div><div><span>Größe</span><strong id="fileSize">–</strong></div></div>
+<p><a class="button ghost" id="openCurrent" href="#" target="_blank" rel="noopener">Aktuelles PDF öffnen</a></p></section>
+
+<section class="panel"><p class="eyebrow">NEUE VERSION</p><h2>PDF ersetzen</h2>
+<p>Nur PDF-Dateien bis 25 MB. Beim Ersetzen wird die vorherige hochgeladene Version automatisch als Backup gespeichert.</p>
+<input id="pdfFile" type="file" accept="application/pdf,.pdf">
+<div style="margin-top:16px"><button class="button primary" id="uploadButton" type="button">Neue PDF hochladen</button>
+<span id="saveStatus" style="margin-left:12px"></span></div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id),trip=AdminTrip.trip;
+const withTrip=path=>`${path}${path.includes('?')?'&':'?'}trip=${encodeURIComponent(trip)}`;
+$('dashBrand').href=withTrip('/admin/');$('dashButton').href=withTrip('/admin/');
+let cfg,app,account,tokenValue='';
+async function init(){
+  cfg=await fetch(withTrip('/api/media/config'),{cache:'no-store'}).then(r=>r.json());
+  app=new msal.PublicClientApplication({auth:{clientId:cfg.clientId,authority:`https://login.microsoftonline.com/${cfg.tenantId}`,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},system:{allowNativeBroker:false}});
+  await app.initialize();account=app.getAllAccounts()[0]||null;
+  await refresh();
+}
+async function token(){
+  if(tokenValue)return tokenValue;
+  if(!account){const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});account=x.account||app.getAllAccounts()[0]}
+  try{tokenValue=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}
+  catch{tokenValue=(await app.acquireTokenPopup({scopes:['User.Read'],account})).accessToken}
+  return tokenValue;
+}
+async function refresh(){
+  const tk=await token();
+  const r=await fetch(withTrip('/api/docs/teacher-handbook/meta'),{headers:{authorization:`Bearer ${tk}`},cache:'no-store'});
+  const d=await r.json();if(!r.ok)throw new Error(d.message||'Handbuchstatus konnte nicht geladen werden.');
+  if(d.user?.role!=='admin')throw new Error('Nur Admins dürfen das Handbuch verwalten.');
+  const m=d.meta||{};
+  $('statusTitle').textContent=m.exists?'Handbuch verfügbar':'Noch kein Handbuch';
+  $('statusDetail').textContent=m.source==='seed'?'Startversion aus der Plattform':'Aktuelle Upload-Version';
+  $('fileName').textContent=m.filename||'–';
+  $('updatedAt').textContent=m.updatedAt?new Date(m.updatedAt).toLocaleString('de-AT'):'–';
+  $('fileSize').textContent=m.size?`${(m.size/1024/1024).toFixed(2)} MB`:'–';
+  $('openCurrent').href=withTrip('/api/docs/teacher-handbook');
+}
+$('uploadButton').onclick=async()=>{
+  const f=$('pdfFile').files?.[0];if(!f){$('saveStatus').textContent='Bitte zuerst eine PDF auswählen.';return}
+  $('uploadButton').disabled=true;$('uploadButton').textContent='Wird hochgeladen …';$('saveStatus').textContent='';
+  try{
+    const tk=await token();
+    const r=await fetch(withTrip('/api/docs/teacher-handbook'),{method:'PUT',headers:{authorization:`Bearer ${tk}`,'content-type':'application/pdf'},body:f});
+    const d=await r.json();if(!r.ok)throw new Error(d.message||'Upload fehlgeschlagen.');
+    $('saveStatus').textContent=`✓ Handbuch aktualisiert · ${new Date().toLocaleTimeString('de-AT',{hour:'2-digit',minute:'2-digit'})} Uhr`;
+    $('pdfFile').value='';await refresh();
+  }catch(e){$('saveStatus').textContent=`✕ ${e.message}`}
+  finally{$('uploadButton').disabled=false;$('uploadButton').textContent='Neue PDF hochladen'}
+};
+init().catch(e=>{$('statusTitle').textContent='Kein Zugriff';$('statusDetail').textContent=e.message});
+</script></body></html>
