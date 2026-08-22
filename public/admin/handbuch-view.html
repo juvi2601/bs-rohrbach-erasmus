@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Lehrkräfte-Handbuch · BS Rohrbach Erasmus+</title>
-<link rel="stylesheet" href="/admin/admin.css?v=15.0.5-dev">
+<link rel="stylesheet" href="/admin/admin.css?v=15.0.6-dev">
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
-<script src="/admin/admin-trip.js?v=15.0.5-dev"></script>
+<script src="/admin/admin-trip.js?v=15.0.6-dev"></script>
 <style>
 .viewer-shell{max-width:1280px;margin:0 auto;padding:18px}
 .viewer-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
@@ -28,6 +28,7 @@
   <div class="viewer-state" id="state">
     <strong>Handbuch wird geladen …</strong>
     <span id="detail">Microsoft-Anmeldung wird geprüft.</span>
+    <div style="margin-top:16px"><button class="button primary" id="loginButton" type="button" hidden>Mit Microsoft anmelden</button></div>
   </div>
   <iframe class="viewer-frame" id="pdfFrame" title="Lehrkräfte-Handbuch" hidden></iframe>
 </main>
@@ -36,29 +37,20 @@ const $=id=>document.getElementById(id);
 const trip=AdminTrip.trip;
 $('backLink').href=AdminTrip.q('/admin/redaktion.html');
 let cfg,app,account,tokenValue='';
-async function token(){
+
+async function silentToken(){
   if(tokenValue)return tokenValue;
-  if(!account){
-    const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});
-    account=x.account||app.getAllAccounts()[0]||null;
+  if(!account)return '';
+  try{
+    tokenValue=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken;
+    return tokenValue;
+  }catch{
+    return '';
   }
-  if(!account)throw new Error('Microsoft-Konto konnte nicht ermittelt werden.');
-  try{tokenValue=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}
-  catch{tokenValue=(await app.acquireTokenPopup({scopes:['User.Read'],account})).accessToken}
-  return tokenValue;
 }
-async function init(){
-  cfg=await fetch(`/api/media/config?trip=${encodeURIComponent(trip)}`,{cache:'no-store'}).then(r=>r.json());
-  $('tripLabel').textContent=cfg.tripLabel||cfg.tripTitle||trip;
-  app=new msal.PublicClientApplication({
-    auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},
-    cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},
-    system:{allowNativeBroker:false}
-  });
-  await app.initialize();
-  account=app.getAllAccounts()[0]||null;
-  const tk=await token();
+async function loadPdf(tk){
   $('detail').textContent='PDF wird geladen …';
+  $('loginButton').hidden=true;
   const r=await fetch(`/api/docs/teacher-handbook?trip=${encodeURIComponent(trip)}`,{
     headers:{authorization:'Bearer '+tk},cache:'no-store'
   });
@@ -72,11 +64,55 @@ async function init(){
   $('pdfFrame').hidden=false;
   $('state').hidden=true;
 }
+async function interactiveLogin(){
+  $('loginButton').disabled=true;
+  $('loginButton').textContent='Anmeldung wird geöffnet …';
+  try{
+    const x=await app.loginPopup({scopes:['User.Read'],prompt:'select_account'});
+    account=x.account||app.getAllAccounts()[0]||null;
+    if(!account)throw new Error('Microsoft-Konto konnte nicht ermittelt werden.');
+    try{tokenValue=(await app.acquireTokenSilent({scopes:['User.Read'],account})).accessToken}
+    catch{
+      const y=await app.acquireTokenPopup({scopes:['User.Read'],account});
+      tokenValue=y.accessToken;
+    }
+    await loadPdf(tokenValue);
+  }catch(e){
+    $('state').hidden=false;
+    $('state').querySelector('strong').textContent='Anmeldung nicht abgeschlossen';
+    $('detail').textContent=e.message;
+    $('loginButton').hidden=false;
+  }finally{
+    $('loginButton').disabled=false;
+    $('loginButton').textContent='Mit Microsoft anmelden';
+  }
+}
+$('loginButton').onclick=interactiveLogin;
+
+async function init(){
+  cfg=await fetch(`/api/media/config?trip=${encodeURIComponent(trip)}`,{cache:'no-store'}).then(r=>r.json());
+  $('tripLabel').textContent=cfg.tripLabel||cfg.tripTitle||trip;
+  app=new msal.PublicClientApplication({
+    auth:{clientId:cfg.clientId,authority:'https://login.microsoftonline.com/'+cfg.tenantId,redirectUri:cfg.redirectUri,navigateToLoginRequestUrl:false},
+    cache:{cacheLocation:'sessionStorage',storeAuthStateInCookie:false},
+    system:{allowNativeBroker:false}
+  });
+  await app.initialize();
+  account=app.getAllAccounts()[0]||null;
+
+  const tk=await silentToken();
+  if(tk){await loadPdf(tk);return}
+
+  $('state').hidden=false;
+  $('state').querySelector('strong').textContent='Microsoft-Anmeldung erforderlich';
+  $('detail').textContent='Bitte mit dem freigeschalteten Microsoft-365-Schulkonto anmelden.';
+  $('loginButton').hidden=false;
+}
 init().catch(e=>{
   $('state').hidden=false;
   $('state').querySelector('strong').textContent='Handbuch konnte nicht geöffnet werden';
   $('detail').textContent=e.message;
-});
-</script>
+  $('loginButton').hidden=false;
+});</script>
 </body>
 </html>

@@ -8,7 +8,7 @@
   <title>Reise-Redaktion – BS Rohrbach Erasmus+</title>
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="stylesheet" href="/admin/admin.css?v=13.6">
-  <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script><script src="/admin/admin-trip.js?v=15.0.5-dev"></script>
+  <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script><script src="/admin/admin-trip.js?v=15.0.6-dev"></script>
   <style>
     .editor-identity{margin:18px 0 26px;padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:#fff;display:flex;justify-content:space-between;gap:18px;align-items:center}
     .editor-identity strong,.editor-identity small{display:block}.editor-identity small{color:var(--muted);margin-top:3px}
@@ -84,7 +84,7 @@ let cfg, msalApp, account;
 const $=id=>document.getElementById(id);
 const redaktionTrip=AdminTrip.trip;
 const teacherHandbookLink=document.getElementById('teacherHandbookLink');
-if(teacherHandbookLink){teacherHandbookLink.href=`/admin/handbuch-view.html?trip=${encodeURIComponent(redaktionTrip)}`;teacherHandbookLink.target='_blank';teacherHandbookLink.rel='noopener';}
+if(teacherHandbookLink){teacherHandbookLink.href=`/admin/handbuch-view.html?trip=${encodeURIComponent(redaktionTrip)}`;}
 AdminTrip.apply().catch(console.error);
 if($('helpLink'))$('helpLink').href=`/admin/hilfe.html?trip=${encodeURIComponent(redaktionTrip)}`;
 
