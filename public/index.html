@@ -56,9 +56,9 @@ footer{background:var(--navy);color:#fff;padding:30px max(20px,calc((100vw - 118
     <div class="section-head"><div><p class="eyebrow" style="color:#0b4f8a">Reiseübersicht</p><h2>Aktuelle & veröffentlichte Reisen</h2></div><p>Wähle eine Reise aus, um Programm, Unterkunft, Karte, Galerie und weitere Informationen zu öffnen.</p></div>
     <div class="trip-grid" id="tripGrid"><div class="empty">Reisen werden geladen …</div></div>
   </section>
-  <section class="panel" id="archivePanel" hidden>
+  <section class="panel archive-panel" id="archivePanel" hidden>
     <div class="section-head"><div><p class="eyebrow" style="color:#0b4f8a">Rückblick</p><h2>Vergangene Reisen / Archiv</h2></div><p>Hier bleiben abgeschlossene Erasmus+-Reisen als Rückblick mit Programm, Galerie und Reisetagebuch erhalten.</p></div>
-    <div class="trip-grid" id="archiveTripGrid"></div>
+    <div class="trip-grid archive-trip-grid" id="archiveTripGrid"></div>
   </section>
   <section class="eu-funding" aria-labelledby="euFundingTitle">
     <div class="eu-funding-head">
@@ -88,7 +88,8 @@ async function init(){
     const trips=Array.isArray(d.trips)?d.trips:[];
     const archivedTrips=Array.isArray(d.archivedTrips)?d.archivedTrips:[];
     const card=t=>`
-      <article class="trip-card">
+      <article class="trip-card ${t.status==='archived'?'archive-trip-card':''}">
+        ${t.status==='archived'?'<span class="archive-badge">ARCHIV</span>':''}
         <a href="${esc(t.path)}" aria-label="${esc(t.title)} öffnen" style="position:absolute;inset:0;z-index:2"></a>
         <div class="trip-bg" style="background-image:url('${esc(t.heroUrl||'/images/hero.jpg')}')"></div><div class="trip-shade"></div>
         <div class="trip-body"><span class="trip-country">${esc(t.country||t.destination||'Erasmus+')}</span><h3>${esc(t.title)}</h3>
