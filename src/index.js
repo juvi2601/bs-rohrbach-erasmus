@@ -1602,7 +1602,7 @@ export default {async fetch(request,env){
         '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reise offline</title></head><body><main style="font-family:system-ui,sans-serif;max-width:680px;margin:12vh auto;padding:28px"><h1>Diese Reise ist derzeit nicht öffentlich.</h1><p>Die Reise wurde vom Administrator offline genommen.</p><p><a href="/">← Zur Reiseübersicht</a></p></main></body></html>',
         {status:404,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}}
       );
-      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/bruessel.html?v=15.0.9-dev`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/bruessel.html?v=15.0.10-dev`,{method:'GET',headers:{'cache-control':'no-cache'}}));
       const headers=new Headers(asset.headers);
       headers.set('cache-control','no-store, max-age=0');
       headers.set('pragma','no-cache');
@@ -1618,7 +1618,7 @@ export default {async fetch(request,env){
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
     if(url.pathname==='/api/trips/public-health'&&request.method==='GET'){
-      return json({ok:true,version:'15.0.9-dev',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
+      return json({ok:true,version:'15.0.10-dev',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
     }
 
     if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){
