@@ -359,6 +359,40 @@ async function getPublishedMeta(env,id){
   if(!object)return null;
   try{return JSON.parse(await object.text())}catch{return null}
 }
+
+const TRIP_LIFECYCLE_STATUSES=Object.freeze(['draft','published','offline','archived']);
+function isPublicTripStatus(status){return status==='published'||status==='archived'}
+async function tripLifecycleStatus(env,id){
+  const tripId=normalizeTripId(id);
+  const meta=await getPublishedMeta(env,tripId);
+  if(meta?.status&&TRIP_LIFECYCLE_STATUSES.includes(meta.status))return meta.status;
+  if(meta?.published===true)return 'published';
+  if(TRIP_REGISTRY[tripId])return 'published';
+  return 'draft';
+}
+async function setTripLifecycleStatus(env,id,status,user){
+  const tripId=normalizeTripId(id),next=String(status||'').trim().toLowerCase();
+  if(!TRIP_LIFECYCLE_STATUSES.includes(next)||next==='draft')
+    throw Object.assign(new Error('Ungültiger Reisestatus.'),{status:400});
+  if(!TRIP_REGISTRY[tripId]&&!DRAFT_ROUTE_REGISTRY[tripId])
+    throw Object.assign(new Error('Unbekannte Reise.'),{status:404});
+  const existing=await getPublishedMeta(env,tripId);
+  if(DRAFT_ROUTE_REGISTRY[tripId]&&!existing)
+    throw Object.assign(new Error('Diese Reise wurde noch nie veröffentlicht. Bitte zuerst über „Prüfen & Veröffentlichen“ veröffentlichen.'),{status:400});
+  const now=new Date().toISOString();
+  const base=existing||{
+    id:tripId,title:TRIP_REGISTRY[tripId]?.title||DRAFT_ROUTE_REGISTRY[tripId]?.title||tripId,
+    destination:TRIP_REGISTRY[tripId]?.destination||DRAFT_ROUTE_REGISTRY[tripId]?.destination||''
+  };
+  const meta={...base,status:next,published:isPublicTripStatus(next),statusUpdatedAt:now,statusUpdatedBy:user?.email||''};
+  if(next==='published')meta.publishedAt=meta.publishedAt||now;
+  if(next==='offline')meta.offlineAt=now;
+  if(next==='archived')meta.archivedAt=now;
+  await env.MEDIA_BUCKET.put(publishedMetaKey(tripId),JSON.stringify(meta,null,2),{
+    httpMetadata:{contentType:'application/json; charset=utf-8'}
+  });
+  return meta;
+}
 function publishRouteForDraft(draftId){
   return Object.values(DRAFT_ROUTE_REGISTRY).find(route=>route.draftId===draftId)||null;
 }
@@ -1466,64 +1500,74 @@ export default {async fetch(request,env){
 
     // --- DEV 14.1: öffentliche Multi-Reise-Startseite ---
     if(url.pathname==='/api/platform/trips'&&request.method==='GET'){
-      const trips=[];
+      const trips=[],archivedTrips=[];
+      const pushTrip=(item,status)=>{(status==='archived'?archivedTrips:trips).push({...item,status,published:isPublicTripStatus(status)})};
+
       const brussels=TRIP_REGISTRY[DEFAULT_TRIP_ID];
-      trips.push({
-        id:brussels.id,title:brussels.title,destination:brussels.destination,country:brussels.country,
-        startDate:brussels.startDate,endDate:brussels.endDate,path:'/bruessel-2026/',
-        heroUrl:'/images/hero.jpg',published:true
-      });
+      const brusselsStatus=await tripLifecycleStatus(env,brussels.id);
+      if(isPublicTripStatus(brusselsStatus)){
+        pushTrip({
+          id:brussels.id,title:brussels.title,destination:brussels.destination,country:brussels.country,
+          startDate:brussels.startDate,endDate:brussels.endDate,path:'/bruessel-2026/',
+          heroUrl:'/images/hero.jpg'
+        },brusselsStatus);
+      }
+
       for(const route of Object.values(DRAFT_ROUTE_REGISTRY)){
         const meta=await getPublishedMeta(env,route.id);
-        if(!meta?.published)continue;
+        const status=await tripLifecycleStatus(env,route.id);
+        if(!isPublicTripStatus(status)||!meta)continue;
         let site={};
         try{
           const object=await env.MEDIA_BUCKET.get(publishedResourceKey(route.id,'site'));
           if(object)site=JSON.parse(await object.text());
         }catch{}
-        trips.push({
+        pushTrip({
           id:route.id,title:site.tripTitle||meta.title||route.title,
           destination:site.destination||meta.destination||route.destination,
           country:site.country||'',
           startDate:(site.startDate||site.departureDate||site.departure||'').slice(0,10),
           endDate:(site.endDate||site.returnDate||'').slice(0,10),
           path:tripPublicPath(route.id),
-          heroUrl:site.heroKey?`${url.origin}/api/trips/public-image?trip=${encodeURIComponent(route.id)}&key=${encodeURIComponent(site.heroKey)}`:'',
-          published:true
-        });
+          heroUrl:site.heroKey?`${url.origin}/api/trips/public-image?trip=${encodeURIComponent(route.id)}&key=${encodeURIComponent(site.heroKey)}`:''
+        },status);
       }
-      trips.sort((a,b)=>String(a.startDate||'9999').localeCompare(String(b.startDate||'9999')));
-      return json({ok:true,mode:'platform-home',trips},200,{'cache-control':'public, max-age=60'});
+      const sorter=(a,b)=>String(a.startDate||'9999').localeCompare(String(b.startDate||'9999'));
+      trips.sort(sorter);archivedTrips.sort((a,b)=>String(b.startDate||'').localeCompare(String(a.startDate||'')));
+      return json({ok:true,mode:'platform-home',trips,archivedTrips},200,{'cache-control':'no-store, max-age=0'});
     }
 
     // --- DEV 14.0 Modul 9.0.1: Multi-Reise-Routing-Grundlage ---
     if(url.pathname==='/api/trips/routes'&&request.method==='GET'){
-      const draftRoutes=[];
+      const dynamicRoutes=[];
       for(const route of Object.values(DRAFT_ROUTE_REGISTRY)){
         const meta=await getPublishedMeta(env,route.id);
-        draftRoutes.push({
-          id:route.id,title:route.title,destination:route.destination,path:tripPublicPath(route.id),
-          status:meta?.published?'published':'draft',published:!!meta?.published,draftId:route.draftId,
-          publishedAt:meta?.publishedAt||''
+        const status=await tripLifecycleStatus(env,route.id);
+        dynamicRoutes.push({
+          id:route.id,title:meta?.title||route.title,destination:meta?.destination||route.destination,path:tripPublicPath(route.id),
+          status,published:isPublicTripStatus(status),draftId:route.draftId,
+          publishedAt:meta?.publishedAt||'',offlineAt:meta?.offlineAt||'',archivedAt:meta?.archivedAt||''
+        });
+      }
+      const registeredRoutes=[];
+      for(const trip of Object.values(TRIP_REGISTRY)){
+        const status=await tripLifecycleStatus(env,trip.id);
+        registeredRoutes.push({
+          id:trip.id,title:trip.title,path:tripPublicPath(trip.id),status,published:isPublicTripStatus(status)
         });
       }
       return json({
         ok:true,
         homepage:{path:'/',mode:'platform-overview',message:'Die Hauptadresse zeigt die Erasmus+ Reiseübersicht.'},
-        routes:[
-          ...Object.values(TRIP_REGISTRY).map(trip=>({
-            id:trip.id,title:trip.title,path:tripPublicPath(trip.id),status:trip.status||'active',published:true
-          })),
-          ...draftRoutes
-        ],
+        routes:[...registeredRoutes,...dynamicRoutes],
         publishingEnabled:true
       });
     }
 
     // Reisebezogener Medienupload: eigener Pfad je Reise.
     if((url.pathname==='/linz-2027/upload'||url.pathname==='/linz-2027/upload/')&&request.method==='GET'){
-      const meta=await getPublishedMeta(env,'linz-2027');
-      if(!meta?.published)return new Response('Reise ist noch nicht veröffentlicht.',{status:404});
+      const status=await tripLifecycleStatus(env,'linz-2027');
+      if(!isPublicTripStatus(status))return new Response('Reise ist derzeit nicht öffentlich.',{status:404});
       const asset=await env.ASSETS.fetch(new Request(`${url.origin}/upload.html?v=14.1.4-dev`,{
         method:'GET',headers:{'cache-control':'no-cache'}
       }));
@@ -1536,8 +1580,8 @@ export default {async fetch(request,env){
 
     // Reservierte neue Reise: nur veröffentlichte Snapshots werden öffentlich ausgeliefert.
     if((url.pathname==='/linz-2027'||url.pathname==='/linz-2027/')&&request.method==='GET'){
-      const meta=await getPublishedMeta(env,'linz-2027');
-      if(meta?.published){
+      const status=await tripLifecycleStatus(env,'linz-2027');
+      if(isPublicTripStatus(status)){
         const asset=await env.ASSETS.fetch(new Request(`${url.origin}/reise.html?v=14.1.4-dev`,{method:'GET',headers:{'cache-control':'no-cache'}}));
         const headers=new Headers(asset.headers);
         headers.set('cache-control','no-store, max-age=0');
@@ -1553,7 +1597,12 @@ export default {async fetch(request,env){
 
     // Brüssel 2026 ist ab DEV 14.1 eine eigenständige Reise unter /bruessel-2026/.
     if((url.pathname==='/bruessel-2026'||url.pathname==='/bruessel-2026/')&&request.method==='GET'){
-      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/bruessel.html?v=14.1.0`,{method:'GET',headers:{'cache-control':'no-cache'}}));
+      const status=await tripLifecycleStatus(env,'bruessel-2026');
+      if(!isPublicTripStatus(status))return new Response(
+        '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reise offline</title></head><body><main style="font-family:system-ui,sans-serif;max-width:680px;margin:12vh auto;padding:28px"><h1>Diese Reise ist derzeit nicht öffentlich.</h1><p>Die Reise wurde vom Administrator offline genommen.</p><p><a href="/">← Zur Reiseübersicht</a></p></main></body></html>',
+        {status:404,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}}
+      );
+      const asset=await env.ASSETS.fetch(new Request(`${url.origin}/bruessel.html?v=15.0.7-dev`,{method:'GET',headers:{'cache-control':'no-cache'}}));
       const headers=new Headers(asset.headers);
       headers.set('cache-control','no-store, max-age=0');
       headers.set('pragma','no-cache');
@@ -1569,14 +1618,15 @@ export default {async fetch(request,env){
       return json({ok:true,trip:tripConfig(id),defaultTrip:DEFAULT_TRIP_ID});
     }
     if(url.pathname==='/api/trips/public-health'&&request.method==='GET'){
-      return json({ok:true,version:'14.1.4-dev',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
+      return json({ok:true,version:'15.0.7-dev',statusHelper:'ok'},200,{'x-bsr-health':'9.1.3'});
     }
 
     if(url.pathname==='/api/trips/public-resource'&&request.method==='GET'){
       try{
         const trip=normalizeTripId(url.searchParams.get('trip')),resource=String(url.searchParams.get('resource')||'');
         const meta=await getPublishedMeta(env,trip);
-        if(!meta?.published)throw Object.assign(new Error('Reise ist nicht veröffentlicht.'),{status:404});
+        const lifecycle=await tripLifecycleStatus(env,trip);
+        if(!isPublicTripStatus(lifecycle)||!meta)throw Object.assign(new Error('Reise ist derzeit nicht öffentlich.'),{status:404});
         if(!['site','program','places','downloads','faq','news','gallery','diary','journey'].includes(resource))
           throw Object.assign(new Error('Unbekannte Reiseressource.'),{status:400});
         let object=null;
@@ -1592,7 +1642,8 @@ export default {async fetch(request,env){
       try{
         const trip=normalizeTripId(url.searchParams.get('trip')),key=String(url.searchParams.get('key')||'');
         const meta=await getPublishedMeta(env,trip);
-        if(!meta?.published)throw Object.assign(new Error('Reise ist nicht veröffentlicht.'),{status:404});
+        const lifecycle=await tripLifecycleStatus(env,trip);
+        if(!isPublicTripStatus(lifecycle)||!meta)throw Object.assign(new Error('Reise ist derzeit nicht öffentlich.'),{status:404});
         if(!key.startsWith(publishedAssetPrefix(trip)))throw Object.assign(new Error('Ungültiger veröffentlichter Bildpfad.'),{status:400});
         const object=await env.MEDIA_BUCKET.get(key);
         if(!object)return new Response('Nicht gefunden',{status:404});
@@ -1631,7 +1682,7 @@ export default {async fetch(request,env){
         }
         const meta={
           id:route.id,draftId,title:draft.title,destination:draft.destination,
-          published:true,publishedAt,publishedBy:user.email,sourceDraftUpdatedAt:draft.updatedAt||''
+          status:'published',published:true,publishedAt,publishedBy:user.email,sourceDraftUpdatedAt:draft.updatedAt||''
         };
         await env.MEDIA_BUCKET.put(publishedMetaKey(route.id),JSON.stringify(meta,null,2),{
           httpMetadata:{contentType:'application/json; charset=utf-8'}
@@ -1655,7 +1706,14 @@ export default {async fetch(request,env){
     if(url.pathname==='/api/trips/drafts'&&request.method==='GET'){
       try{
         const user=await verifyTripRole(request,env,['admin']);
-        return json({ok:true,user,drafts:await listTripDrafts(env)});
+        const drafts=await listTripDrafts(env);
+        const decorated=[];
+        for(const draft of drafts){
+          const route=publishRouteForDraft(draft.id);
+          const routeStatus=route?await tripLifecycleStatus(env,route.id):'draft';
+          decorated.push({...draft,routeId:route?.id||'',routeStatus});
+        }
+        return json({ok:true,user,drafts:decorated});
       }catch(error){return mediaError(error)}
     }
     if(url.pathname==='/api/trips/drafts'&&request.method==='POST'){
@@ -1771,10 +1829,41 @@ export default {async fetch(request,env){
         return json({ok:true,id,message:'Entwurf gelöscht.'});
       }catch(error){return mediaError(error)}
     }
+    if(url.pathname==='/api/trips/status'&&request.method==='POST'){
+      try{
+        const user=await verifyTripRole(request,env,['admin']);
+        if(!env.MEDIA_BUCKET)throw Object.assign(new Error('R2-Binding MEDIA_BUCKET fehlt.'),{status:503});
+        const body=await request.json().catch(()=>({}));
+        const routeId=normalizeTripId(body.routeId),status=String(body.status||'').trim().toLowerCase();
+        const meta=await setTripLifecycleStatus(env,routeId,status,user);
+        return json({ok:true,routeId,status:meta.status,meta,message:
+          status==='offline'?'Reise wurde offline genommen.':
+          status==='archived'?'Reise wurde archiviert.':
+          'Reise wurde wieder veröffentlicht.'});
+      }catch(error){return mediaError(error)}
+    }
+
     if(url.pathname==='/api/trips/admin'&&request.method==='GET'){
       try{
         const user=await verifyTripRole(request,env,['admin']);
-        return json({ok:true,user,defaultTrip:DEFAULT_TRIP_ID,trips:Object.values(TRIP_REGISTRY)});
+        const trips=[];
+        for(const trip of Object.values(TRIP_REGISTRY)){
+          const status=await tripLifecycleStatus(env,trip.id);
+          trips.push({...trip,status,published:isPublicTripStatus(status),path:tripPublicPath(trip.id),draftId:null});
+        }
+        for(const route of Object.values(DRAFT_ROUTE_REGISTRY)){
+          const meta=await getPublishedMeta(env,route.id);
+          const status=await tripLifecycleStatus(env,route.id);
+          if(status==='draft')continue;
+          const draft=await getTripDraft(env,route.draftId);
+          trips.push({
+            id:route.id,title:meta?.title||draft?.title||route.title,destination:meta?.destination||draft?.destination||route.destination,
+            country:draft?.country||'',startDate:draft?.startDate||'',endDate:draft?.endDate||'',
+            theme:draft?.theme||{},features:draft?.features||{},status,published:isPublicTripStatus(status),
+            path:tripPublicPath(route.id),draftId:route.draftId
+          });
+        }
+        return json({ok:true,user,defaultTrip:DEFAULT_TRIP_ID,trips});
       }catch(error){return mediaError(error)}
     }
 

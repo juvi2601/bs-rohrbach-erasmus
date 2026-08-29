@@ -56,6 +56,10 @@ footer{background:var(--navy);color:#fff;padding:30px max(20px,calc((100vw - 118
     <div class="section-head"><div><p class="eyebrow" style="color:#0b4f8a">Reiseübersicht</p><h2>Aktuelle & veröffentlichte Reisen</h2></div><p>Wähle eine Reise aus, um Programm, Unterkunft, Karte, Galerie und weitere Informationen zu öffnen.</p></div>
     <div class="trip-grid" id="tripGrid"><div class="empty">Reisen werden geladen …</div></div>
   </section>
+  <section class="panel" id="archivePanel" hidden>
+    <div class="section-head"><div><p class="eyebrow" style="color:#0b4f8a">Rückblick</p><h2>Vergangene Reisen / Archiv</h2></div><p>Hier bleiben abgeschlossene Erasmus+-Reisen als Rückblick mit Programm, Galerie und Reisetagebuch erhalten.</p></div>
+    <div class="trip-grid" id="archiveTripGrid"></div>
+  </section>
   <section class="eu-funding" aria-labelledby="euFundingTitle">
     <div class="eu-funding-head">
       <div class="eu-funding-copy">
@@ -82,14 +86,24 @@ async function init(){
     const r=await fetch('/api/platform/trips',{cache:'no-store'}),d=await r.json();
     if(!r.ok)throw new Error(d.message||'Reisen konnten nicht geladen werden.');
     const trips=Array.isArray(d.trips)?d.trips:[];
-    document.getElementById('tripGrid').innerHTML=trips.length?trips.map(t=>`
+    const archivedTrips=Array.isArray(d.archivedTrips)?d.archivedTrips:[];
+    const card=t=>`
       <article class="trip-card">
         <a href="${esc(t.path)}" aria-label="${esc(t.title)} öffnen" style="position:absolute;inset:0;z-index:2"></a>
         <div class="trip-bg" style="background-image:url('${esc(t.heroUrl||'/images/hero.jpg')}')"></div><div class="trip-shade"></div>
         <div class="trip-body"><span class="trip-country">${esc(t.country||t.destination||'Erasmus+')}</span><h3>${esc(t.title)}</h3>
         <div class="trip-meta">${esc(t.destination||'')}${t.startDate?`<br>${esc(fmtDate(t.startDate))}${t.endDate?` – ${esc(fmtDate(t.endDate))}`:''}`:''}</div>
         <a class="trip-button" href="${esc(t.path)}" style="position:relative;z-index:4">Reise ansehen →</a></div>
-      </article>`).join(''):'<div class="empty">Derzeit sind keine Reisen veröffentlicht.</div>';
+      </article>`;
+    document.getElementById('tripGrid').innerHTML=trips.length?trips.map(card).join(''):'<div class="empty">Derzeit sind keine aktuellen Reisen veröffentlicht.</div>';
+    const archivePanel=document.getElementById('archivePanel'),archiveGrid=document.getElementById('archiveTripGrid');
+    if(archivedTrips.length){
+      archiveGrid.innerHTML=archivedTrips.map(card).join('');
+      archivePanel.hidden=false;
+    }else{
+      archiveGrid.innerHTML='';
+      archivePanel.hidden=true;
+    }
   }catch(e){document.getElementById('tripGrid').innerHTML=`<div class="empty">${esc(e.message)}</div>`}
 }
 init();

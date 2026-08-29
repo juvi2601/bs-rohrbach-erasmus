@@ -98,32 +98,59 @@ function fmtDate(value){
   try{return new Intl.DateTimeFormat('de-AT',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(value+'T12:00:00'))}
   catch{return value}
 }
-function render(trips,defaultTrip){
-  $('tripGrid').innerHTML=trips.map(t=>`
+function statusLabel(status){
+  return status==='published'?'VERÖFFENTLICHT':status==='offline'?'OFFLINE':status==='archived'?'ARCHIVIERT':'ENTWURF';
+}
+function statusClass(status){
+  return status==='published'?'published':status==='offline'?'offline':status==='archived'?'archived':'draft';
+}
+function render(trips,defaultTrip,tk){
+  const grid=$('tripGrid');
+  if(!trips.length){grid.innerHTML='<article class="trip-card"><p class="eyebrow">Keine Reisen</p><h3>Noch keine veröffentlichte oder archivierte Reise</h3></article>';return}
+  grid.innerHTML=trips.map(t=>`
     <article class="trip-card">
       <div class="trip-accent" style="background:${t.theme?.primary||'#0b4f8a'}"></div>
-      <p class="eyebrow">${t.status==='active'?'Aktuelle Reise':'Reise'}</p>
+      <span class="draft-label status-${statusClass(t.status)}">${statusLabel(t.status)}</span>
       <h3>${t.title}</h3>
       <div class="trip-meta">
-        <span>📍 ${t.destination}, ${t.country}</span>
+        <span>📍 ${t.destination||'–'}${t.country?', '+t.country:''}</span>
         <span>📅 ${fmtDate(t.startDate)} – ${fmtDate(t.endDate)}</span>
         <span>🔑 Reise-ID: ${t.id}</span>
       </div>
       <div class="trip-badges">
-        ${t.features?.diary?'<span>Reisetagebuch</span>':''}
-        ${t.features?.gallery?'<span>Galerie</span>':''}
-        ${t.features?.mediaUpload?'<span>Upload</span>':''}
-        ${t.features?.map?'<span>Karte</span>':''}
+        ${t.status==='published'?'<span>Öffentlich sichtbar</span>':''}
+        ${t.status==='offline'?'<span>Nicht öffentlich</span>':''}
+        ${t.status==='archived'?'<span>Öffentlicher Rückblick</span>':''}
       </div>
       <div class="trip-actions">
-        <a class="button primary" href="/">Website öffnen</a>
+        ${t.published?`<a class="button primary" href="${t.path||('/'+t.id+'/')}" target="_blank" rel="noopener">Website öffnen</a>`:''}
+        ${t.draftId?`<a class="button ghost" href="/admin/reise-neu.html?id=${encodeURIComponent(t.draftId)}">Bearbeiten</a>`:''}
         <a class="button ghost" href="/admin/redaktion.html?trip=${encodeURIComponent(t.id)}">Reise-Redaktion</a>
         <a class="button ghost" href="/admin/teilnehmer.html?trip=${encodeURIComponent(t.id)}">Teilnehmer & Rollen</a>
+        ${t.status==='published'?`<button class="button ghost" data-status-trip="${t.id}" data-status-next="offline" type="button">Offline nehmen</button><button class="button ghost" data-status-trip="${t.id}" data-status-next="archived" type="button">Archivieren</button>`:''}
+        ${t.status==='offline'?`<button class="button primary" data-status-trip="${t.id}" data-status-next="published" type="button">Wieder veröffentlichen</button><button class="button ghost" data-status-trip="${t.id}" data-status-next="archived" type="button">Archivieren</button>`:''}
+        ${t.status==='archived'?`<button class="button primary" data-status-trip="${t.id}" data-status-next="published" type="button">Wieder als aktuell veröffentlichen</button><button class="button ghost" data-status-trip="${t.id}" data-status-next="offline" type="button">Offline nehmen</button>`:''}
         ${t.id===defaultTrip?'<span class="badge">Standardreise</span>':''}
       </div>
     </article>`).join('');
+  document.querySelectorAll('[data-status-trip]').forEach(btn=>btn.onclick=async()=>{
+    const id=btn.dataset.statusTrip,next=btn.dataset.statusNext;
+    const question=next==='offline'
+      ?'Reise wirklich offline nehmen? Sie verschwindet von der öffentlichen Übersicht und ist nicht mehr öffentlich erreichbar. Alle Daten bleiben erhalten.'
+      :next==='archived'
+      ?'Reise archivieren? Sie erscheint danach im öffentlichen Bereich „Vergangene Reisen / Archiv“.'
+      :'Reise wieder veröffentlichen? Sie erscheint wieder unter den aktuellen Reisen.';
+    if(!confirm(question))return;
+    btn.disabled=true;
+    try{
+      const r=await fetch('/api/trips/status',{method:'POST',headers:{authorization:'Bearer '+tk,'content-type':'application/json'},body:JSON.stringify({routeId:id,status:next})});
+      const d=await r.json();if(!r.ok)throw new Error(d.message||'Statusänderung fehlgeschlagen.');
+      await load();
+    }catch(e){alert(e.message);btn.disabled=false}
+  });
 }
 function renderDrafts(drafts,tk){
+  drafts=(drafts||[]).filter(t=>(t.routeStatus||'draft')==='draft');
   const grid=$('draftGrid');
   if(!drafts.length){grid.innerHTML='<article class="trip-card draft-card"><p class="eyebrow">Keine Entwürfe</p><h3>Noch keine Reise vorbereitet</h3><div class="trip-meta"><span>Über „Neue Reise erstellen“ kannst du einen Entwurf anlegen.</span></div></article>';return}
   grid.innerHTML=drafts.map(t=>`<article class="trip-card draft-card">
@@ -156,7 +183,7 @@ async function load(){
     const d=await r.json(),dd=await dr.json();
     if(!r.ok)throw new Error(d.message||'Zugriff nicht möglich.');
     if(!dr.ok)throw new Error(dd.message||'Entwürfe konnten nicht geladen werden.');
-    render(d.trips||[],d.defaultTrip);
+    render(d.trips||[],d.defaultTrip,tk);
     renderDrafts(dd.drafts||[],tk);
     $('state').textContent='Admin freigeschaltet';
     $('detail').textContent=`${d.trips?.length||0} Reise(n) · ${dd.drafts?.length||0} Entwurf/Entwürfe`;
