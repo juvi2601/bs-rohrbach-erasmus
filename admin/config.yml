@@ -368,6 +368,7 @@ collections:
       - label: Galerie-Button
         name: galleryButton
         widget: string
+        required: false
       - label: Hinweis
         name: note
         widget: text
@@ -377,6 +378,7 @@ collections:
       - label: SharePoint-Galerie-Link
         name: galleryUrl
         widget: string
+        required: false
     - label: Admin-Hinweis
       name: adminArea
       widget: object
