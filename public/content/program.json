@@ -168,7 +168,7 @@
       "dayNumber": 4,
       "date": "25.11.",
       "gallery": [
-        "/images/uploads/hausdereurop#U00e4ischengeschichte.jpg",
+        "/images/uploads/hausdereuropäischengeschichte.jpg",
         "/images/uploads/csm_at_haus_b3eaaed185.jpeg"
       ],
       "cover": "/images/uploads/andigahleitner.jpg",
@@ -183,17 +183,17 @@
           "status": "pending"
         },
         {
-          "time": "Abend",
-          "title": "Stadtprogramm und Freizeit",
-          "text": "Zeit für weitere Eindrücke, Einkäufe und gemeinsames Abendessen.",
-          "icon": "leisure"
-        },
-        {
           "icon": "automatic",
           "time": "Nachmittag",
           "title": "Ständige Vertretung Österreichs in Brüssel",
           "status": "pending",
           "text": "Besuch der ständigen Vertretung Österreichs in Brüssel."
+        },
+        {
+          "time": "Abend",
+          "title": "Stadtprogramm und Freizeit",
+          "text": "Zeit für weitere Eindrücke, Einkäufe und gemeinsames Abendessen.",
+          "icon": "leisure"
         }
       ],
       "id": "mi",
