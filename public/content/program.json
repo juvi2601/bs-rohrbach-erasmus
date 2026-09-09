@@ -167,7 +167,9 @@
     {
       "dayNumber": 4,
       "date": "25.11.",
-      "gallery": [],
+      "gallery": [
+        "/images/uploads/hausdereuropäischengeschichte.jpg"
+      ],
       "cover": "/images/uploads/andigahleitner.jpg",
       "subtitle": "Einblicke in die Arbeit in Brüssel.",
       "title": "Brüssel & Europa",
@@ -180,17 +182,17 @@
           "status": "pending"
         },
         {
-          "time": "Abend",
-          "title": "Stadtprogramm und Freizeit",
-          "text": "Zeit für weitere Eindrücke, Einkäufe und gemeinsames Abendessen.",
-          "icon": "leisure"
-        },
-        {
           "icon": "automatic",
           "time": "Nachmittag",
           "title": "Ständige Vertretung Österreichs",
           "text": "Besuch der ständigen Vertretung Österreichs",
           "status": "pending"
+        },
+        {
+          "time": "Abend",
+          "title": "Stadtprogramm und Freizeit",
+          "text": "Zeit für weitere Eindrücke, Einkäufe und gemeinsames Abendessen.",
+          "icon": "leisure"
         }
       ],
       "id": "mi",
