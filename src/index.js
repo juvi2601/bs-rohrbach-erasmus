@@ -1,4 +1,4 @@
-import { unzipSync, strFromU8 } from 'fflate';
+import { unzipSync, strFromU8, zipSync, strToU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
 const VERSION = '14.1.4-dev';
@@ -1238,12 +1238,27 @@ async function participantAdminRows(env,project){
 async function handleParticipantAdminList(request,env){try{const project=mediaProjectFromRequest(request),user=await verifyTripRole(request,env,['admin'],project),settings=await loadParticipantSettings(env,project),rows=await participantAdminRows(env,project);return json({ok:true,project,tripLabel:tripLabelForProject(project),user,settings,rows});}catch(e){return mediaError(e)}}
 async function handleParticipantSettings(request,env){try{const project=mediaProjectFromRequest(request),user=await verifyTripRole(request,env,['admin'],project),body=await request.json(),settings={open:Boolean(body?.open),deadline:String(body?.deadline||'').slice(0,10),updatedAt:new Date().toISOString(),updatedBy:user.email};await env.MEDIA_BUCKET.put(participantSettingsKey(project),JSON.stringify(settings,null,2),{httpMetadata:{contentType:'application/json'}});return json({ok:true,settings});}catch(e){return mediaError(e)}}
 function xmlEsc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;')}
+function participantXlsx(headers,values){
+  const colWidths=[18,22,13,15,17,28,10,22,27,30,18,20,20,26,14,32];
+  const cell=(v,style=0)=>`<c t="inlineStr" s="${style}"><is><t xml:space="preserve">${xmlEsc(v)}</t></is></c>`;
+  const row=(a,r,style=0)=>`<row r="${r}">${a.map(v=>cell(v,style)).join('')}</row>`;
+  const cols=colWidths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');
+  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${cols}</cols><sheetData>${row(headers,1,1)}${values.map((a,i)=>row(a,i+2,0)).join('')}</sheetData><autoFilter ref="A1:P${Math.max(1,values.length+1)}"/></worksheet>`;
+  const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Aptos"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF087443"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFill="1" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+  const files={
+    '[Content_Types].xml':strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`),
+    '_rels/.rels':strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`),
+    'xl/workbook.xml':strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="TeilnehmerInnen" sheetId="1" r:id="rId1"/></sheets></workbook>`),
+    'xl/_rels/workbook.xml.rels':strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`),
+    'xl/worksheets/sheet1.xml':strToU8(sheet),'xl/styles.xml':strToU8(styles)
+  };
+  return zipSync(files,{level:6});
+}
 async function handleParticipantExport(request,env){
   try{const project=mediaProjectFromRequest(request);await verifyTripRole(request,env,['admin'],project);const rows=await participantAdminRows(env,project);const headers=['Nachname','Vorname','Geschlecht','Geburtsdatum','SV-Nummer','Straße','PLZ','Ort','IBAN','E-Mail','Telefonnummer','Reisepassnummer','Reisepass gültig bis','Telefonnummer Vater/Mutter','Status','Schulkonto'];
     const values=rows.map(r=>{const d=r.data||{};return[d.passportLastName,d.passportFirstNames,d.gender,d.birthDate,d.svNumber,d.street,d.postalCode,d.city,d.iban,d.email,d.phone,d.passportNumber,d.passportValidUntil,d.parentPhone,r.status==='submitted'?'Abgegeben':r.status==='draft'?'Entwurf':'Fehlt',r.email]});
-    const rowXml=a=>`<Row>${a.map(v=>`<Cell><Data ss:Type="String">${xmlEsc(v)}</Data></Cell>`).join('')}</Row>`;
-    const xml=`<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="TeilnehmerInnen"><Table>${rowXml(headers)}${values.map(rowXml).join('')}</Table></Worksheet></Workbook>`;
-    return new Response(xml,{headers:{'content-type':'application/vnd.ms-excel; charset=utf-8','content-disposition':`attachment; filename="TeilnehmerInnen_${project}.xls"`,'cache-control':'no-store'}});
+    const xlsx=participantXlsx(headers,values);
+    return new Response(xlsx,{headers:{'content-type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','content-disposition':`attachment; filename="TeilnehmerInnen_${project}.xlsx"`,'cache-control':'no-store'}});
   }catch(e){return mediaError(e)}
 }
 // --- Ende Teilnehmerdaten-Modul ---
