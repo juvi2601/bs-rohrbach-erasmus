@@ -2,6 +2,7 @@ const $ = id => document.getElementById(id);
 const uploadPathMatch = location.pathname.match(/^\/([a-z0-9][a-z0-9-]*)\/upload\/?$/i);
 const uploadTrip = (uploadPathMatch?.[1] || new URLSearchParams(location.search).get('trip') || 'bruessel-2026').toLowerCase();
 const tripQuery = `trip=${encodeURIComponent(uploadTrip)}`;
+window.addEventListener('DOMContentLoaded',()=>{const a=document.getElementById('participantDataLink');if(a)a.href=`/teilnehmerdaten.html?trip=${encodeURIComponent(uploadTrip)}`});
 const withTrip = path => `${path}${path.includes('?')?'&':'?'}${tripQuery}`;
 let config = null;
 let msalApp = null;
