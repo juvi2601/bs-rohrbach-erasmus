@@ -1,7 +1,7 @@
 import { unzipSync, strFromU8, zipSync, strToU8 } from 'fflate';
 
 const REPO = 'juvi2601/bs-rohrbach-erasmus';
-const VERSION = '14.1.4-dev';
+const VERSION = '15.0.15-dev';
 
 function normalizeHttpStatus(value,fallback=200){
   const n=Number(value);
@@ -1293,6 +1293,33 @@ function participantXlsx(headers,values){
   };
   return zipSync(files,{level:6});
 }
+function safeDownloadPart(v,fallback='Dokument'){
+  const x=String(v||'').trim().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'_').replace(/^_+|_+$/g,'');
+  return x||fallback;
+}
+function documentExtension(meta){
+  const byType=PARTICIPANT_DOC_TYPES[String(meta?.contentType||'').toLowerCase()];
+  if(byType)return byType;
+  const m=String(meta?.fileName||'').toLowerCase().match(/\.([a-z0-9]{2,5})$/); return m?m[1]:'bin';
+}
+async function handleParticipantDocumentsExport(request,env){
+  try{
+    const project=mediaProjectFromRequest(request); await verifyTripRole(request,env,['admin'],project);
+    const rows=await participantAdminRows(env,project),files={}; let total=0,count=0;
+    for(const r of rows){
+      if(!r.document?.key)continue;
+      const o=await env.MEDIA_BUCKET.get(r.document.key); if(!o)continue;
+      const bytes=new Uint8Array(await o.arrayBuffer()); total+=bytes.byteLength;
+      if(total>80*1024*1024)throw Object.assign(new Error('Die Ausweisdokumente sind zusammen zu groß für einen Sammeldownload. Bitte einzelne Dokumente herunterladen.'),{status:413});
+      const d=r.data||{},last=safeDownloadPart(d.passportLastName||r.name||r.email,'Teilnehmer'),first=safeDownloadPart(d.passportFirstNames||'',''),kind=safeDownloadPart(d.documentType||'Ausweis','Ausweis'),ext=documentExtension(r.document);
+      let name=`${last}${first?'_'+first:''}_${kind}.${ext}`,n=2; while(files[name]){name=`${last}${first?'_'+first:''}_${kind}_${n++}.${ext}`}
+      files[name]=bytes; count++;
+    }
+    if(!count)throw Object.assign(new Error('Es sind noch keine Ausweisdokumente vorhanden.'),{status:404});
+    const zip=zipSync(files,{level:0});
+    return new Response(zip,{headers:{'content-type':'application/zip','content-disposition':`attachment; filename="Ausweisdokumente_${project}.zip"`,'cache-control':'private, no-store'}});
+  }catch(e){return mediaError(e)}
+}
 async function handleParticipantExport(request,env){
   try{const project=mediaProjectFromRequest(request);await verifyTripRole(request,env,['admin'],project);const rows=await participantAdminRows(env,project);const headers=['Nachname','Vorname','Geschlecht','Geburtsdatum','SV-Nummer','Straße','PLZ','Ort','IBAN','E-Mail','Telefonnummer','Dokumentart','Dokumentnummer','Gültig bis','Kontaktperson im Notfall','Telefonnummer Kontaktperson','Ausweisdokument','Status','Schulkonto'];
     const values=rows.map(r=>{const d=r.data||{};return[d.passportLastName,d.passportFirstNames,d.gender,d.birthDate,d.svNumber,d.street,d.postalCode,d.city,d.iban,d.email,d.phone,d.documentType||'Reisepass',d.passportNumber,d.passportValidUntil,d.emergencyContactName||'',d.emergencyContactPhone||d.parentPhone||'',r.document?'Vorhanden':'Fehlt',r.status==='submitted'?'Abgegeben':r.status==='draft'?'Entwurf':'Fehlt',r.email]});
@@ -1996,6 +2023,7 @@ export default {async fetch(request,env){
     if(url.pathname==='/api/participant/admin'&&request.method==='GET')return handleParticipantAdminList(request,env);
     if(url.pathname==='/api/participant/settings'&&request.method==='PUT')return handleParticipantSettings(request,env);
     if(url.pathname==='/api/participant/export'&&request.method==='GET')return handleParticipantExport(request,env);
+    if(url.pathname==='/api/participant/documents-export'&&request.method==='GET')return handleParticipantDocumentsExport(request,env);
     if(url.pathname==='/api/participant/document'&&request.method==='PUT')return handleParticipantDocumentUpload(request,env);
     if(url.pathname==='/api/participant/document'&&request.method==='GET')return handleParticipantDocumentGet(request,env);
     if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
