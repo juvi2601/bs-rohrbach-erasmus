@@ -1201,20 +1201,58 @@ async function loadParticipantRecord(env,project,email){
 }
 function cleanParticipantData(x={}){
   const s=(v,n=160)=>String(v??'').trim().slice(0,n);
-  return {passportFirstNames:s(x.passportFirstNames,120),passportLastName:s(x.passportLastName,120),gender:s(x.gender,30),birthDate:s(x.birthDate,10),svNumber:s(x.svNumber,30),street:s(x.street,160),postalCode:s(x.postalCode,20),city:s(x.city,100),iban:s(x.iban,40).replace(/\s+/g,'').toUpperCase(),email:s(x.email,160).toLowerCase(),phone:s(x.phone,60),passportNumber:s(x.passportNumber,60).toUpperCase(),passportValidUntil:s(x.passportValidUntil,10),emergencyContactName:s(x.emergencyContactName,120),emergencyContactPhone:s(x.emergencyContactPhone||x.parentPhone,60),confirmed:Boolean(x.confirmed)};
+  return {passportFirstNames:s(x.passportFirstNames,120),passportLastName:s(x.passportLastName,120),gender:s(x.gender,30),birthDate:s(x.birthDate,10),svNumber:s(x.svNumber,30),street:s(x.street,160),postalCode:s(x.postalCode,20),city:s(x.city,100),iban:s(x.iban,40).replace(/\s+/g,'').toUpperCase(),email:s(x.email,160).toLowerCase(),phone:s(x.phone,60),documentType:s(x.documentType||'Reisepass',30),passportNumber:s(x.passportNumber,60).toUpperCase(),passportValidUntil:s(x.passportValidUntil,10),emergencyContactName:s(x.emergencyContactName,120),emergencyContactPhone:s(x.emergencyContactPhone||x.parentPhone,60),confirmed:Boolean(x.confirmed)};
 }
-const PARTICIPANT_REQUIRED=['passportFirstNames','passportLastName','gender','birthDate','svNumber','street','postalCode','city','iban','email','phone','passportNumber','passportValidUntil','emergencyContactName','emergencyContactPhone'];
+const PARTICIPANT_REQUIRED=['documentType','passportFirstNames','passportLastName','gender','birthDate','svNumber','street','postalCode','city','iban','email','phone','passportNumber','passportValidUntil','emergencyContactName','emergencyContactPhone'];
 function participantValidation(d){
   const missing=PARTICIPANT_REQUIRED.filter(k=>!String(d[k]||'').trim());
   const errors=[];
   if(d.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email))errors.push('E-Mail-Adresse ist ungültig.');
   if(d.iban&&!/^[A-Z]{2}[0-9A-Z]{13,32}$/.test(d.iban))errors.push('IBAN ist ungültig.');
   if(d.birthDate&&!/^\d{4}-\d{2}-\d{2}$/.test(d.birthDate))errors.push('Geburtsdatum ist ungültig.');
-  if(d.passportValidUntil&&!/^\d{4}-\d{2}-\d{2}$/.test(d.passportValidUntil))errors.push('Pass-Gültigkeit ist ungültig.');
+  if(d.passportValidUntil&&!/^\d{4}-\d{2}-\d{2}$/.test(d.passportValidUntil))errors.push('Dokument-Gültigkeit ist ungültig.');
   return {missing,errors,complete:missing.length===0&&errors.length===0&&d.confirmed};
 }
+
+function participantDocumentKey(project,email,ext='bin'){
+  const safe=String(email||'').trim().toLowerCase().replace(/[^a-z0-9@._+-]/g,'_');
+  return `__system/participant-documents/${project}/${safe}/identity.${ext}`;
+}
+const PARTICIPANT_DOC_TYPES=Object.freeze({'application/pdf':'pdf','image/jpeg':'jpg','image/png':'png'});
+async function participantDocumentMeta(env,project,email){
+  const prefix=`__system/participant-documents/${project}/${String(email||'').trim().toLowerCase().replace(/[^a-z0-9@._+-]/g,'_')}/`;
+  const list=await env.MEDIA_BUCKET.list({prefix,limit:5});
+  const o=list.objects?.[0]; if(!o)return null;
+  return {key:o.key,fileName:o.customMetadata?.originalName||'Ausweisdokument',contentType:o.httpMetadata?.contentType||'',uploadedAt:o.customMetadata?.uploadedAt||o.uploaded?.toISOString?.()||'',size:o.size||0};
+}
+async function handleParticipantDocumentUpload(request,env){
+  try{
+    const project=mediaProjectFromRequest(request),user=await verifyTripRole(request,env,['student','teacher','admin'],project),settings=await loadParticipantSettings(env,project);
+    if(!settings.open)throw Object.assign(new Error('Die Datenerfassung ist derzeit geschlossen.'),{status:403});
+    const type=String(request.headers.get('content-type')||'').split(';')[0].toLowerCase(),ext=PARTICIPANT_DOC_TYPES[type];
+    if(!ext)throw Object.assign(new Error('Bitte PDF, JPG/JPEG oder PNG hochladen.'),{status:415});
+    const size=Number(request.headers.get('x-file-size')||request.headers.get('content-length')||0);
+    if(!size||size>10*1024*1024)throw Object.assign(new Error('Das Ausweisdokument darf höchstens 10 MB groß sein.'),{status:413});
+    const originalName=cleanText(decodeHeader(request.headers.get('x-file-name')),160)||`Ausweisdokument.${ext}`;
+    const old=await participantDocumentMeta(env,project,user.email); if(old?.key)await env.MEDIA_BUCKET.delete(old.key);
+    const uploadedAt=new Date().toISOString(),key=participantDocumentKey(project,user.email,ext);
+    await env.MEDIA_BUCKET.put(key,request.body,{httpMetadata:{contentType:type,contentDisposition:`inline; filename*=UTF-8''${encodeURIComponent(originalName)}`},customMetadata:{project,accountEmail:user.email,originalName,uploadedAt}});
+    return json({ok:true,document:{fileName:originalName,contentType:type,uploadedAt,size}});
+  }catch(e){return mediaError(e)}
+}
+async function handleParticipantDocumentGet(request,env){
+  try{
+    const project=mediaProjectFromRequest(request),viewer=await verifyTripRole(request,env,['student','teacher','admin'],project),url=new URL(request.url);
+    const requested=String(url.searchParams.get('email')||viewer.email).trim().toLowerCase();
+    if(requested!==viewer.email.toLowerCase()&&viewer.role!=='admin')throw Object.assign(new Error('Kein Zugriff auf dieses Ausweisdokument.'),{status:403});
+    const meta=await participantDocumentMeta(env,project,requested); if(!meta)throw Object.assign(new Error('Noch kein Ausweisdokument hochgeladen.'),{status:404});
+    const o=await env.MEDIA_BUCKET.get(meta.key); if(!o)throw Object.assign(new Error('Ausweisdokument nicht gefunden.'),{status:404});
+    return new Response(o.body,{headers:{'content-type':meta.contentType||'application/octet-stream','content-disposition':`inline; filename*=UTF-8''${encodeURIComponent(meta.fileName)}`,'cache-control':'private, no-store'}});
+  }catch(e){return mediaError(e)}
+}
+
 async function handleParticipantMe(request,env){
-  try{const project=mediaProjectFromRequest(request),user=await verifyTripRole(request,env,['student','teacher','admin'],project),settings=await loadParticipantSettings(env,project),record=await loadParticipantRecord(env,project,user.email);return json({ok:true,project,tripLabel:tripLabelForProject(project),user:{name:user.name,email:user.email},settings,record});}catch(e){return mediaError(e)}
+  try{const project=mediaProjectFromRequest(request),user=await verifyTripRole(request,env,['student','teacher','admin'],project),settings=await loadParticipantSettings(env,project),record=await loadParticipantRecord(env,project,user.email);return json({ok:true,project,tripLabel:tripLabelForProject(project),user:{name:user.name,email:user.email},settings,record,document:await participantDocumentMeta(env,project,user.email)});}catch(e){return mediaError(e)}
 }
 async function handleParticipantSave(request,env){
   try{
@@ -1222,6 +1260,7 @@ async function handleParticipantSave(request,env){
     if(!settings.open)throw Object.assign(new Error('Die Datenerfassung ist derzeit geschlossen.'),{status:403});
     const body=await request.json(),data=cleanParticipantData(body?.data),submit=Boolean(body?.submit),validation=participantValidation(data);
     if(submit&&!validation.complete)throw Object.assign(new Error('Bitte alle Pflichtfelder vollständig und korrekt ausfüllen und die Bestätigung aktivieren.'),{status:400,details:validation});
+    if(submit&&!await participantDocumentMeta(env,project,user.email))throw Object.assign(new Error('Bitte zuerst eine Kopie deines Reisepasses oder Personalausweises hochladen.'),{status:400});
     const previous=await loadParticipantRecord(env,project,user.email);
     const record={project,accountEmail:user.email,accountName:user.name,data,status:submit?'submitted':'draft',submittedAt:submit?new Date().toISOString():(previous?.submittedAt||''),updatedAt:new Date().toISOString()};
     await env.MEDIA_BUCKET.put(participantDataKey(project,user.email),JSON.stringify(record,null,2),{httpMetadata:{contentType:'application/json'},customMetadata:{project,status:record.status,accountEmail:user.email}});
@@ -1232,18 +1271,18 @@ async function participantAdminRows(env,project){
   const fixed=Object.entries(TRIP_ACCESS[project]||{}).map(([email,x])=>({email,name:x.name||email,role:x.role}));
   const roster=await loadTripRoster(env,project); const map=new Map();
   [...fixed,...roster].filter(x=>['student','teacher','admin'].includes(x.role)).forEach(x=>map.set(x.email.toLowerCase(),x));
-  const rows=[]; for(const participant of map.values()){const record=await loadParticipantRecord(env,project,participant.email);rows.push({email:participant.email,name:participant.name||participant.email,role:participant.role,status:record?.status||'missing',updatedAt:record?.updatedAt||'',submittedAt:record?.submittedAt||'',data:record?.data||null});}
+  const rows=[]; for(const participant of map.values()){const record=await loadParticipantRecord(env,project,participant.email);const document=await participantDocumentMeta(env,project,participant.email);const effectiveStatus=record?.status==='submitted'&&!document?'draft':(record?.status||'missing');rows.push({email:participant.email,name:participant.name||participant.email,role:participant.role,status:effectiveStatus,updatedAt:record?.updatedAt||'',submittedAt:record?.submittedAt||'',data:record?.data||null,document});}
   rows.sort((a,b)=>a.name.localeCompare(b.name,'de')); return rows;
 }
 async function handleParticipantAdminList(request,env){try{const project=mediaProjectFromRequest(request),user=await verifyTripRole(request,env,['admin'],project),settings=await loadParticipantSettings(env,project),rows=await participantAdminRows(env,project);return json({ok:true,project,tripLabel:tripLabelForProject(project),user,settings,rows});}catch(e){return mediaError(e)}}
 async function handleParticipantSettings(request,env){try{const project=mediaProjectFromRequest(request),user=await verifyTripRole(request,env,['admin'],project),body=await request.json(),settings={open:Boolean(body?.open),deadline:String(body?.deadline||'').slice(0,10),updatedAt:new Date().toISOString(),updatedBy:user.email};await env.MEDIA_BUCKET.put(participantSettingsKey(project),JSON.stringify(settings,null,2),{httpMetadata:{contentType:'application/json'}});return json({ok:true,settings});}catch(e){return mediaError(e)}}
 function xmlEsc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;')}
 function participantXlsx(headers,values){
-  const colWidths=[18,22,13,15,17,28,10,22,27,30,18,20,20,28,24,14,32];
+  const colWidths=[18,22,13,15,17,28,10,22,27,30,18,18,20,20,28,24,16,14,32];
   const cell=(v,style=0)=>`<c t="inlineStr" s="${style}"><is><t xml:space="preserve">${xmlEsc(v)}</t></is></c>`;
   const row=(a,r,style=0)=>`<row r="${r}">${a.map(v=>cell(v,style)).join('')}</row>`;
   const cols=colWidths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');
-  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${cols}</cols><sheetData>${row(headers,1,1)}${values.map((a,i)=>row(a,i+2,0)).join('')}</sheetData><autoFilter ref="A1:Q${Math.max(1,values.length+1)}"/></worksheet>`;
+  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${cols}</cols><sheetData>${row(headers,1,1)}${values.map((a,i)=>row(a,i+2,0)).join('')}</sheetData><autoFilter ref="A1:S${Math.max(1,values.length+1)}"/></worksheet>`;
   const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Aptos"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF087443"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFill="1" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
   const files={
     '[Content_Types].xml':strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`),
@@ -1255,8 +1294,8 @@ function participantXlsx(headers,values){
   return zipSync(files,{level:6});
 }
 async function handleParticipantExport(request,env){
-  try{const project=mediaProjectFromRequest(request);await verifyTripRole(request,env,['admin'],project);const rows=await participantAdminRows(env,project);const headers=['Nachname','Vorname','Geschlecht','Geburtsdatum','SV-Nummer','Straße','PLZ','Ort','IBAN','E-Mail','Telefonnummer','Reisepassnummer','Reisepass gültig bis','Kontaktperson im Notfall','Telefonnummer Kontaktperson','Status','Schulkonto'];
-    const values=rows.map(r=>{const d=r.data||{};return[d.passportLastName,d.passportFirstNames,d.gender,d.birthDate,d.svNumber,d.street,d.postalCode,d.city,d.iban,d.email,d.phone,d.passportNumber,d.passportValidUntil,d.emergencyContactName||'',d.emergencyContactPhone||d.parentPhone||'',r.status==='submitted'?'Abgegeben':r.status==='draft'?'Entwurf':'Fehlt',r.email]});
+  try{const project=mediaProjectFromRequest(request);await verifyTripRole(request,env,['admin'],project);const rows=await participantAdminRows(env,project);const headers=['Nachname','Vorname','Geschlecht','Geburtsdatum','SV-Nummer','Straße','PLZ','Ort','IBAN','E-Mail','Telefonnummer','Dokumentart','Dokumentnummer','Gültig bis','Kontaktperson im Notfall','Telefonnummer Kontaktperson','Ausweisdokument','Status','Schulkonto'];
+    const values=rows.map(r=>{const d=r.data||{};return[d.passportLastName,d.passportFirstNames,d.gender,d.birthDate,d.svNumber,d.street,d.postalCode,d.city,d.iban,d.email,d.phone,d.documentType||'Reisepass',d.passportNumber,d.passportValidUntil,d.emergencyContactName||'',d.emergencyContactPhone||d.parentPhone||'',r.document?'Vorhanden':'Fehlt',r.status==='submitted'?'Abgegeben':r.status==='draft'?'Entwurf':'Fehlt',r.email]});
     const xlsx=participantXlsx(headers,values);
     return new Response(xlsx,{headers:{'content-type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','content-disposition':`attachment; filename="TeilnehmerInnen_${project}.xlsx"`,'cache-control':'no-store'}});
   }catch(e){return mediaError(e)}
@@ -1957,6 +1996,8 @@ export default {async fetch(request,env){
     if(url.pathname==='/api/participant/admin'&&request.method==='GET')return handleParticipantAdminList(request,env);
     if(url.pathname==='/api/participant/settings'&&request.method==='PUT')return handleParticipantSettings(request,env);
     if(url.pathname==='/api/participant/export'&&request.method==='GET')return handleParticipantExport(request,env);
+    if(url.pathname==='/api/participant/document'&&request.method==='PUT')return handleParticipantDocumentUpload(request,env);
+    if(url.pathname==='/api/participant/document'&&request.method==='GET')return handleParticipantDocumentGet(request,env);
     if(url.pathname==='/api/access/me'&&request.method==='GET')return handleAccessMe(request,env);
     if(url.pathname==='/api/help/access'&&request.method==='GET')return handleHelpAccess(request,env);
     if(url.pathname==='/api/access/roster'&&request.method==='GET')return handleAccessRosterGet(request,env);
