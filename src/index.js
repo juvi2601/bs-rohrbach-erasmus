@@ -1223,8 +1223,10 @@ async function participantDocumentMeta(env,project,email){
   const prefix=`__system/participant-documents/${project}/${String(email||'').trim().toLowerCase().replace(/[^a-z0-9@._+-]/g,'_')}/`;
   const list=await env.MEDIA_BUCKET.list({prefix,limit:5});
   const o=list.objects?.[0]; if(!o)return null;
-  const contentType=o.httpMetadata?.contentType||'';
-  const ext=PARTICIPANT_DOC_TYPES[String(contentType).toLowerCase()]||String(o.key||'').split('.').pop()||'bin';
+  const keyExt=String(o.key||'').split('.').pop().toLowerCase();
+  const typeFromExt={pdf:'application/pdf',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png'}[keyExt]||'';
+  const contentType=o.httpMetadata?.contentType||typeFromExt||'application/octet-stream';
+  const ext=PARTICIPANT_DOC_TYPES[String(contentType).toLowerCase()]||keyExt||'bin';
   let fileName=o.customMetadata?.originalName||`Ausweisdokument.${ext}`;
   if(!/\.[a-z0-9]{2,5}$/i.test(fileName))fileName+=`.${ext}`;
   return {key:o.key,fileName,contentType,uploadedAt:o.customMetadata?.uploadedAt||o.uploaded?.toISOString?.()||'',size:o.size||0};
