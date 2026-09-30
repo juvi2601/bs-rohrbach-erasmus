@@ -1223,7 +1223,11 @@ async function participantDocumentMeta(env,project,email){
   const prefix=`__system/participant-documents/${project}/${String(email||'').trim().toLowerCase().replace(/[^a-z0-9@._+-]/g,'_')}/`;
   const list=await env.MEDIA_BUCKET.list({prefix,limit:5});
   const o=list.objects?.[0]; if(!o)return null;
-  return {key:o.key,fileName:o.customMetadata?.originalName||'Ausweisdokument',contentType:o.httpMetadata?.contentType||'',uploadedAt:o.customMetadata?.uploadedAt||o.uploaded?.toISOString?.()||'',size:o.size||0};
+  const contentType=o.httpMetadata?.contentType||'';
+  const ext=PARTICIPANT_DOC_TYPES[String(contentType).toLowerCase()]||String(o.key||'').split('.').pop()||'bin';
+  let fileName=o.customMetadata?.originalName||`Ausweisdokument.${ext}`;
+  if(!/\.[a-z0-9]{2,5}$/i.test(fileName))fileName+=`.${ext}`;
+  return {key:o.key,fileName,contentType,uploadedAt:o.customMetadata?.uploadedAt||o.uploaded?.toISOString?.()||'',size:o.size||0};
 }
 async function handleParticipantDocumentUpload(request,env){
   try{
@@ -1247,7 +1251,8 @@ async function handleParticipantDocumentGet(request,env){
     if(requested!==viewer.email.toLowerCase()&&viewer.role!=='admin')throw Object.assign(new Error('Kein Zugriff auf dieses Ausweisdokument.'),{status:403});
     const meta=await participantDocumentMeta(env,project,requested); if(!meta)throw Object.assign(new Error('Noch kein Ausweisdokument hochgeladen.'),{status:404});
     const o=await env.MEDIA_BUCKET.get(meta.key); if(!o)throw Object.assign(new Error('Ausweisdokument nicht gefunden.'),{status:404});
-    return new Response(o.body,{headers:{'content-type':meta.contentType||'application/octet-stream','content-disposition':`inline; filename*=UTF-8''${encodeURIComponent(meta.fileName)}`,'cache-control':'private, no-store'}});
+    const ext=documentExtension(meta),safeName=safeDownloadPart(String(meta.fileName||'').replace(/\.[^.]+$/,''),'Ausweisdokument')+'.'+ext;
+    return new Response(o.body,{headers:{'content-type':meta.contentType||'application/octet-stream','content-disposition':`inline; filename=\"${safeName}\"; filename*=UTF-8''${encodeURIComponent(meta.fileName)}`,'x-document-filename':encodeURIComponent(meta.fileName),'cache-control':'private, no-store'}});
   }catch(e){return mediaError(e)}
 }
 
