@@ -137,8 +137,8 @@
         {
           "time": "11:30–12:30",
           "title": "Plenarsaal des Europäischen Parlaments",
-          "text": "Der Besuch ist angefragt.",
-          "status": "pending",
+          "text": "Bei einer Führung durch das Europäische Parlament erhalten wir spannende Einblicke in die Arbeit und die Aufgaben dieser wichtigen EU-Institution. Da die Plenarsitzungen in dieser Woche in Straßburg stattfinden, wird die Führung in englischer Sprache durchgeführt. Eine deutschsprachige Führung ist daher leider nicht möglich.",
+          "status": "confirmed",
           "icon": "parliament"
         },
         {
