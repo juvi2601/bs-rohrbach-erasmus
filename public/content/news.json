@@ -1,9 +1,9 @@
 {
   "news": [
     {
-      "title": "🧳 Packliste für die Brüsselreise – jetzt verfügbar!",
+      "title": "🧳 Packliste für die Brüsselreise",
       "date": "2026-11-07",
-      "text": "Unsere Erasmus+-Reise rückt näher! Damit ihr beim Packen nichts vergesst, findet ihr hier die Packliste mit Kleidung, Reisedokumenten, persönlichen Dingen und Tipps zum EU-Roaming. Denkt besonders an passende Kleidung für unsere offiziellen Besuche. Bitte schaut die Liste rechtzeitig durch und hakt alles ab. Wir freuen uns auf die gemeinsame Reise! 🇧🇪🇪🇺",
+      "text": "Unsere Erasmus+-Reise rückt näher! Damit ihr beim Packen nichts vergesst, findet ihr hier die Packliste mit Kleidung, Reisedokumenten, persönlichen Dingen und Tipps zum EU-Roaming. Denkt besonders an passende Kleidung für unsere offiziellen Besuche. Bitte schaut die Liste rechtzeitig durch und hakt alles ab. Wir freuen uns auf die gemeinsame Reise! ",
       "important": true,
       "published": true,
       "link": "/documents/packliste-bruessel-2026.pdf",
@@ -14,13 +14,6 @@
       "date": "2026-08-05",
       "text": "Programm, Hotelinformationen und wichtige Hinweise sind nun übersichtlich an einem Ort verfügbar.",
       "important": false,
-      "published": true
-    },
-    {
-      "title": "Noch offene Programmpunkte",
-      "date": "2026-08-05",
-      "text": "Der Besuch des Plenarsaals und weitere noch offene Programmdetails werden laufend aktualisiert.",
-      "important": true,
       "published": true
     }
   ]
