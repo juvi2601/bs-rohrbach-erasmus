@@ -453,6 +453,16 @@ collections:
       - label: Text
         name: text
         widget: text
+      - label: Link / PDF (optional)
+        name: link
+        widget: string
+        required: false
+        hint: URL oder Pfad zur PDF-Datei (z. B. /documents/packliste-bruessel-2026.pdf).
+      - label: Linktext (optional)
+        name: linkLabel
+        widget: string
+        required: false
+        hint: Beschriftung der Schaltfläche, z. B. „Packliste öffnen (PDF)“.
       - label: Wichtig hervorheben
         name: important
         widget: boolean
