@@ -1,0 +1,1 @@
+Korrektur: public/admin/config.yml in den gleichnamigen Repository-Ordner kopieren und bestehende Datei ersetzen. Danach GitHub Desktop Commit + Push origin. Bestehende News-Inhalte werden nicht verändert.
