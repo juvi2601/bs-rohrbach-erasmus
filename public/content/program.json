@@ -28,17 +28,17 @@
       "cover": "/images/grand-place.webp",
       "events": [
         {
-          "time": "08:00",
+          "time": "09:00-10:00",
           "title": "Ankunft beim Hotel",
           "text": "Gepäck deponieren, kurze Pause und nach Möglichkeit einzelne Zimmer früher beziehen."
         },
         {
-          "time": "08:30–10:30",
+          "time": "10:00–11:00",
           "title": "Altstadtspaziergang · ca. 2 km",
           "text": "Grand Place · Galeries Royales Saint-Hubert · Manneken Pis · Mont des Arts"
         },
         {
-          "time": "10:30–12:00",
+          "time": "11:00–12:00",
           "title": "Freizeit in 4er-Gruppen",
           "text": "Waffeln, Schokolade, Souvenirs oder Kaffee. Treffpunkt anschließend wieder am Grand Place.",
           "icon": "leisure"
