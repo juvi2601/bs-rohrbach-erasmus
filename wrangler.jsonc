@@ -13,6 +13,7 @@
       "/auth",
       "/callback",
       "/api/*",
+      "/content/diary.json",
       "/bruessel-2026",
       "/bruessel-2026/",
       "/linz-2027",
