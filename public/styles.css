@@ -1487,10 +1487,21 @@ html[data-theme="dark"] .news-document-link{background:#183a69;color:#f2f7ff!imp
 }
 
 /* Reisetagebuch: kompakte Karten und antippbare Fotovorschauen */
+#reisetagebuch .diary-latest,
+#reisetagebuch .diary-timeline,
+#reisetagebuch #diaryAll {
+  width: 100%;
+  max-width: 980px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
 #reisetagebuch .diary-latest {
   margin-bottom: 1.5rem;
-  padding: 0.75rem;
-  border-radius: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 #reisetagebuch .diary-timeline,
