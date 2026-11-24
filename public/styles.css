@@ -1485,3 +1485,61 @@ html[data-theme="dark"] .news-document-link{background:#183a69;color:#f2f7ff!imp
   color: #ffffff !important;
   background-color: #0955ae;
 }
+
+/* Reisetagebuch: kompakte Karten und antippbare Fotovorschauen */
+#reisetagebuch .diary-latest {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  border-radius: 1rem;
+}
+
+#reisetagebuch .diary-timeline,
+#reisetagebuch #diaryAll {
+  gap: 0.85rem;
+}
+
+#reisetagebuch .diary-card {
+  border-radius: 1rem;
+}
+
+#reisetagebuch .diary-card.featured {
+  display: block;
+}
+
+#reisetagebuch .diary-card-body {
+  padding: 0.85rem 1rem;
+}
+
+#reisetagebuch .diary-cover {
+  height: clamp(130px, 30vw, 180px);
+  min-height: 0;
+}
+
+#reisetagebuch .diary-cover img {
+  min-height: 0;
+  object-fit: contain;
+}
+
+#reisetagebuch .diary-card h3 {
+  margin: 0.35rem 0;
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+}
+
+#reisetagebuch .diary-text {
+  line-height: 1.55;
+}
+
+#reisetagebuch .diary-tags,
+#reisetagebuch .diary-gallery,
+#reisetagebuch .diary-author {
+  margin-top: 0.65rem;
+}
+
+#reisetagebuch .diary-gallery {
+  grid-template-columns: repeat(auto-fill, minmax(80px, 112px));
+  gap: 0.5rem;
+}
+
+#reisetagebuch .diary-gallery button {
+  height: 76px;
+}
