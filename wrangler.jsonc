@@ -9,18 +9,7 @@
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page",
-    "run_worker_first": [
-      "/auth",
-      "/callback",
-      "/api/*",
-      "/content/diary.json",
-      "/bruessel-2026",
-      "/bruessel-2026/",
-      "/linz-2027",
-      "/linz-2027/",
-      "/linz-2027/upload",
-      "/linz-2027/upload/"
-    ]
+    "run_worker_first": true
   },
   "r2_buckets": [
     {
